@@ -1,0 +1,110 @@
+# --- Internal-only workspace (never push) ---
+.workspace/
+INTERNAL_*
+
+# --- HuggingFace dataset (downloaded at runtime, not source) ---
+# data_loader.py caches the dataset snapshot here on first call. Reset
+# with `rm -rf .hf_cache`.
+.hf_cache/
+
+# --- Audit trail SQLite database (created at runtime by AuditStore) ---
+# Override location via AUDIT_DB_PATH env. Default: .audit_db/audit.db.
+# Reset with `rm -rf .audit_db`.
+.audit_db/
+
+# --- One-shot HuggingFace dataset uploads (regenerated, not source) ---
+HF_dataset_update*.zip
+HF_upload/
+
+# --- Secrets and environment ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.ruff_cache/
+.uv-cache/
+.ipynb_checkpoints/
+
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# --- Testing and coverage ---
+.pytest_cache/
+pytest-cache-files-*/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# --- IDE and editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Project data (generated artifacts, not source) ---
+data/raw/
+data/interim/
+data/wiki/
+data/draft/
+data/graph/
+data/corpus_cache/
+reports/runs/
+data/generated/
+data/smoke_test/
+data/final/*.jsonl
+
+
+# --- LangSmith / LangGraph / LlamaIndex caches ---
+.llama_index/
+.langsmith/
+# `langgraph dev` writes its API server state here (checkpoints, run logs).
+.langgraph_api/
+# Mermaid graph exports from `app.get_graph().draw_mermaid()` are derived
+# artifacts — the canonical diagram lives in ARCHITECTURE.md.
+*.mmd
+
+# --- pgvector / docker volumes ---
+pgdata/
+postgres_data/
+
+# --- Logs ---
+*.log
+logs/
