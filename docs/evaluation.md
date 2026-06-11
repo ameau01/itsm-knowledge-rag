@@ -76,6 +76,8 @@ The judge model is different from the curation model, to avoid a model grading i
 | Citation precision | TBD |
 | Citation coverage | TBD |
 
+The automated metrics are the scalable half of curation quality. A human spot-check of a sampled set of overviews is the complement. It catches what judge-based metrics miss: a page that scores well but reads poorly, or a redaction artifact that is technically clean but confusing. In a deployment this spot-check is the human-review step of periodic lint (see [ARCHITECTURE.md](../ARCHITECTURE.md)). For this corpus it is a one-time sample, reported alongside the automated numbers.
+
 
 ## Abstention (label-based)
 
