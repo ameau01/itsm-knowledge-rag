@@ -103,6 +103,8 @@ flowchart LR
 
 The eval is split by what can be checked deterministically and what needs judgment. The leakage check is deterministic, graded against an authored sidecar, and non-circular: the ground truth is written upstream, independently of the redactor being tested. The curation metrics are judge-based and reported as such. The eval is also designed to localize failures. Retrieval metrics catch the wrong tickets being surfaced. Curation metrics catch a faithful overview not being produced from the right ones. Full methodology, the hybrid ablation, and results are in [docs/evaluation.md](docs/evaluation.md).
 
+Lint is also where wiki maintenance lives. For this corpus, frozen and bounded, lint runs once: it is the quality gate above. In a deployment where new tickets keep arriving, the same operation runs periodically. New tickets re-curate the affected families, the leakage and faithfulness checks re-run on the changed pages, and any page that is low-confidence or contradicted by a newer ticket is surfaced for a human to review before it stays published. The frozen corpus is a scope choice for the portfolio, not a claim that a real wiki needs no upkeep. The periodic loop is the maintenance and human-oversight path, and lint is where it belongs.
+
 
 ## Two surfaces and the interface
 
