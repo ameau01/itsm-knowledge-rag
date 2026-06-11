@@ -1,4 +1,4 @@
-# Redaction Policy and Leakage Eval
+# Redaction Policy and Leakage Evaluation
 
 The classification contract for what is redacted and what is kept, plus the contract for how leakage is scored. The data project authored the tickets and the `pii.json` sidecar using these rules. The redaction pipeline in this project must apply the same rules to match the sidecar. For the corpus and sidecar shape, see [dataset.md](dataset.md). For where this sits in the eval, see [evaluation.md](evaluation.md).
 

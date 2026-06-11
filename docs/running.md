@@ -1,4 +1,4 @@
-# Running it
+# Running the system
 
 Three paths, by how much you want to run. For what the system does, see the [README](../README.md). For how it works, see [ARCHITECTURE.md](../ARCHITECTURE.md).
 
