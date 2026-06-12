@@ -54,7 +54,7 @@ flowchart LR
     R --> G["Golden fields<br/>diagnostics, resolution"]
     C --> W["Wiki page<br/>per root cause"]
     G --> W
-    R --> IDX[("Hybrid index<br/>pgvector + BM25")]
+    R --> IDX[("Hybrid index<br/>Qdrant dense + sparse")]
 ```
 
 **Redaction runs first, over the whole ticket.** It is a safety gate. No personal data reaches the index or the published wiki. It is also an enabling precondition. Removing person-specific tokens is what lets curation consolidate many descriptions into one common pattern. Redaction does not normalize. It clears the way so curation can. The policy and the leakage contract are in [docs/redaction-policy.md](docs/redaction-policy.md).

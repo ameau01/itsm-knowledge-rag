@@ -1,0 +1,1137 @@
+{
+ "provenance": {
+  "model": "claude-sonnet-4-6",
+  "date": "2026-06-11",
+  "method": "per-family binary check, all families must answer no; no regeneration",
+  "catalog_provenance": {
+   "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+   "model": "claude-opus-4-8",
+   "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+   "date": "2026-06-11",
+   "review_not_converged": [],
+   "merges": [
+    {
+     "date": "2026-06-11",
+     "families": [
+      "ALP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "CES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DCP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DRF"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "EDE"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "OES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "PDQ"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SIB"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SML"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "VDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "WCI"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    }
+   ]
+  }
+ },
+ "total": 15,
+ "passed": 15,
+ "failed": 0,
+ "questions": [
+  {
+   "query_id": "q-abstain-1",
+   "query": "conference room display panel won't turn on after firmware update pushed overnight",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about a hardware display panel failure after a firmware update, unrelated to API gateway timeouts or integration sync issues."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about a display panel hardware/firmware issue, unrelated to AD lockouts or credential management."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about a display panel hardware/firmware issue, unrelated to TLS certificates or load balancer problems."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Conference room display panel power issue after firmware update is unrelated to Intune device compliance, encryption signals, or Conditional Access blocks."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about a display panel hardware/firmware issue, unrelated to DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about a display panel power issue after firmware update, unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a display panel hardware/firmware issue, unrelated to laptop post-login CPU/disk contention."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about a conference room display panel hardware/firmware issue, unrelated to Outlook/Exchange mailbox sync failures."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about a display panel firmware issue, unrelated to print server, printer drivers, or spooler problems."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware failure after firmware update, unrelated to shared drive access or SMB/AD authentication issues."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about a display panel hardware/firmware issue, unrelated to Software Center installs, Endpoint Protection, or Intune policy."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about a hardware/firmware issue with a display device, unrelated to SSO/MFA authentication loops or identity provider problems."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about a display panel hardware/firmware issue, unrelated to VPN, GlobalProtect, or MFA authentication problems."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a display panel power issue after firmware update, unrelated to Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-10",
+   "query": "desk phone showing no line registration after moving to new office floor",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about VoIP/telephony line registration failure after physical relocation, unrelated to API gateway timeouts or integration sync jobs."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about physical desk phone line registration after a move, unrelated to AD lockouts or stale mobile credentials."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about VoIP/telephony line registration after physical relocation, unrelated to TLS certificate expiry on web service load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about physical desk phone line registration after an office move, unrelated to Intune device compliance or encryption/CA blocking."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about VoIP/telephony line registration after a physical move, not internal DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about VoIP/desk phone line registration failure after physical relocation, unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about VoIP/desk phone line registration failure after relocation, unrelated to laptop post-login CPU/disk performance issues."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about physical desk phone line registration after an office move, unrelated to Outlook/Exchange mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about VoIP/desk phone line registration failure after relocation, unrelated to print server or spooler issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about VoIP/phone registration issues after physical relocation, unrelated to shared drive access or SMB/AD permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about physical desk phone line registration after a move, unrelated to Software Center installs, Endpoint Protection, or Intune policy."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about physical desk phone line registration after a physical move, unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about physical desk phone line registration after a move, unrelated to VPN/GlobalProtect disconnects or MFA authentication issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Desk phone line registration failure after physical relocation is a VoIP/telephony provisioning issue, not a corporate Wi-Fi 802.1X authentication problem."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-12",
+   "query": "video conferencing room system shows black screen after firmware update won't boot",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about a video conferencing hardware boot failure after firmware update, completely unrelated to API gateway timeouts or integration sync jobs."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about a video conferencing hardware/firmware boot failure, unrelated to AD account lockouts or stale credentials."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about a firmware/boot failure on a video conferencing device, completely unrelated to TLS certificate expiry or load balancer issues."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about a room system hardware/firmware boot failure, unrelated to Intune compliance, encryption signals, or Conditional Access blocking."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about a hardware/firmware boot failure in a video conferencing device, unrelated to DNS resolution issues."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about a video conferencing device boot failure after firmware update, unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a room video conferencing system failing to boot after firmware update, unrelated to laptop post-login CPU/disk contention issues."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about a video conferencing room system boot failure after firmware update, unrelated to Outlook/Exchange mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about a video conferencing room system failing to boot after firmware update, unrelated to print server, spooler, or printer driver issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about AV/firmware boot failure on a conferencing device, completely unrelated to shared drive access or SMB/AD permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about a room system hardware/firmware boot failure, completely unrelated to Software Center install blocking or endpoint protection policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about a video conferencing hardware boot failure after firmware update, completely unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about a video conferencing room system boot failure after firmware update, unrelated to VPN/GlobalProtect/MFA disconnects."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a video conferencing device boot failure after firmware update, unrelated to Wi-Fi 802.1X authentication issues."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-14",
+   "query": "conference room display panel won't turn on after overnight power outage hdmi handshake failing",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about physical AV hardware failure after power outage, unrelated to API gateway timeouts or integration sync issues."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about AV/power hardware issues, unrelated to AD lockouts or stale credential problems."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about physical AV hardware failure after power outage, unrelated to TLS certificates or load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about physical AV hardware (display panel/HDMI) power issues, unrelated to Intune compliance, encryption signals, or Conditional Access."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about physical AV hardware and HDMI connectivity after a power outage, unrelated to internal DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about AV hardware/display failure after power outage, unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about display/HDMI hardware issues after a power outage, unrelated to laptop post-login CPU/disk performance problems."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about physical AV/display hardware failure after power outage, completely unrelated to Outlook/Exchange Online mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about display panel power and HDMI handshake issues, unrelated to print spooler, printer drivers, or stuck print jobs."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware and HDMI connectivity after a power outage, completely unrelated to shared drive access or SMB/AD authentication issues."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about physical AV/display hardware failure after a power outage, unrelated to software deployment, endpoint protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about physical hardware/display issues after a power outage, completely unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware failure after power outage, completely unrelated to VPN/GlobalProtect/MFA/certificate issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a display panel power/HDMI issue unrelated to Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-15",
+   "query": "desk phone display blank and no dial tone after office move",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware failure after relocation, unrelated to API gateway timeouts or integration sync issues."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after a move, unrelated to AD lockouts or credential problems."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after relocation, completely unrelated to TLS certificates or load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after relocation, unrelated to Intune device compliance or encryption/CA blocking."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after relocation, unrelated to DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware issues after relocation, completely unrelated to BitLocker encryption or Intune device management."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about desk phone hardware issues after relocation, unrelated to laptop post-login CPU/disk contention."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after office relocation, unrelated to Outlook/Exchange mailbox sync failures."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about VoIP/desk phone hardware issues after relocation, completely unrelated to print server or spooler problems."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about a physical desk phone hardware/connectivity issue after relocation, unrelated to shared drive access or file permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about physical telephony hardware issues after relocation, unrelated to software deployment, endpoint protection, or Intune policy."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after an office relocation, completely unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about physical desk phone hardware/connectivity issues after relocation, unrelated to VPN/GlobalProtect/MFA disconnects."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a physical desk phone issue after office relocation, unrelated to Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-17",
+   "query": "conference room display not showing presenter laptop screen after HDMI switch installed",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about AV/hardware issue with HDMI display, completely unrelated to API timeouts or integration gateway problems."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about AV/display hardware issues unrelated to AD authentication, password resets, or credential management."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about AV/display hardware (HDMI switch, conference room screen) with no relation to TLS certificates, load balancers, or HTTPS failures."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about AV/display hardware issues unrelated to Intune compliance, encryption, or Conditional Access."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about AV/HDMI display hardware, completely unrelated to DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about AV/display connectivity with HDMI hardware, completely unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about HDMI display/AV connectivity in a conference room, unrelated to post-login CPU/disk performance issues on laptops."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about AV/display hardware (HDMI switch, conference room screen) with no relation to email sync, Outlook, or Exchange Online."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about AV/display connectivity with an HDMI switch, completely unrelated to print server, spooler, or driver issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware (HDMI switch, conference room screen) unrelated to shared drive access or SMB/AD authentication issues."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about AV/display hardware (HDMI switch) not showing laptop screen, unrelated to Software Center installs, Endpoint Protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about AV/display hardware (HDMI switch, conference room screen), completely unrelated to SSO, MFA, or identity provider authentication issues."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware issues (HDMI switch), completely unrelated to VPN, GlobalProtect, or authentication."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about AV/display hardware (HDMI switch) connectivity, unrelated to Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-18",
+   "query": "desk phone showing 'no service' after office move can still ping gateway",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing service after an office move, unrelated to API gateway timeouts or integration sync jobs."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about desk phone connectivity after physical relocation, unrelated to AD lockouts or stale credential authentication issues."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about a VoIP/desk phone connectivity issue after physical relocation, unrelated to TLS certificate expiry on web service load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing network/telephony service after an office relocation, unrelated to Intune device compliance or encryption signals."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing telephony service after relocation, not about DNS resolution failures for internal hostnames."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about a desk phone connectivity/telephony issue after physical relocation, unrelated to BitLocker encryption or Intune device compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a desk phone connectivity issue after physical relocation, unrelated to laptop post-login CPU/disk performance problems."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing cellular/VoIP service after an office relocation, unrelated to Outlook/Exchange mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about a desk phone (VoIP/telephony) losing service after physical relocation, unrelated to print server, spooler, or printer driver issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about a desk phone losing service after an office move, unrelated to shared drive access or SMB/Windows file permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about a physical desk phone connectivity issue after relocation, unrelated to Software Center installs, Endpoint Protection, or Intune policy."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after an office move, unrelated to SSO/MFA authentication loops or identity provider issues."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about a desk phone losing service after physical relocation, unrelated to GlobalProtect VPN post-MFA disconnect issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Desk phone 'no service' after office move is a telephony/VoIP provisioning issue, not a corporate Wi-Fi 802.1X authentication failure."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-19",
+   "query": "desk phone showing 'no service' after moving to new floor cant register to pbx",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about VoIP/PBX phone registration failure after physical relocation, unrelated to API gateway timeouts or integration sync jobs."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about a physical desk phone/PBX registration issue after relocation, unrelated to AD lockouts or stale credential problems."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about VoIP/PBX phone registration failure after physical relocation, unrelated to TLS certificate expiry on internal web service load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing PBX registration after a physical move, unrelated to Intune device compliance or encryption/Conditional Access issues."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about VoIP/PBX phone registration failure after physical relocation, not internal DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about a desk phone/PBX registration issue after physical relocation, unrelated to BitLocker encryption or Intune device compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a desk phone/PBX registration issue after physical relocation, unrelated to laptop post-login CPU/disk performance problems."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about a physical desk phone failing to register with a PBX after relocation, unrelated to Outlook/Exchange Online mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about VoIP/PBX phone registration failure after physical relocation, unrelated to print spooler or printer driver issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about VoIP/PBX phone registration failure after a physical move, unrelated to shared drive access or SMB/AD file permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about a physical desk phone/PBX registration issue after relocation, unrelated to Software Center installs or Endpoint Protection policies."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about a physical desk phone/PBX registration issue after relocation, unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about a physical desk phone failing to register to a PBX after relocation, unrelated to VPN/GlobalProtect or MFA authentication issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a desk phone PBX registration failure after a physical move, unrelated to corporate Wi-Fi 802.1X authentication issues."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-2",
+   "query": "video conferencing room system shows black screen after windows update hdmi handshake failing",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about a video conferencing hardware/display issue (HDMI handshake after Windows update), completely unrelated to API gateway timeouts or integration sync failures."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about a video conferencing display/HDMI hardware issue after Windows update, unrelated to AD lockouts or stale credentials."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about HDMI display handshake on a video conferencing system after a Windows update, unrelated to TLS certificates or load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about a display/HDMI handshake hardware issue after Windows update on a room system, unrelated to Intune compliance, encryption signals, or Conditional Access blocking."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about video/display hardware (HDMI handshake) after a Windows update, unrelated to DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about display/HDMI issues after Windows update on a conferencing system, unrelated to BitLocker encryption or key escrow."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a video conferencing room system with HDMI handshake/display issues after Windows update, unrelated to laptop post-login CPU/disk contention."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about video conferencing hardware/display issues after a Windows update, completely unrelated to Outlook/Exchange mailbox sync failures."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about display/HDMI handshake issues after Windows update, unrelated to print spooler or driver failures for printers."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about video conferencing display/HDMI issues after Windows update, unrelated to shared drive access or SMB/file permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about display/HDMI handshake failure after Windows update, unrelated to Software Center installs, Endpoint Protection blocks, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about a display/HDMI hardware issue after Windows update, completely unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about HDMI display handshake failure after Windows update, unrelated to VPN/certificate/GlobalProtect authentication issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a display/HDMI handshake issue after a Windows update, unrelated to Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-3",
+   "query": "video conferencing room system showing black screen after firmware update",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about AV/hardware display issues after firmware update, unrelated to API gateway timeouts or integration sync failures."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about AV/firmware issues with a room system, unrelated to AD lockouts or stale credentials."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about AV/video conferencing hardware display failure after firmware update, unrelated to TLS certificate expiry or load balancer issues."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about AV/hardware display failure after firmware update, unrelated to Intune compliance, encryption signals, or Conditional Access blocking."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about AV/firmware issues with video conferencing hardware, unrelated to internal DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about AV/display hardware failure after firmware update, unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a room video conferencing system with a black screen after firmware update, unrelated to laptop post-login CPU/disk contention issues."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about AV/room system firmware issues, completely unrelated to Outlook/Exchange mailbox sync failures."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about video conferencing firmware/display issues, unrelated to print spooler, printer drivers, or print queues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about AV/firmware issues with a conferencing device, unrelated to shared drive access or SMB/NTFS permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about AV/room system display failure after firmware update, unrelated to Software Center installs, endpoint protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about AV/hardware firmware issues with room systems, completely unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about AV/firmware issues on a room system, unrelated to VPN/GlobalProtect post-MFA disconnects."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Black screen after firmware update on a video conferencing system is unrelated to 802.1X Wi-Fi authentication failures or RADIUS/NAC issues."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-4",
+   "query": "desk phone shows 'no service' after moving to new office floor",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to API gateway timeouts or integration sync issues."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about desk phone connectivity after physical relocation, unrelated to AD account lockouts or stale credentials."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing service after relocation, unrelated to TLS certificates or HTTPS load balancer issues."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity/signal loss after relocation, unrelated to Intune device compliance or encryption."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about physical/network connectivity for a desk phone relocation, not internal DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about desk phone connectivity/network service issue after physical relocation, unrelated to BitLocker encryption or Intune device compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a desk phone connectivity issue after relocation, unrelated to laptop post-login CPU/disk performance problems."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to Outlook/Exchange Online mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about desk phone connectivity/telecom issue after physical relocation, unrelated to print server, drivers, or spooler problems."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about desk phone connectivity/telephony issue after relocation, unrelated to shared drive access or file server permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to Software Center installs, Endpoint Protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity/telecom issue, unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to GlobalProtect VPN or certificate/MFA issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Desk phone 'no service' after physical relocation is a telephony/VoIP provisioning or network port issue, unrelated to 802.1X WiFi authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-5",
+   "query": "projector in conference room not displaying laptop screen over HDMI after docking station connected",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about physical AV/display hardware issues, completely unrelated to API gateway timeouts or integration failures."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, completely unrelated to AD account lockouts or credential issues."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, completely unrelated to TLS certificates or load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about a physical AV/display hardware issue (HDMI/docking station/projector), completely unrelated to Intune compliance or Conditional Access."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about AV/display hardware issues, completely unrelated to DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, entirely unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about HDMI/display output with a docking station and projector, unrelated to post-login CPU/disk performance issues."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, completely unrelated to Outlook/Exchange mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about display/video output over HDMI with a docking station, unrelated to print server, spooler, or printer driver issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, completely unrelated to shared drive access or SMB/AD permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, unrelated to Software Center installs, Endpoint Protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about AV/display hardware connectivity, completely unrelated to SSO, MFA, or identity provider authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about AV/display hardware issues unrelated to VPN, GlobalProtect, or authentication."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about display/HDMI connectivity issues with a projector and docking station, completely unrelated to Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-6",
+   "query": "desk phone showing 'no service' after office move to new floor",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after an office relocation, unrelated to API gateway timeouts or integration sync issues."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after an office move, unrelated to AD lockouts or credential/authentication issues."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to TLS certificate expiry or HTTPS load balancer issues."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to Intune device compliance or encryption signals."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about physical phone provisioning/connectivity after relocation, not DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about a physical desk phone losing service after relocation, unrelated to BitLocker encryption or Intune device compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a desk phone connectivity issue after physical relocation, completely unrelated to laptop post-login CPU/disk performance."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after relocation, unrelated to Outlook/Exchange Online mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about desk phone connectivity after a physical office move, unrelated to print spooler or printer driver issues."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about a desk phone connectivity issue after physical relocation, unrelated to shared drive access or SMB/Windows file permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after an office move, unrelated to Software Center installs, Endpoint Protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about physical telephony/network connectivity after a physical relocation, unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about physical desk phone connectivity after an office move, unrelated to GlobalProtect VPN/MFA disconnects."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about a desk phone losing service after a physical relocation, unrelated to corporate Wi-Fi 802.1X authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-7",
+   "query": "teams video call audio cuts out when screen sharing with external participants",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about Teams video call audio issues during screen sharing, unrelated to API gateway timeouts or integration sync problems."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about Teams audio/video quality during screen sharing, unrelated to AD lockouts or stale credentials."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about audio/video quality in Teams calls, unrelated to TLS certificate expiry or load balancer issues."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about Teams audio/video quality during screen sharing, unrelated to device compliance, encryption signals, or Conditional Access blocking."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about audio/video quality during Teams calls, unrelated to internal DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about Teams audio/video issues during screen sharing, completely unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about Teams audio/video issues during screen sharing, unrelated to post-login CPU/disk contention on laptops."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about Teams video/audio issues during screen sharing, unrelated to Outlook/Exchange mailbox sync failures."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about Teams audio/video issues during screen sharing, unrelated to print spooler, printer drivers, or stuck print jobs."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about Teams audio/video quality during screen sharing, completely unrelated to shared drive access or SMB/ACL issues."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about Teams audio/video quality during screen sharing, unrelated to Software Center installs, Endpoint Protection blocks, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about Teams audio/video quality during screen sharing, unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about Teams audio/video quality during screen sharing, unrelated to VPN tunnel disconnects or certificate validation failures."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about Teams audio quality during screen sharing, unrelated to 802.1X Wi-Fi authentication failures."
+    }
+   }
+  },
+  {
+   "query_id": "q-abstain-8",
+   "query": "video conferencing room system won't detect the USB camera after firmware update",
+   "passed": true,
+   "matched_families": [],
+   "per_family": {
+    "AIT": {
+     "match": false,
+     "reason": "Query is about hardware/firmware detection issue with USB camera, unrelated to API gateway timeouts or integration sync problems."
+    },
+    "ALP": {
+     "match": false,
+     "reason": "Query is about USB camera detection after firmware update, unrelated to AD lockouts or credential/password issues."
+    },
+    "CES": {
+     "match": false,
+     "reason": "Query is about USB camera detection after firmware update on video conferencing hardware, unrelated to TLS certificates or load balancers."
+    },
+    "DCP": {
+     "match": false,
+     "reason": "Query is about USB camera detection after firmware update on a room system, unrelated to Intune compliance, encryption signals, or Conditional Access blocks."
+    },
+    "DRF": {
+     "match": false,
+     "reason": "Query is about USB camera detection after firmware update on a video conferencing system, unrelated to DNS resolution failures."
+    },
+    "EDE": {
+     "match": false,
+     "reason": "Query is about USB camera detection failure after firmware update on a video conferencing system, unrelated to BitLocker encryption or Intune compliance."
+    },
+    "LPD": {
+     "match": false,
+     "reason": "Query is about a video conferencing room system USB camera detection issue post-firmware update, unrelated to laptop post-login CPU/disk contention."
+    },
+    "OES": {
+     "match": false,
+     "reason": "Query is about AV/hardware USB camera detection after firmware update, unrelated to Outlook/Exchange mailbox sync issues."
+    },
+    "PDQ": {
+     "match": false,
+     "reason": "Query is about USB camera detection after firmware update in a video conferencing system, unrelated to print spooler, printer drivers, or stuck print jobs."
+    },
+    "SDA": {
+     "match": false,
+     "reason": "Query is about USB camera hardware detection after firmware update, unrelated to shared drive access or SMB/AD permissions."
+    },
+    "SIB": {
+     "match": false,
+     "reason": "Query is about hardware/USB camera detection after firmware update, unrelated to Software Center installs, endpoint protection, or Intune policy issues."
+    },
+    "SML": {
+     "match": false,
+     "reason": "Query is about USB camera detection after firmware update on a video conferencing device, unrelated to SSO/MFA authentication loops."
+    },
+    "VDA": {
+     "match": false,
+     "reason": "Query is about USB camera detection failure on a video conferencing system after firmware update, unrelated to VPN/GlobalProtect authentication or certificate issues."
+    },
+    "WCI": {
+     "match": false,
+     "reason": "Query is about USB camera detection failure after firmware update, unrelated to Wi-Fi 802.1X authentication issues."
+    }
+   }
+  }
+ ]
+}

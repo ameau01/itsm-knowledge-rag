@@ -1,0 +1,508 @@
+{
+ "provenance": {
+  "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+  "generator_model": "claude-sonnet-4-6",
+  "verifier_model": "claude-opus-4-8",
+  "seed": 20260611,
+  "date": "2026-06-11",
+  "catalog_provenance": {
+   "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+   "model": "claude-opus-4-8",
+   "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+   "date": "2026-06-11",
+   "review_not_converged": [],
+   "merges": [
+    {
+     "date": "2026-06-11",
+     "families": [
+      "ALP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "CES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DCP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DRF"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "EDE"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "OES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "PDQ"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SIB"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SML"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "VDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "WCI"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    }
+   ]
+  }
+ },
+ "category": "abstention",
+ "description": "No answer exists in the corpus; correct behavior is to abstain. Each question certified against every family individually (see abstention-certification.json).",
+ "queries": [
+  {
+   "query_id": "q-abstain-1",
+   "query": "conference room display panel won't turn on after firmware update pushed overnight",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "A/V facilities-tech problem with managed display hardware post-firmware push \u2014 outside all catalog families."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-10",
+   "query": "desk phone showing no line registration after moving to new office floor",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "VoIP telephony re-registration failure after physical relocation \u2014 outside all catalog families"
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-12",
+   "query": "video conferencing room system shows black screen after firmware update won't boot",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "AV/room system firmware brick \u2014 outside all catalog families which cover auth, certs, DNS, print, VPN, WiFi, BitLocker, Outlook, etc."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-14",
+   "query": "conference room display panel won't turn on after overnight power outage hdmi handshake failing",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "A/V facilities-tech issue (room display/HDMI hardware fault after power event) with no overlap with any catalog family."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-15",
+   "query": "desk phone display blank and no dial tone after office move",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "Telephony hardware/facilities issue after a physical relocation; outside all catalog families."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-17",
+   "query": "conference room display not showing presenter laptop screen after HDMI switch installed",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "A/V facilities-tech issue about HDMI switching hardware in a conference room \u2014 outside all catalog families."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-18",
+   "query": "desk phone showing 'no service' after office move can still ping gateway",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "VoIP/telephony provisioning issue after physical relocation \u2014 outside all catalog families"
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-19",
+   "query": "desk phone showing 'no service' after moving to new floor cant register to pbx",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "VoIP/telephony handset registration failure after physical relocation \u2014 outside all catalog families."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-2",
+   "query": "video conferencing room system shows black screen after windows update hdmi handshake failing",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "AV/display HDMI handshake failure on room hardware after OS update \u2014 no overlap with any catalog family."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-3",
+   "query": "video conferencing room system showing black screen after firmware update",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "AV/room system firmware failure \u2014 outside all catalog families"
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-4",
+   "query": "desk phone shows 'no service' after moving to new office floor",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "telephony relocation issue - VoIP/PSTN provisioning, outside all catalog families"
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-5",
+   "query": "projector in conference room not displaying laptop screen over HDMI after docking station connected",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "AV/display hardware issue with docking station and conference room projector; no overlap with any cataloged family."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-6",
+   "query": "desk phone showing 'no service' after office move to new floor",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "Telephony/VoIP provisioning issue after physical relocation \u2014 outside all catalog families."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-7",
+   "query": "teams video call audio cuts out when screen sharing with external participants",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 4,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "Pure Teams AV/media quality issue during screen share - no sync failures, compliance, DNS, certs, auth loops, or any other cataloged family involved."
+   },
+   "category": "abstention"
+  },
+  {
+   "query_id": "q-abstain-8",
+   "query": "video conferencing room system won't detect the USB camera after firmware update",
+   "expected_family": null,
+   "expected_root_cause": null,
+   "metadata": {
+    "intent": "abstention",
+    "source_tickets": [],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "abstention_cold": true
+     },
+     "marks": []
+    },
+    "notes": "AV/room hardware firmware compatibility issue \u2014 outside all catalog families."
+   },
+   "category": "abstention"
+  }
+ ]
+}

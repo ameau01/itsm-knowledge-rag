@@ -5,14 +5,9 @@ The corpus and its ground-truth sidecar. Published at [`ameau01/synthetic-it-sup
 
 ## What it is
 
-745 synthetic ITSM incident records across 15 diagnostic families, roughly 13 to 60 records each. Each ticket is a closed incident: a submitted problem, agent correspondence, diagnostic steps, a root cause, and a resolution. PII is injected into the free-text fields. An authored sidecar, `pii.json`, records every injected value and how it should be redacted.
+745 synthetic ITSM incident records across 14 diagnostic families, roughly 13 to 60 records each. Each ticket is a closed incident: a submitted problem, agent correspondence, diagnostic steps, a root cause, and a resolution. PII is injected into the free-text fields. Two authored sidecars ship with the dataset. `pii.json` records every injected value and how it should be redacted. `retention.json` records the RETAIN-class strings that must survive redaction.
 
-The corpus is synthetic by design. This is a strength, not a limitation. Real ticket data has no ground-truth label for what is PII and what is technical content. Synthetic data does, because the PII was authored, not detected. That authored label is what makes the deterministic leakage benchmark possible. No real personal data is involved.
-
-
-## Why synthetic transfers
-
-The project showcases a method, not a product. The method is: redact against an authored ground truth, then measure leakage deterministically. That method does not depend on the data being real. A synthetic corpus that mirrors the structure of real tickets (free-text descriptions, embedded identifiers, technical noise) exercises the same redaction and curation logic a real corpus would. The synthetic corpus is the controlled starting condition, chosen so the eval has a stable answer key.
+The corpus is synthetic by design. This is a strength, not a limitation. Real ticket data has no ground-truth label for what is PII and what is technical content. Synthetic data does, because the PII was authored, not detected. That authored label is what makes the deterministic leakage benchmark possible. The project demonstrates a method: redact against an authored ground truth, then measure leakage deterministically. A synthetic corpus is the controlled starting condition that gives the method a stable answer key. No real personal data is involved.
 
 
 ## Ticket schema
@@ -53,6 +48,31 @@ Injected PII lives in the free-text fields: `submitted_description`, `correspond
 ```
 
 The sidecar contains only the eight redacted types: person, username, email, phone, emp_id, location, ip, hostname. Technical content is never in the sidecar. The full classification rules, the eight types, the composite cases, and the leakage gate are in [redaction-policy.md](redaction-policy.md). How the sidecar is used to score leakage is in [evaluation.md](evaluation.md).
+
+`retention.json` is the mirror key. It records the RETAIN-class strings that must survive redaction: system names, service hostnames, error codes, cert serials, region codes. It backs the over-retention axis the same way `pii.json` backs leakage. The two together make redaction scoring two-sided.
+
+`retention.json` is per-ticket: one entry per ticket, each holding a `retain_instances` list. Every instance carries the value, its type, the fields it appears in, and a rationale for keeping it.
+
+```json
+{
+  "ticket_id": "INC-AIT-0001",
+  "retain_instances": [
+    {
+      "id": "INC-AIT-0001:retain:002",
+      "value": "AUTH_EXPIRED",
+      "type": "error_code",
+      "occurrences": [
+        "correspondence[0].message",
+        "diagnostics.steps[0].evidence",
+        "diagnostics.summary"
+      ],
+      "rationale": "Named authentication error code returned by the downstream API."
+    }
+  ]
+}
+```
+
+The two sidecars are deliberately shaped differently. `pii.json` is value-keyed because a leak is checked by absence-anywhere: one value, every site it must be gone from. `retention.json` is ticket-keyed because retention is reviewed per ticket: each kept span is owner-ruled with a logged rationale.
 
 
 ## Known limitations

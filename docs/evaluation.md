@@ -10,6 +10,24 @@ Evaluation is split by what can be checked deterministically and what needs judg
 The eval is also designed to localize failures. A wrong answer is either a retrieval failure (the wrong tickets were surfaced) or a generation failure (the right tickets were surfaced but the overview was not faithful to them). Separating the axes lets a failure be traced to the layer that caused it, rather than tuning blindly.
 
 
+## The frozen eval-set
+
+The ground truth is built, frozen, and committed under `eval-set/`. The harness reads only these files. Upstream copies are documentation; these are the answer key.
+
+Two kinds of truth are kept separate. Data truth is a property of the corpus and ships with the dataset: `pii.json` and `retention.json`, authored independently of any system under test. Design truth is the experimental choice of this project and lives in the eval-set: the canonical catalog, the query set, the abstention probes.
+
+What is frozen:
+
+- `catalog.json`: the canonical ontology. 14 families, 76 root causes, all 745 tickets assigned. It defines both the wiki page boundaries and every eval label. Built by one model and blind-reviewed family by family by a second model under an adversarial protocol. All 14 families converged. Convergence was contested and the full attempt history is recorded in the catalog, not hidden.
+- `retrieval/simple-queries.json`: 63 questions with exactly one correct root cause. Subtypes: 21 diagnosis, 19 synthesis, 10 exact-match, 13 fix-lookup. Each one blind-verified and baseline smoke-tested at generation.
+- `retrieval/complex-queries.json`: 34 questions with multiple plausible root causes. These are corpus-discovered sibling-cluster ambiguities, each anchored to a ticket-derived cause. This is the class where the system is meant to beat a general model.
+- `retrieval/abstention-queries.json`: 15 questions with no answer in the corpus. The correct behavior is to abstain.
+- `retrieval/abstention-certification.json`: every abstention question interrogated against all 14 families. 210 of 210 probes returned null.
+- `redaction/pii.json` and `redaction/retention.json`: the two redaction answer keys, frozen alongside the rest.
+
+Each artifact records its provenance: the dataset revision it was built against, the producing and verifying models, the generation date, and its review trail. The builders run separately from this repo, with blind label verification by an independent model and deterministic lint gates.
+
+
 ## Axes
 
 | Axis | Layer | Metric | Class |
@@ -45,7 +63,7 @@ The other side of redaction. A redactor that strips error codes and hostnames to
 
 ## Retrieval, L1 (label-based)
 
-Relevance is defined by issue family: a retrieved ticket is relevant if it shares the query's family. This is a proxy, stated as an assumption, and it is reasonable for this corpus.
+The query set is 63 single-answer and 34 ambiguous questions, scored against the frozen catalog labels. Relevance is defined by issue family: a retrieved ticket is relevant if it shares the query's family. This is a proxy, stated as an assumption, and it is reasonable for this corpus.
 
 - recall@k: are the relevant tickets in the top k.
 - nDCG@k: are they ranked high enough to be seen. The UI is a ranked list, so rank matters, not just presence.
@@ -81,7 +99,7 @@ The automated metrics are the scalable half of curation quality. A human spot-ch
 
 ## Abstention (label-based)
 
-A held-out issue family is withheld from the wiki. Queries about it should return no confident overview. This checks the system declines on knowledge it does not have, rather than inventing an answer.
+The abstention set is 15 questions with no answer in the corpus. Correct behavior is to abstain rather than invent one. The set is certified per family in `eval-set/retrieval/abstention-certification.json`: every abstention question was interrogated against all 14 families and 210 of 210 probes returned null. This checks the system declines on knowledge it does not have. A held-out family probe extends the same idea to a family withheld from the wiki at eval time.
 
 | Metric | Result |
 |---|---|
