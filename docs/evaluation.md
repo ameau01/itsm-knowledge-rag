@@ -69,11 +69,11 @@ The query set is 63 single-answer and 34 ambiguous questions, scored against the
 - nDCG@k: are they ranked high enough to be seen. The UI is a ranked list, so rank matters, not just presence.
 - context precision: of what was returned, how much is the right family. Guards against a confidently wrong overview built on a wrong-family match.
 
-The improvement experiment is the hybrid ablation: BM25 alone, dense alone, fused. It shows whether the hybrid earns its place.
+The improvement experiment is the hybrid ablation: sparse alone, dense alone, fused. It shows whether the hybrid earns its place.
 
 | Retriever | recall@10 | nDCG@10 |
 |---|---|---|
-| BM25 only | TBD | TBD |
+| Sparse only | TBD | TBD |
 | Dense only | TBD | TBD |
 | Hybrid | TBD | TBD |
 

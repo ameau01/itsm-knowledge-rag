@@ -33,12 +33,13 @@ class Settings:
     # Mode: "mock" replays fixtures, "live" calls real models.
     pipeline_mode: str = field(default_factory=lambda: os.getenv("PIPELINE_MODE", "mock"))
 
-    # Postgres + pgvector
-    database_url: str = field(
-        default_factory=lambda: os.getenv(
-            "DATABASE_URL", "postgresql://itsm:itsm@localhost:5432/itsm_rag"
-        )
-    )
+    # Qdrant (hybrid index: dense + sparse vectors, native fusion)
+    qdrant_url: str = field(
+        default_factory=lambda: os.getenv("QDRANT_URL", "http://localhost:6333"))
+    qdrant_api_key: str | None = field(
+        default_factory=lambda: os.getenv("QDRANT_API_KEY"))
+    qdrant_collection: str = field(
+        default_factory=lambda: os.getenv("QDRANT_COLLECTION", "itsm_tickets"))
 
     # Models
     anthropic_api_key: str | None = field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY"))

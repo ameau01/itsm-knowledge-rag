@@ -1,4 +1,4 @@
-"""ITSM Knowledge RAG: turns closed IT tickets into searchable, verifiable answers — PII redaction at ingest, hybrid retrieval (pgvector + BM25), LLM-curated overviews."""
+"""ITSM Knowledge RAG: turns closed IT tickets into searchable, verifiable answers — PII redaction at ingest, hybrid retrieval (Qdrant, dense + sparse), LLM-curated overviews."""
 
 # Single source of truth for the version is pyproject.toml.
 from importlib.metadata import PackageNotFoundError, version

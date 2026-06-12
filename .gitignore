@@ -59,9 +59,9 @@ data/generated/
 eval/results/
 reports/runs/
 
-# --- Postgres / docker volumes ---
-pgdata/
-postgres_data/
+# --- Qdrant / docker volumes ---
+qdrant_storage/
+qdrant_data/
 
 # --- Logs ---
 *.log

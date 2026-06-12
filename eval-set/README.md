@@ -30,6 +30,8 @@ Two kinds of truth, deliberately separated:
 | `knowledge-gap-queries.json` | Knowledge-gap probes: strong questions whose family (DRF) is deliberately excluded from the wiki at eval time. Kept with the builders until the consumer wiki exists. | protocol artifact (not exported, by design) |
 | `redaction/retention.json` | Per-ticket RETAIN-class strings: 745/745 tickets, 8,581 entries, 0 flags, 0 unresolved suspects. Every disputed span owner-ruled with logged rationale. | **FROZEN** (2026-06-11) |
 | `redaction/pii.json` | Copy of the dataset sidecar (leakage ground truth), byte-identical in revisions `6e9ec80b` (build) and `db074a5` (current) | **FROZEN** (2026-06-11) |
+| `metrics.md` | The scoring contract: every metric defined per axis (deterministic gates, label-based, judge-based), failure localization, judge protocol | **FROZEN** (2026-06-11) |
+| `metrics-config.json` | Machine-readable parameters: k values, gates, thresholds, ablation arms, judge settings | **FROZEN** (2026-06-11) |
 
 ## catalog.json provenance
 
