@@ -13,7 +13,7 @@ The whole system at a glance. The system is on the left. The two end users are o
 flowchart LR
     subgraph SYS["System"]
         direction TB
-        IDX[("Vector + BM25 index")] --> L1["L1: ranked source tickets"]
+        IDX[("Qdrant index<br/>dense + sparse")] --> L1["L1: ranked source tickets"]
         WIKI["Wiki pages<br/>one per root cause"] --> LLM["LLM curation"]
         LLM --> AO["L2: AI overview<br/>cached per family"]
     end
@@ -78,7 +78,7 @@ flowchart LR
     L2 --> ANS
 ```
 
-**Retrieval is hybrid.** Dense vectors catch semantic matches. BM25 catches exact identifiers and error codes that embeddings miss. The two are fused. Whether the hybrid beats either component alone is an ablation, not an assumption. See [docs/evaluation.md](docs/evaluation.md).
+**Retrieval is hybrid.** Dense vectors catch semantic matches. Sparse vectors catch exact identifiers and error codes that dense embeddings blur. Qdrant fuses the two natively in a single query. Whether the hybrid beats either component alone is an ablation, not an assumption. See [docs/evaluation.md](docs/evaluation.md).
 
 **The overview is precomputed, not generated per query (L2).** A bounded corpus clusters into a finite set of issue families. The overview for each family is built once, during ingest, and cached. A search returns a prepared answer instead of paying for synthesis every time. This is the same experience as a Google "AI overview," but precomputed, which a live web search cannot do. The efficiency claim is measured head to head against per-query synthesis. See [docs/evaluation.md](docs/evaluation.md).
 

@@ -19,11 +19,11 @@ L1 fuses two retrievers.
 
 Dense retrieval embeds tickets and the query, then matches by vector similarity. It catches semantic matches: a query about "cannot sign in after reset" finds tickets about account lockout even with different words.
 
-Sparse retrieval (BM25) matches exact terms. It catches identifiers, error codes, and product names that embeddings blur. A query naming a specific error string should surface tickets with that exact string.
+Sparse retrieval (sparse vectors with BM25-family scoring) matches exact terms. It catches identifiers, error codes, and product names that embeddings blur. A query naming a specific error string should surface tickets with that exact string.
 
 The two are fused into one ranked list. Neither alone is enough. Dense misses exact codes. Sparse misses paraphrase. The hybrid is meant to get both. Whether it actually beats either component alone is measured as an ablation, not assumed. See [evaluation.md](evaluation.md).
 
-Storage and indexing use LlamaIndex over Qdrant. Qdrant fuses the dense and sparse vectors natively in a single query, so the fusion is not hand-rolled in application code. Tickets are indexed after redaction. No personal data enters the index.
+LlamaIndex drives the pipeline — document processing, embedding, and index construction — with Qdrant as the vector store underneath. Qdrant holds both the dense and sparse vectors and fuses them natively in a single query, so the fusion is not hand-rolled in application code. Tickets are indexed after redaction. No personal data enters the index.
 
 
 ## L2: the cached overview

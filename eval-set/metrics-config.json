@@ -1,0 +1,114 @@
+{
+ "version": "1.0",
+ "frozen": "2026-06-11",
+ "spec": "metrics.md",
+ "redaction": {
+  "leakage": {
+   "gate": "zero_leaks",
+   "check": "absence_anywhere",
+   "instances": 8839,
+   "token_vocabulary": [
+    "<PERSON>",
+    "<USER>",
+    "<EMAIL>",
+    "<PHONE>",
+    "<EMP_ID>",
+    "<LOCATION>",
+    "<IP>",
+    "<HOSTNAME>"
+   ]
+  },
+  "retention": {
+   "gate": "report_only",
+   "recommended_min_rate": 0.98,
+   "check": "presence",
+   "instances": 8581
+  }
+ },
+ "retrieval": {
+  "k_values": [
+   5,
+   10
+  ],
+  "recall_definition": "capped: hits / min(k, n_relevant)",
+  "levels": {
+   "strict": "expected_root_cause cluster",
+   "lenient": "expected_family"
+  },
+  "per_intent": {
+   "diagnosis": [
+    "recall_at_k",
+    "ndcg_at_k",
+    "context_precision"
+   ],
+   "synthesis": [
+    "set_recall_over_expected_ticket_set",
+    "context_precision"
+   ],
+   "exact_match": [
+    "recall_at_k",
+    "ndcg_at_k",
+    "sparse_dense_gap"
+   ],
+   "fix_lookup": [
+    "precision_at_k_strict",
+    "ndcg_at_k"
+   ]
+  },
+  "ablation_arms": [
+   "sparse_only",
+   "dense_only",
+   "hybrid"
+  ],
+  "sparse_implementation": "recorded at run time (BM25 or learned sparse vectors); the contract is implementation-neutral"
+ },
+ "decision_policy": {
+  "complex": [
+   "candidate_set_precision",
+   "candidate_set_recall",
+   "candidate_set_f1",
+   "anchor_hit_rate",
+   "set_size_delta"
+  ],
+  "abstention": [
+   "abstention_accuracy",
+   "false_abstention_rate",
+   "ambiguity_flag_accuracy",
+   "false_ambiguity_rate"
+  ],
+  "knowledge_gap": {
+   "file": "builders:query-builder/out/knowledge-gap-queries.json",
+   "excluded_family": "DRF",
+   "protocol": "run abstention pass with DRF pages excluded; run standard pass with full wiki"
+  },
+  "threshold_policy": "configured on dev slice or reported as-configured; never tuned on these queries"
+ },
+ "curation": {
+  "framework": "deepeval/g-eval",
+  "metrics": [
+   "faithfulness",
+   "unsupported_claim_rate",
+   "citation_precision",
+   "citation_coverage"
+  ],
+  "scope": "synthesized text only; golden fields excluded",
+  "judge": {
+   "must_differ_from_curation_model": true,
+   "temperature": 0,
+   "runs_per_metric": 3,
+   "report_variance": true,
+   "prompts_versioned": true
+  }
+ },
+ "efficiency": {
+  "arms": [
+   "cached_overview",
+   "zero_shot_synthesis"
+  ],
+  "measures": [
+   "latency_per_query",
+   "cost_per_query",
+   "curation_judge_metrics_on_both"
+  ]
+ }
+}
