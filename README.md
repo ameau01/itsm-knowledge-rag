@@ -1,11 +1,11 @@
-# ITSM Knowledge RAG
+# ITSM Knowledge RAG with Hybrid Retrieval
 
 [![Status](https://img.shields.io/badge/status-v0.0.2%20initial%20design-orange)](#project-status)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org)
 [![Dataset](https://img.shields.io/badge/Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
 [![PII](https://img.shields.io/badge/PII-Presidio%20%2B%20custom%20recognizers-orange)](https://microsoft.github.io/presidio/)
-[![retrieval](https://img.shields.io/badge/retrieval-pgvector%20%2B%20BM25-blueviolet)](https://github.com/pgvector/pgvector)
+[![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20dense%20%2B%20sparse-blueviolet)](https://qdrant.tech)
 [![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://github.com/confident-ai/deepeval)
 
 **Turns a company's closed IT tickets into searchable, verifiable answers, so problems that have already been solved don't get solved from scratch again. It recommends; the agent decides.**
@@ -39,14 +39,14 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 **Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
 
-**Retrieval is hybrid, and the overview is cached.** Hybrid search (pgvector + BM25) matches a query to the right issue family. The overview is precomputed per family, so a search returns a prepared answer instead of generating one on every query. The cached overview is the same idea as a Google "AI overview," but precomputed because the corpus is bounded. See [docs/retrieval.md](docs/retrieval.md).
+**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query, so the two signals combine in the engine. The overview is precomputed per family. A search returns a prepared answer instead of generating one on every query. The cached overview is the same idea as a Google "AI overview." It is precomputed because the corpus is bounded. See [docs/retrieval.md](docs/retrieval.md).
 
 **Two surfaces share one pipeline.** Support agents get the full search: the overview plus ranked source tickets they are authorized to read. General employees get a redaction-safe, browse-only version of the same curated knowledge.
 
 
 ## Results
 
-Measured on a synthetic corpus of 745 tickets across 15 issue families. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md).
+Measured on a synthetic corpus of 745 tickets across 14 issue families. The evaluation ground truth is frozen and committed: a canonical catalog of 14 families and 76 root causes with all 745 tickets assigned, a query set of 63 single-answer, 34 ambiguous, and 15 abstention questions, and a per-family abstention certification (210/210 probes returned null). Result numbers are pending the harness run. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md).
 
 | Axis | Metric | Result |
 |---|---|---|
@@ -90,7 +90,7 @@ This is a focused system, not a platform. It runs on a single ITSM ticket corpus
 
 ## Dataset
 
-A synthetic ITSM corpus of 745 tickets across 15 issue families. PII is injected into the free-text fields, with an authored ground-truth sidecar (`pii.json`) that backs the deterministic leakage benchmark. The corpus is synthetic by design: it gives controllable ground truth, which is what makes the deterministic eval possible. No real personal data is involved. Published at [`ameau01/synthetic-it-support-tickets`](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets). Schema and the sidecar contract are in [docs/dataset.md](docs/dataset.md).
+A synthetic ITSM corpus of 745 tickets across 14 issue families. PII is injected into the free-text fields. Two authored ground-truth sidecars back the deterministic redaction axes: `pii.json` (what must be removed) and `retention.json` (what must survive). Both are published with the dataset. The corpus is synthetic by design: it gives controllable ground truth, which is what makes the deterministic eval possible. No real personal data is involved. Published at [`ameau01/synthetic-it-support-tickets`](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets). Schema and the sidecar contract are in [docs/dataset.md](docs/dataset.md).
 
 
 ## Repo orientation
@@ -107,7 +107,7 @@ examples/            real worked outputs: query, overview, source tickets, redac
 
 ## Stack
 
-Python, pgvector, BM25, Presidio (with custom recognizers), DeepEval / G-Eval, MkDocs-Material, Docker.
+Python, LlamaIndex, Qdrant (native dense + sparse fusion), Presidio (with custom recognizers), DeepEval / G-Eval, MkDocs-Material, Docker.
 
 
 ## Project status

@@ -1,0 +1,1325 @@
+{
+ "provenance": {
+  "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+  "generator_model": "claude-sonnet-4-6",
+  "verifier_model": "claude-opus-4-8",
+  "seed": 20260611,
+  "date": "2026-06-11",
+  "catalog_provenance": {
+   "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+   "model": "claude-opus-4-8",
+   "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+   "date": "2026-06-11",
+   "review_not_converged": [],
+   "merges": [
+    {
+     "date": "2026-06-11",
+     "families": [
+      "ALP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "CES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DCP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DRF"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "EDE"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "OES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "PDQ"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SIB"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SML"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "VDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "WCI"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    }
+   ]
+  }
+ },
+ "category": "complex",
+ "description": "Multiple plausible root causes (sibling clusters that are mechanistically distinct but symptomatically inseparable). expected_root_cause is the plausible SET; metadata.anchor_root_cause is the ticket-derived ground anchor.",
+ "queries": [
+  {
+   "query_id": "q-alp-diag-2",
+   "query": "account locked out right after self-service password reset completed and can't access sso portal",
+   "expected_family": [
+    "ALP"
+   ],
+   "expected_root_cause": [
+    "ALP/stale-credentials-unidentified-source",
+    "ALP/stale-mobile-cached-credentials",
+    "ALP/stale-mobile-credentials-plus-expired-reset-token"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-ALP-0065"
+    ],
+    "generation": {
+     "attempts": 4,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 1.0
+     },
+     "marks": [
+      "easy"
+     ]
+    },
+    "notes": "Symptom-phrased from user perspective: lockout immediately following self-service reset, SSO blocked, cause unknown to asker; no personal data included.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "ALP/stale-mobile-credentials-plus-expired-reset-token"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-alp-diag-3",
+   "query": "password reset finished but account keeps locking out and new password still not accepted on sso",
+   "expected_family": [
+    "ALP"
+   ],
+   "expected_root_cause": [
+    "ALP/stale-credentials-unidentified-source",
+    "ALP/stale-mobile-cached-credentials",
+    "ALP/stale-mobile-credentials-plus-expired-reset-token"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-ALP-V0004"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased: focuses on post-reset lockout and credential rejection without naming the invalid token root cause.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "ALP/expired-reset-token-primary"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-alp-syn-1",
+   "query": "why does account keep locking out again right after a password reset",
+   "expected_family": [
+    "ALP"
+   ],
+   "expected_root_cause": [
+    "ALP/stale-credentials-unidentified-source",
+    "ALP/stale-mobile-cached-credentials",
+    "ALP/stale-mobile-credentials-plus-expired-reset-token"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-ALP-0051",
+     "INC-ALP-0032",
+     "INC-ALP-0036"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Synthesizes the common pattern across all three tickets: mobile cached credentials re-triggering AD lockout immediately following a self-service password reset.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "ALP/stale-mobile-cached-credentials"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-alp-syn-2",
+   "query": "what usually causes repeated sso account lockouts after a self-service password reset when a mobile device is involved",
+   "expected_family": [
+    "ALP"
+   ],
+   "expected_root_cause": [
+    "ALP/expired-reset-token-primary",
+    "ALP/stale-mobile-cached-credentials",
+    "ALP/stale-mobile-credentials-plus-expired-reset-token"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-ALP-0043",
+     "INC-ALP-0063",
+     "INC-ALP-0033"
+    ],
+    "generation": {
+     "attempts": 4,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: mobile cached credentials re-triggering AD lockouts combined with expired reset tokens blocking SSO propagation",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "ALP/stale-mobile-credentials-plus-expired-reset-token"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-ces-diag-2",
+   "query": "internal web portal showing security warning in browser and backend services failing to connect since yesterday morning",
+   "expected_family": [
+    "CES"
+   ],
+   "expected_root_cause": [
+    "CES/automated-renewal-process-failed-to-complete",
+    "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+    "CES/valid-leaf-but-stale-or-missing-intermediate-served"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-CES-0052"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 1.0
+     },
+     "marks": [
+      "easy"
+     ]
+    },
+    "notes": "Symptom-only phrasing covering expired cert browser errors and TLS handshake failures without naming cert expiry or the load balancer as cause.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "CES/valid-leaf-but-stale-or-missing-intermediate-served"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-ces-fix-1",
+   "query": "how to fix expired internal tls certificate on load balancer when intermediate chain is also outdated",
+   "expected_family": [
+    "CES"
+   ],
+   "expected_root_cause": [
+    "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+    "CES/valid-leaf-but-stale-or-missing-intermediate-served"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-CES-0015"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Cause-aware fix_lookup: asker knows expired leaf cert + stale intermediate chain on LB are the problem and wants the remediation steps.",
+    "reclassified_from": "fix_lookup",
+    "anchor_root_cause": "CES/valid-leaf-but-stale-or-missing-intermediate-served"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-ces-syn-2",
+   "query": "what typically causes internal https services to go down with certificate warnings and tls handshake failures at the load balancer",
+   "expected_family": [
+    "CES"
+   ],
+   "expected_root_cause": [
+    "CES/automated-renewal-process-failed-to-complete",
+    "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+    "CES/valid-leaf-but-stale-or-missing-intermediate-served"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-CES-0032",
+     "INC-CES-0015",
+     "INC-CES-0057"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: expired leaf cert + incomplete intermediate chain on LB + failed renewal alerting as a combined pattern.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "CES/valid-leaf-but-stale-or-missing-intermediate-served"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-dcp-diag-2",
+   "query": "corporate laptops marked noncompliant in intune blocking exchange and sharepoint access after overnight policy change",
+   "expected_family": [
+    "DCP"
+   ],
+   "expected_root_cause": [
+    "DCP/indeterminate-compliance-refresh-failure",
+    "DCP/stale-checkin-missing-encryption-signal",
+    "DCP/stale-deprecated-compliance-policy-reference"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-DCP-0013"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user perspective; omits the deprecated baseline root cause the asker wouldn't yet know.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "DCP/stale-deprecated-compliance-policy-reference"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-drf-diag-2",
+   "query": "internal hostname resolves to wrong ip or nxdomain depending on which office subnet queries from",
+   "expected_family": [
+    "DRF"
+   ],
+   "expected_root_cause": [
+    "DRF/missing-or-incorrect-conditional-forwarder",
+    "DRF/resolver-path-inconsistency-mixed-cause",
+    "DRF/stale-resolver-cache-after-record-change"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-DRF-0063"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around inconsistent resolution across subnets; cause (stale resolver cache) not mentioned.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "DRF/stale-authoritative-zone-record"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-drf-syn-2",
+   "query": "what usually causes internal hostnames to return NXDOMAIN or stale IPs after a server migration",
+   "expected_family": [
+    "DRF"
+   ],
+   "expected_root_cause": [
+    "DRF/missing-or-incorrect-conditional-forwarder",
+    "DRF/stale-authoritative-zone-record",
+    "DRF/stale-resolver-cache-after-record-change"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-DRF-0041",
+     "INC-DRF-0061",
+     "INC-DRF-0034"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: stale/outdated A records left in internal DNS zones after migrations, combined with cached stale resolver data, producing NXDOMAIN or wrong-IP responses.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "DRF/stale-authoritative-zone-record"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-ede-diag-2",
+   "query": "windows 11 laptop shows noncompliant for bitlocker in company portal but tpm is present and initialized",
+   "expected_family": [
+    "EDE"
+   ],
+   "expected_root_cause": [
+    "EDE/intune-policy-not-assigned-or-stale-deprecated-policy",
+    "EDE/mdm-sync-failure-causing-state-desync",
+    "EDE/recovery-key-escrow-failure-despite-healthy-tpm-and-policy"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-EDE-V0025"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.1,
+      "dense_recall": 0.1
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user perspective; cause (Intune policy assignment filter mismatch) unknown to asker",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "EDE/intune-policy-not-assigned-or-stale-deprecated-policy"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-lpd-diag-3",
+   "query": "laptop extremely slow after login outlook and chrome take forever to open disk almost full",
+   "expected_family": [
+    "LPD"
+   ],
+   "expected_root_cause": [
+    "LPD/endpoint-scan-backlog-startup-disk-contention",
+    "LPD/low-disk-temp-file-accumulation",
+    "LPD/resource-heavy-startup-policy"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-LPD-V0007"
+    ],
+    "generation": {
+     "attempts": 4,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 1.0
+     },
+     "marks": [
+      "easy"
+     ]
+    },
+    "notes": "Symptom-phrased with low disk space detail from diagnostics, no cause attribution stated by asker",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "LPD/low-disk-temp-file-accumulation"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-oes-diag-2",
+   "query": "outlook mobile showing disconnected on iphone while desktop works fine after restart",
+   "expected_family": [
+    "OES"
+   ],
+   "expected_root_cause": [
+    "OES/intune-mdm-device-compliance-block",
+    "OES/stale-mobile-sync-partnership",
+    "OES/unresolved-endpoint-client-sync-state"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-OES-0047"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.4
+     },
+     "marks": []
+    },
+    "notes": "Symptom-focused: mobile stays disconnected post-restart-fix, cause (MDM compliance block) unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "OES/intune-mdm-device-compliance-block"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-oes-diag-3",
+   "query": "outlook android showing disconnected inbox not updating hours no new mail received",
+   "expected_family": [
+    "OES"
+   ],
+   "expected_root_cause": [
+    "OES/intune-mdm-device-compliance-block",
+    "OES/stale-corrupted-outlook-desktop-profile-cache",
+    "OES/stale-mobile-sync-partnership"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-OES-0021"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Symptom-only phrasing: disconnected status + inbox freeze on mobile, cause unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "OES/stale-mobile-sync-partnership"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-oes-err-1",
+   "query": "outlook mobile flips to Disconnected even after restarting app but desktop works fine",
+   "expected_family": [
+    "OES"
+   ],
+   "expected_root_cause": [
+    "OES/intune-mdm-device-compliance-block",
+    "OES/stale-mobile-sync-partnership",
+    "OES/unresolved-endpoint-client-sync-state"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-OES-V0044"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.3,
+      "dense_recall": 0.2
+     },
+     "marks": []
+    },
+    "notes": "Embeds 'Disconnected' verbatim in a symptom description consistent with stale mobile auth root cause, no personal data included.",
+    "reclassified_from": "exact_match",
+    "anchor_root_cause": "OES/stale-mobile-sync-partnership",
+    "error_string": "Disconnected (no exact numeric error provided)"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-pdq-diag-3",
+   "query": "shared printer queue accepts jobs but nothing prints access error on print server",
+   "expected_family": [
+    "PDQ"
+   ],
+   "expected_root_cause": [
+    "PDQ/corrupt-driver-package-spooler-load-failure",
+    "PDQ/queue-left-paused",
+    "PDQ/spool-directory-permissions"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-PDQ-V0013"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around jobs entering queue but not completing with access errors, cause unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "PDQ/spool-directory-permissions"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sda-diag-1",
+   "query": "mapped network drive keeps asking for credentials then says access denied but coworkers can open the same folder fine",
+   "expected_family": [
+    "SDA"
+   ],
+   "expected_root_cause": [
+    "SDA/missing-ad-security-group-membership",
+    "SDA/missing-group-plus-stale-credential-or-acl-compound",
+    "SDA/stale-cached-smb-credentials"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SDA-0046"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Symptom-only phrasing focusing on intermittent credential prompt + access denied + coworker contrast, cause unknown to asker",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SDA/missing-ad-security-group-membership"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sda-diag-2",
+   "query": "mapped network drive opens fine on other shares but prompts for credentials then access denied on finance folder only",
+   "expected_family": [
+    "SDA"
+   ],
+   "expected_root_cause": [
+    "SDA/broken-ntfs-acl-inheritance-or-deny-ace",
+    "SDA/missing-ad-security-group-membership",
+    "SDA/stale-cached-smb-credentials"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SDA-0039"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around the credential-prompt + access-denied pattern isolated to the Finance share, cause unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SDA/missing-group-plus-stale-credential-or-acl-compound"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sda-syn-2",
+   "query": "why do finance users suddenly lose shared drive access after account changes and need sign-out to restore it",
+   "expected_family": [
+    "SDA"
+   ],
+   "expected_root_cause": [
+    "SDA/missing-ad-security-group-membership",
+    "SDA/missing-group-plus-stale-credential-or-acl-compound",
+    "SDA/stale-cached-smb-credentials"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SDA-0018",
+     "INC-SDA-0063",
+     "INC-SDA-0033"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: missing AD group membership combined with stale session/cached credentials requiring token refresh after account modification.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "SDA/missing-group-plus-stale-credential-or-acl-compound"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sib-diag-1",
+   "query": "software center showing app as blocked after policy sync on managed windows 10 laptop",
+   "expected_family": [
+    "SIB"
+   ],
+   "expected_root_cause": [
+    "SIB/endpoint-protection-app-control-block",
+    "SIB/missing-entitlement-group-membership",
+    "SIB/stale-inventory-policy-targeting-only"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SIB-0050"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.3,
+      "dense_recall": 0.3
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased; asker observes block persisting after sync, unaware entitlement group membership is missing.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SIB/missing-entitlement-group-membership"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sib-diag-2",
+   "query": "app shows installation blocked in software center and missing from company portal no error message",
+   "expected_family": [
+    "SIB"
+   ],
+   "expected_root_cause": [
+    "SIB/missing-entitlement-group-membership",
+    "SIB/missing-entitlement-plus-stale-inventory",
+    "SIB/stale-inventory-policy-targeting-only"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SIB-0014"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.3
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased query focusing on the blocked install and missing app experience without revealing the entitlement root cause.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SIB/missing-entitlement-plus-stale-inventory"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sib-diag-3",
+   "query": "salesapp not showing up in software center and direct install attempt blocked on windows 10 laptop",
+   "expected_family": [
+    "SIB"
+   ],
+   "expected_root_cause": [
+    "SIB/endpoint-protection-app-control-block",
+    "SIB/missing-entitlement-group-membership",
+    "SIB/missing-entitlement-group-membership-plus-endpoint-protection-block"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SIB-0040"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.3
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around app missing from Software Center plus failed manual install, cause (missing entitlement group + endpoint protection block) unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SIB/missing-entitlement-group-membership-plus-endpoint-protection-block"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sib-syn-1",
+   "query": "what is the usual cause when software center apps are missing or blocked with entitlement errors on compliant devices",
+   "expected_family": [
+    "SIB"
+   ],
+   "expected_root_cause": [
+    "SIB/endpoint-protection-app-control-block",
+    "SIB/missing-entitlement-group-membership",
+    "SIB/stale-inventory-policy-targeting-only"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SIB-0001",
+     "INC-SIB-0037",
+     "INC-SIB-0028"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.3
+     },
+     "marks": []
+    },
+    "notes": "Synthesizes the common root cause across all three tickets: missing entitlement group membership preventing app targeting, not a device compliance or cache issue.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "SIB/missing-entitlement-group-membership"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sml-diag-1",
+   "query": "okta login keeps looping back to mfa prompt after approving on phone never reaches app",
+   "expected_family": [
+    "SML"
+   ],
+   "expected_root_cause": [
+    "SML/conditional-access-group-policy-mismatch",
+    "SML/post-mfa-federation-session-fault",
+    "SML/stale-mfa-factor-enrollment"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SML-0018"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user perspective: primary auth succeeds but MFA approval sends them back to the same challenge, cause unknown.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SML/stale-mfa-factor-enrollment"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sml-diag-3",
+   "query": "sso portal keeps looping back to mfa screen then shows login rejected for multiple saas apps",
+   "expected_family": [
+    "SML"
+   ],
+   "expected_root_cause": [
+    "SML/conditional-access-group-policy-mismatch",
+    "SML/post-mfa-federation-session-fault",
+    "SML/stale-mfa-factor-enrollment"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SML-0055"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.4,
+      "dense_recall": 0.6
+     },
+     "marks": []
+    },
+    "notes": "Symptom-only phrasing covering the combined stale-enrollment MFA loop and login rejection across Salesforce and Concur, no cause implied.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "SML/combined-stale-enrollment-and-policy-desync"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-sml-err-1",
+   "query": "users stuck in MFA_PROMPT_LOOP after okta group policy update stale enrollment suspected",
+   "expected_family": [
+    "SML"
+   ],
+   "expected_root_cause": [
+    "SML/combined-stale-enrollment-and-policy-desync",
+    "SML/conditional-access-group-policy-mismatch",
+    "SML/stale-mfa-factor-enrollment"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-SML-0010"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string; centers on stale MFA enrollment as dominant cause while acknowledging policy change context.",
+    "reclassified_from": "exact_match",
+    "anchor_root_cause": "SML/combined-stale-enrollment-and-policy-desync",
+    "error_string": "MFA_PROMPT_LOOP"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-vda-diag-1",
+   "query": "globalprotect drops a few seconds after mfa approval and nothing on the internal network is reachable",
+   "expected_family": [
+    "VDA"
+   ],
+   "expected_root_cause": [
+    "VDA/expired-device-certificate-post-mfa-validation-failure",
+    "VDA/globalprotect-profile-cert-mapping-misconfiguration",
+    "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-VDA-0041"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Focuses on the post-MFA tunnel teardown symptom without mentioning certificate or any cause-specific language.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "VDA/expired-device-certificate-post-mfa-validation-failure"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-vda-diag-2",
+   "query": "globalprotect shows connected for a few seconds then drops after okta push approved, internal sites unreachable",
+   "expected_family": [
+    "VDA"
+   ],
+   "expected_root_cause": [
+    "VDA/expired-device-certificate-post-mfa-validation-failure",
+    "VDA/globalprotect-profile-cert-mapping-misconfiguration",
+    "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-VDA-0035"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Symptom-only phrasing focusing on the brief connected state and post-auth drop without mentioning certificate or profile cause.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-vda-diag-3",
+   "query": "vpn drops 10 seconds after mfa approval but authentication itself succeeds on windows laptop",
+   "expected_family": [
+    "VDA"
+   ],
+   "expected_root_cause": [
+    "VDA/expired-device-certificate-post-mfa-validation-failure",
+    "VDA/globalprotect-profile-cert-mapping-misconfiguration",
+    "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-VDA-V0010"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Symptom-focused: brief connection then disconnect post-MFA, cause (cert thumbprint mismatch in pushed profile) unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "VDA/globalprotect-profile-cert-mapping-misconfiguration"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-vda-syn-1",
+   "query": "globalprotect vpn drops immediately after okta mfa succeeds what usually causes this",
+   "expected_family": [
+    "VDA"
+   ],
+   "expected_root_cause": [
+    "VDA/expired-device-certificate-post-mfa-validation-failure",
+    "VDA/globalprotect-profile-cert-mapping-misconfiguration",
+    "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-VDA-0007",
+     "INC-VDA-0011",
+     "INC-VDA-0047"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Synthesis query spanning all three tickets: common pattern of post-MFA tunnel teardown due to expired endpoint device certificates across EMEA and US-East users.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "VDA/expired-device-certificate-post-mfa-validation-failure"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-vda-syn-2",
+   "query": "globalprotect vpn drops a few seconds after successful okta mfa what usually causes this pattern",
+   "expected_family": [
+    "VDA"
+   ],
+   "expected_root_cause": [
+    "VDA/expired-device-certificate-post-mfa-validation-failure",
+    "VDA/globalprotect-profile-cert-mapping-misconfiguration",
+    "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-VDA-0035",
+     "INC-VDA-0025"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across both tickets: MFA succeeds but tunnel tears down immediately post-auth due to stale VPN profile/certificate mismatch after device cert renewal.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "VDA/stale-vpn-profile-blocking-renewed-certificate"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-wci-diag-2",
+   "query": "laptop connects to corporate wifi then loses network access after about a minute only on one device",
+   "expected_family": [
+    "WCI"
+   ],
+   "expected_root_cause": [
+    "WCI/incorrect-nac-policy-assignment",
+    "WCI/stale-or-corrupt-client-wifi-profile",
+    "WCI/wireless-rf-controller-instability"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-WCI-0025"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user's experience; cause (corrupted EAP-TLS profile + stale NAC session) unknown to asker.",
+    "reclassified_from": "diagnosis",
+    "anchor_root_cause": "WCI/stale-or-corrupt-client-wifi-profile"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-wci-err-1",
+   "query": "laptops showing \"authentication failed\" on corporate wifi after overnight maintenance window",
+   "expected_family": [
+    "WCI"
+   ],
+   "expected_root_cause": [
+    "WCI/cert-rollover-incomplete-trust-propagation",
+    "WCI/expired-radius-controller-eap-tls-certificate",
+    "WCI/incorrect-nac-policy-assignment"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-WCI-0034"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Embeds the exact error string naturally while describing the symptom without naming the root cause (expired certificate).",
+    "reclassified_from": "exact_match",
+    "anchor_root_cause": "WCI/expired-radius-controller-eap-tls-certificate",
+    "error_string": "authentication failed"
+   },
+   "category": "complex"
+  },
+  {
+   "query_id": "q-wci-syn-2",
+   "query": "why do laptops keep losing corporate wifi access shortly after connecting and reconnecting only fixes it temporarily",
+   "expected_family": [
+    "WCI"
+   ],
+   "expected_root_cause": [
+    "WCI/cert-rollover-incomplete-trust-propagation",
+    "WCI/stale-or-corrupt-client-wifi-profile",
+    "WCI/wireless-rf-controller-instability"
+   ],
+   "metadata": {
+    "intent": "ambiguous",
+    "source_tickets": [
+     "INC-WCI-0025",
+     "INC-WCI-0043",
+     "INC-WCI-V0022"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: recurring pattern of endpoint wireless profile corruption/staleness causing EAP-TLS/NAC failures, with temporary relief from reconnects until profile and session state are fully rebuilt.",
+    "reclassified_from": "synthesis",
+    "anchor_root_cause": "WCI/stale-or-corrupt-client-wifi-profile"
+   },
+   "category": "complex"
+  }
+ ]
+}

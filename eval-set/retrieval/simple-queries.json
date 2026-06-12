@@ -1,0 +1,1902 @@
+{
+ "provenance": {
+  "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+  "generator_model": "claude-sonnet-4-6",
+  "verifier_model": "claude-opus-4-8",
+  "seed": 20260611,
+  "date": "2026-06-11",
+  "catalog_provenance": {
+   "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+   "model": "claude-opus-4-8",
+   "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+   "date": "2026-06-11",
+   "review_not_converged": [],
+   "merges": [
+    {
+     "date": "2026-06-11",
+     "families": [
+      "ALP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "CES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DCP"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "DRF"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "EDE"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "OES"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "PDQ"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SIB"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "SML"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "VDA"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    },
+    {
+     "date": "2026-06-11",
+     "families": [
+      "WCI"
+     ],
+     "source_provenance": {
+      "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+      "model": "claude-opus-4-8",
+      "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+      "date": "2026-06-11",
+      "review_not_converged": []
+     }
+    }
+   ]
+  }
+ },
+ "category": "simple",
+ "description": "One correct root cause per question. Subtypes in metadata.intent: diagnosis, synthesis, exact_match, fix_lookup.",
+ "queries": [
+  {
+   "query_id": "q-ait-diag-1",
+   "query": "nightly sync jobs failing with 504 timeouts after 401 errors on integration gateway",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/expired-api-token-auth-failures",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-AIT-0032"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from the asker's perspective; no mention of expired token root cause, consistent with the described overnight failure pattern."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ait-diag-2",
+   "query": "integration gateway sync jobs timing out with http 504 after waiting 30 seconds on third-party api responses",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/downstream-api-latency-exceeds-timeout",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-AIT-0052"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around the 504 timeouts and slow downstream responses; no mention of auth or rate limiting to avoid ambiguity."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ait-diag-3",
+   "query": "integration jobs failing with gateway timeouts after external api started rate limiting our requests",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/downstream-rate-limiting-throttling",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-AIT-0014"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from analyst perspective; centers on rate-limiting as the dominant cause without naming root cause explicitly."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ait-err-1",
+   "query": "integration gateway showing 504 Gateway Timeout on scheduled syncs after api token expired",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/expired-api-token-auth-failures",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-AIT-0005"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.4
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string verbatim; query centers on expired token as root cause without ambiguity about latency or rate limiting.",
+    "error_string": "504 Gateway Timeout"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ait-fix-1",
+   "query": "how to fix integration gateway still using deprecated retry backoff policy causing 504 timeouts during batch sync",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/stale-retry-backoff-amplifies-latency",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-AIT-0010"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Asker knows root cause (deprecated retry/backoff policy amplifying timeouts) and wants the remediation steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ait-syn-1",
+   "query": "why do nightly integration gateway sync jobs fail with 401 and 504 errors when service account tokens expire",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/expired-api-token-auth-failures",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-AIT-0012",
+     "INC-AIT-0037",
+     "INC-AIT-0034"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: expired service account API tokens on the integration gateway causing auth failures that cascade into retry storms and timeout errors during scheduled sync windows."
+   },
+   "expected_ticket_set": [
+    "INC-AIT-0012",
+    "INC-AIT-0037",
+    "INC-AIT-0034"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ait-syn-2",
+   "query": "why do integration gateway sync jobs keep failing with 504 timeouts when downstream APIs get slow",
+   "expected_family": "AIT",
+   "expected_root_cause": "AIT/downstream-api-latency-exceeds-timeout",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-AIT-0065",
+     "INC-AIT-0023",
+     "INC-AIT-0004"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: common pattern of downstream API latency exceeding the gateway timeout window causing 504s and failed sync jobs, no auth or rate-limit cause."
+   },
+   "expected_ticket_set": [
+    "INC-AIT-0065",
+    "INC-AIT-0023",
+    "INC-AIT-0004"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-alp-diag-1",
+   "query": "account keeps getting locked out again right after helpdesk unlocks it, phone might be to blame",
+   "expected_family": "ALP",
+   "expected_root_cause": "ALP/stale-mobile-cached-credentials",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-ALP-0017"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Focuses on recurrent lockout post-unlock with mobile device suspicion, no cause identified, avoids any personal details or copied phrasing."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-alp-err-1",
+   "query": "password reset keeps failing and sso rejecting login with AD: account lockout - failedLogonCount exceeded after phone cached old credentials",
+   "expected_family": "ALP",
+   "expected_root_cause": "ALP/stale-mobile-credentials-plus-expired-reset-token",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-ALP-0033"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.4,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Embeds the exact error string naturally while describing the mobile-cached-credentials lockout scenario without copying ticket sentences.",
+    "error_string": "AD: account lockout - failedLogonCount exceeded"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-alp-fix-1",
+   "query": "how to fix ad account locked out by stale cached credentials on mobile device after password reset",
+   "expected_family": "ALP",
+   "expected_root_cause": "ALP/stale-mobile-cached-credentials",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-ALP-0051"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.3,
+      "dense_recall": 0.1
+     },
+     "marks": []
+    },
+    "notes": "Asker knows the cause (stale mobile cached creds triggering AD lockout post-reset) and wants the resolution steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ces-diag-1",
+   "query": "internal web service showing ssl expired warnings and load balancer health checks failing tls handshakes",
+   "expected_family": "CES",
+   "expected_root_cause": "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-CES-0013"
+    ],
+    "generation": {
+     "attempts": 4,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Symptom-only phrasing covering expired cert on LB plus health check failures, no cause mentioned, dominated by the renewed-cert-not-deployed-with-monitoring-gap root cause."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ces-diag-3",
+   "query": "automated cert renewal job failing with access denied and old certificate still being served",
+   "expected_family": "CES",
+   "expected_root_cause": "CES/automated-renewal-process-failed-to-complete",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-CES-0003"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.333,
+      "dense_recall": 0.333
+     },
+     "marks": []
+    },
+    "notes": "Focuses on the automated renewal failure as the dominant cause, symptom-phrased without naming specific systems or people"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ces-err-1",
+   "query": "haproxy presenting expired cert and clients getting TLS handshake failure on internal api endpoint",
+   "expected_family": "CES",
+   "expected_root_cause": "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-CES-0014"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string naturally while describing the load-balancer cert expiry scenario with wording distinct from source material.",
+    "error_string": "TLS handshake failure"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ces-syn-1",
+   "query": "why do internal https services keep going down due to expired certificates without any advance warning",
+   "expected_family": "CES",
+   "expected_root_cause": "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-CES-0038",
+     "INC-CES-0026",
+     "INC-CES-0002"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.4,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Synthesizes the common pattern across all three tickets: load balancer serving expired cert plus stale chain, compounded by certificate renewal monitoring failing to alert before expiry."
+   },
+   "expected_ticket_set": [
+    "INC-CES-0038",
+    "INC-CES-0026",
+    "INC-CES-0002"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-dcp-diag-1",
+   "query": "laptop blocked from outlook and sharepoint because intune shows encryption false after not syncing for over a week",
+   "expected_family": "DCP",
+   "expected_root_cause": "DCP/stale-checkin-missing-encryption-signal",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-DCP-0030"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around stale checkin + encryption signal without naming root cause; focuses on the specific compliance signals from the ticket."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-dcp-diag-3",
+   "query": "laptop shows compliant in intune but conditional access still blocking outlook and sharepoint due to missing encryption",
+   "expected_family": "DCP",
+   "expected_root_cause": "DCP/stale-compliance-state-mismatch-ca-cache",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-DCP-0029"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased: user sees compliant status yet gets denied access; cause (stale encryption signal propagation lag) not stated."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-dcp-err-1",
+   "query": "intune device noncompliant showing \"Stale check-in: last reported 72 hours ago\" and exchange blocked by conditional access",
+   "expected_family": "DCP",
+   "expected_root_cause": "DCP/stale-checkin-missing-encryption-signal",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-DCP-0042"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.6
+     },
+     "marks": []
+    },
+    "notes": "Embeds the exact error string naturally while describing the symptom of CA-blocked Exchange without revealing root cause certainty.",
+    "error_string": "Stale check-in: last reported 72 hours ago"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-dcp-fix-1",
+   "query": "stale intune group assignment still pointing to retired compliance policy after consolidation how to fix and force re-evaluation",
+   "expected_family": "DCP",
+   "expected_root_cause": "DCP/stale-deprecated-compliance-policy-reference",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-DCP-0003"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.714,
+      "dense_recall": 0.429
+     },
+     "marks": []
+    },
+    "notes": "Cause-language query asking for the proven fix: reassign policy and force remote check-in to clear stale compliance state."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-dcp-syn-1",
+   "query": "why does intune mark devices noncompliant and block microsoft 365 when bitlocker status goes unreported after a missed check-in",
+   "expected_family": "DCP",
+   "expected_root_cause": "DCP/stale-checkin-missing-encryption-signal",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-DCP-0001",
+     "INC-DCP-0011",
+     "INC-DCP-0017"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.4
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: stale check-in + missing BitLocker/encryption signal \u2192 noncompliant \u2192 Conditional Access blocks M365 access"
+   },
+   "expected_ticket_set": [
+    "INC-DCP-0001",
+    "INC-DCP-0011",
+    "INC-DCP-0017"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-dcp-syn-2",
+   "query": "after intune compliance policy consolidation devices stay noncompliant for encryption even though they were already encrypted and syncing normally",
+   "expected_family": "DCP",
+   "expected_root_cause": "DCP/stale-deprecated-compliance-policy-reference",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-DCP-0003",
+     "INC-DCP-0063",
+     "INC-DCP-V0035"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.429,
+      "dense_recall": 0.429
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: healthy encrypted devices wrongly flagged noncompliant after policy changes due to stale deprecated policy assignments, not actual encryption failures."
+   },
+   "expected_ticket_set": [
+    "INC-DCP-0003",
+    "INC-DCP-0063",
+    "INC-DCP-V0035"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-drf-diag-1",
+   "query": "internal hostname resolving to old ip address after dns record was updated causing connection timeouts",
+   "expected_family": "DRF",
+   "expected_root_cause": "DRF/stale-resolver-cache-after-record-change",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-DRF-0053"
+    ],
+    "generation": {
+     "attempts": 4,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.6
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased: stale resolver cache returning outdated A record post-update, cause unknown to asker"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-drf-diag-3",
+   "query": "internal hostname resolves fine from some subnets but always returns nxdomain from one office subnet",
+   "expected_family": "DRF",
+   "expected_root_cause": "DRF/missing-or-incorrect-conditional-forwarder",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-DRF-0002"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.4,
+      "dense_recall": 0.4
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased diagnosis focusing on subnet-specific NXDOMAIN without revealing the conditional forwarder misconfiguration root cause."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-drf-err-1",
+   "query": "internal app connection timeouts because resolver returned stale A record (172.16.10.45) while authoritative answer is 172.16.10.78 how to fix",
+   "expected_family": "DRF",
+   "expected_root_cause": "DRF/stale-resolver-cache-after-record-change",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-DRF-0051"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Embeds the exact error string naturally in a cause-seeking fix question about the DNS cache mismatch scenario.",
+    "error_string": "resolver returned stale A record (172.16.10.45) while authoritative answer is 172.16.10.78"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-drf-fix-1",
+   "query": "how to fix internal hostname NXDOMAIN after database migration because zone A record still points to old decommissioned address",
+   "expected_family": "DRF",
+   "expected_root_cause": "DRF/stale-authoritative-zone-record",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-DRF-0041"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Cause-language query focused on stale/wrong A record in authoritative zone as the dominant issue, resolver cache flush mentioned in fix but zone record is primary cause."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-drf-syn-1",
+   "query": "what usually causes internal hostnames to return NXDOMAIN or stale IPs after a DNS record change when direct IP access still works",
+   "expected_family": "DRF",
+   "expected_root_cause": "DRF/stale-resolver-cache-after-record-change",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-DRF-0020",
+     "INC-DRF-0023",
+     "INC-DRF-0043"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.3
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: stale positive/negative cache on recursive resolvers following zone updates, resolved by cache flush and resolver restart."
+   },
+   "expected_ticket_set": [
+    "INC-DRF-0020",
+    "INC-DRF-0023",
+    "INC-DRF-0043"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ede-diag-1",
+   "query": "bitlocker won't start on windows 10 laptop tpm shows troubleshooting recommended device noncompliant in intune",
+   "expected_family": "EDE",
+   "expected_root_cause": "EDE/tpm-protector-not-initialized",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-EDE-0039"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Focuses on TPM not provisioned as root cause; symptom-phrased from user perspective without mentioning policy or escrow issues as cause."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ede-diag-3",
+   "query": "bitlocker policy assigned and encryption started but recovery key never showed up in azure ad and device still noncompliant",
+   "expected_family": "EDE",
+   "expected_root_cause": "EDE/recovery-key-escrow-failure-despite-healthy-tpm-and-policy",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-EDE-0058"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.286,
+      "dense_recall": 0.286
+     },
+     "marks": []
+    },
+    "notes": "Focuses on the escrow gap as the core mystery rather than policy or encryption state, matching the root cause without implying encryption is actually off."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ede-err-1",
+   "query": "bitlocker shows \"Device compliance: Encryption not enabled\" after intune enrollment with deprecated policy reference",
+   "expected_family": "EDE",
+   "expected_root_cause": "EDE/intune-policy-not-assigned-or-stale-deprecated-policy",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-EDE-0017"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.667,
+      "dense_recall": 0.333
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string; cause clearly framed as stale/deprecated Intune policy, dominant EDE root cause.",
+    "error_string": "Device compliance: Encryption not enabled"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ede-fix-1",
+   "query": "intune device stuck on deprecated bitlocker policy not receiving updated encryption profile how to fix",
+   "expected_family": "EDE",
+   "expected_root_cause": "EDE/intune-policy-not-assigned-or-stale-deprecated-policy",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-EDE-0057"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.833,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Asker knows the cause (stale deprecated policy assignment) and wants the remediation steps: reassign profile, force sync, rotate protector."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ede-syn-1",
+   "query": "why does bitlocker fail to start and recovery key not escrow to intune when tpm protector initialization never completes on managed laptops",
+   "expected_family": "EDE",
+   "expected_root_cause": "EDE/tpm-protector-not-initialized",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-EDE-0001",
+     "INC-EDE-0054",
+     "INC-EDE-0009"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: common pattern is uninitialized TPM protector blocking both BitLocker enablement and recovery key escrow to Intune/Azure AD."
+   },
+   "expected_ticket_set": [
+    "INC-EDE-0001",
+    "INC-EDE-0054",
+    "INC-EDE-0009"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-ede-syn-2",
+   "query": "intune bitlocker noncompliant after policy rollout stale policy reference still assigned to device",
+   "expected_family": "EDE",
+   "expected_root_cause": "EDE/intune-policy-not-assigned-or-stale-deprecated-policy",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-EDE-0057",
+     "INC-EDE-V0025",
+     "INC-EDE-0017"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.167,
+      "dense_recall": 0.0
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: root cause is always a deprecated/stale Intune encryption policy reference preventing active policy delivery, not hardware or sync issues."
+   },
+   "expected_ticket_set": [
+    "INC-EDE-0057",
+    "INC-EDE-V0025",
+    "INC-EDE-0017"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-lpd-diag-1",
+   "query": "windows laptop grinds to a halt for several minutes after logging in, antivirus process pegging cpu and storage",
+   "expected_family": "LPD",
+   "expected_root_cause": "LPD/endpoint-scan-backlog-startup-disk-contention",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-LPD-0046"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 1.0
+     },
+     "marks": [
+      "easy"
+     ]
+    },
+    "notes": "Describes post-login performance degradation with MsMpEng-style antivirus saturation without copying source phrasing or naming the specific policy/cause."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-lpd-diag-2",
+   "query": "laptop extremely slow right after login cpu spikes to 90 percent since last policy update",
+   "expected_family": "LPD",
+   "expected_root_cause": "LPD/resource-heavy-startup-policy",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-LPD-0051"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.0,
+      "dense_recall": 0.333
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around post-login CPU spike following policy change, cause unknown to asker."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-lpd-err-1",
+   "query": "laptop crawls after sign-in and apps won't open, diagnostics show Disk free space ~8% on C: drive alongside a defender scan backlog",
+   "expected_family": "LPD",
+   "expected_root_cause": "LPD/endpoint-scan-backlog-startup-disk-contention",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-LPD-0059"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Embeds the exact error string naturally while rephrasing symptom details away from source wording",
+    "error_string": "Disk free space ~8% on C: drive"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-lpd-fix-1",
+   "query": "fix for high cpu after login caused by intune startup policy pushing duplicate sync triggers and scheduled tasks",
+   "expected_family": "LPD",
+   "expected_root_cause": "LPD/resource-heavy-startup-policy",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-LPD-0034"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.333,
+      "dense_recall": 0.333
+     },
+     "marks": []
+    },
+    "notes": "Asker knows root cause (Intune startup policy overload) and wants the proven remediation steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-lpd-syn-1",
+   "query": "why do corporate laptops bog down right after signing in with defender and full disk together",
+   "expected_family": "LPD",
+   "expected_root_cause": "LPD/endpoint-scan-backlog-startup-disk-contention",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-LPD-0007",
+     "INC-LPD-0059",
+     "INC-LPD-0008"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 1.0
+     },
+     "marks": [
+      "easy"
+     ]
+    },
+    "notes": "Synthesis across all three tickets: common pattern of MsMpEng scan backlog + excess startup items + near-full C: drive causing post-login sluggishness, rephrased to avoid source wording."
+   },
+   "expected_ticket_set": [
+    "INC-LPD-0007",
+    "INC-LPD-0059",
+    "INC-LPD-0008"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-lpd-syn-2",
+   "query": "why does laptop cpu spike and apps run slow right after login following a policy deployment",
+   "expected_family": "LPD",
+   "expected_root_cause": "LPD/resource-heavy-startup-policy",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-LPD-V0008",
+     "INC-LPD-0034",
+     "INC-LPD-0051"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.667,
+      "dense_recall": 0.667
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets where a recently pushed startup/endpoint policy caused post-login CPU contention and delayed app launches across different users and offices."
+   },
+   "expected_ticket_set": [
+    "INC-LPD-V0008",
+    "INC-LPD-0034",
+    "INC-LPD-0051"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-oes-diag-1",
+   "query": "outlook desktop shows disconnected after weekend windows update but owa and mobile email working fine",
+   "expected_family": "OES",
+   "expected_root_cause": "OES/stale-corrupted-outlook-desktop-profile-cache",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-OES-0010"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.2,
+      "dense_recall": 0.5
+     },
+     "marks": []
+    },
+    "notes": "Symptom-only phrasing focused on the OST/profile corruption root cause without naming it; OWA working narrows it away from exchange outage."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-oes-fix-1",
+   "query": "how to fix outlook desktop stuck disconnected after office 365 update by rebuilding stale profile exchange online",
+   "expected_family": "OES",
+   "expected_root_cause": "OES/stale-corrupted-outlook-desktop-profile-cache",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-OES-0001"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Asker knows the cause (stale profile/cached connection state post-update) and wants the rebuild/reauthenticate fix."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-oes-syn-1",
+   "query": "what usually causes outlook desktop to show disconnected while owa and mobile still work fine",
+   "expected_family": "OES",
+   "expected_root_cause": "OES/stale-corrupted-outlook-desktop-profile-cache",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-OES-0029",
+     "INC-OES-0010",
+     "INC-OES-0001"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.2,
+      "dense_recall": 0.4
+     },
+     "marks": []
+    },
+    "notes": "Synthesizes the common pattern across all three tickets: desktop-only disconnected state with healthy server-side and alternative clients, rooted in stale/corrupted local Outlook profiles."
+   },
+   "expected_ticket_set": [
+    "INC-OES-0029",
+    "INC-OES-0010",
+    "INC-OES-0001"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-oes-syn-2",
+   "query": "what usually causes outlook to stop syncing on both desktop and mobile when intune compliance policy changes",
+   "expected_family": "OES",
+   "expected_root_cause": "OES/intune-mdm-device-compliance-block",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-OES-0005",
+     "INC-OES-0047",
+     "INC-OES-V0040"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.6
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: MDM/Intune non-compliant device state blocking Exchange Online mailbox access as the common pattern."
+   },
+   "expected_ticket_set": [
+    "INC-OES-0005",
+    "INC-OES-0047",
+    "INC-OES-V0040"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-pdq-diag-1",
+   "query": "shared office printer showing offline after driver update jobs stuck in queue won't print",
+   "expected_family": "PDQ",
+   "expected_root_cause": "PDQ/corrupt-driver-package-spooler-load-failure",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-PDQ-0039"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Symptom-focused query about printer going offline and stalled print jobs following a driver push, cause unknown to asker."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-pdq-diag-2",
+   "query": "shared office printer queue stuck after driver reinstall spooler showing driver unavailable errors",
+   "expected_family": "PDQ",
+   "expected_root_cause": "PDQ/stale-queue-driver-mapping",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-PDQ-0031"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.333,
+      "dense_recall": 0.0
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased query focusing on stuck queue and driver unavailable error post-reinstall, cause (queue/driver mapping mismatch) unknown to asker."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-pdq-err-1",
+   "query": "event log showing Printer driver load failure (INF parse error) after overnight driver update pushed to print server",
+   "expected_family": "PDQ",
+   "expected_root_cause": "PDQ/corrupt-driver-package-spooler-load-failure",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-PDQ-0062"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string verbatim in context of overnight deployment causing spooler failures, without copying ticket sentences.",
+    "error_string": "Printer driver load failure (INF parse error)"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-pdq-fix-1",
+   "query": "print spooler service account missing write access to spool folder how to restore acls",
+   "expected_family": "PDQ",
+   "expected_root_cause": "PDQ/spool-directory-permissions",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-PDQ-V0013"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 1.0
+     },
+     "marks": [
+      "easy"
+     ]
+    },
+    "notes": "Cause-language phrasing focused on ACL restoration for spool directory, avoids source wording like 'baseline ACLs' or 'svc-printspooler'."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-pdq-syn-1",
+   "query": "shared print server queue stuck jobs driver unavailable after driver package deployment what usually causes this",
+   "expected_family": "PDQ",
+   "expected_root_cause": "PDQ/corrupt-driver-package-spooler-load-failure",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-PDQ-0034",
+     "INC-PDQ-0024",
+     "INC-PDQ-0051"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: corrupt/incomplete driver packages deployed to print servers causing spooler DLL load failures and stuck queues \u2014 dominant root cause throughout."
+   },
+   "expected_ticket_set": [
+    "INC-PDQ-0034",
+    "INC-PDQ-0024",
+    "INC-PDQ-0051"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-pdq-syn-2",
+   "query": "what usually causes shared print queue jobs to stay stuck with driver unavailable after a driver reinstall",
+   "expected_family": "PDQ",
+   "expected_root_cause": "PDQ/stale-queue-driver-mapping",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-PDQ-0046",
+     "INC-PDQ-0019",
+     "INC-PDQ-0031"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.167
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: the common pattern is a queue remaining bound to a stale/incorrect driver mapping even after a driver reinstall, not a missing driver per se."
+   },
+   "expected_ticket_set": [
+    "INC-PDQ-0046",
+    "INC-PDQ-0019",
+    "INC-PDQ-0031"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sda-diag-3",
+   "query": "shared drive access denied even though user is in the correct security group ntfs inheritance issue",
+   "expected_family": "SDA",
+   "expected_root_cause": "SDA/broken-ntfs-acl-inheritance-or-deny-ace",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-SDA-0042"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.8
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased around the key finding that group membership was correct but access still blocked, pointing squarely at ACL/inheritance conflict as root cause."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sda-err-1",
+   "query": "mapped network drive shows Access is denied after changing domain password today",
+   "expected_family": "SDA",
+   "expected_root_cause": "SDA/stale-cached-smb-credentials",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-SDA-0062"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string naturally while describing the stale-credential symptom post-password-change without copying source sentences.",
+    "error_string": "Access is denied"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sda-fix-1",
+   "query": "how to fix mapped network drive pointing to retired UNC path after file server migration causing access denied",
+   "expected_family": "SDA",
+   "expected_root_cause": "SDA/stale-or-wrong-mapped-share-path",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-SDA-V0028"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.0
+     },
+     "marks": []
+    },
+    "notes": "Asker knows root cause (stale mapped drive targeting old server path post-migration) and wants the remediation steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sda-syn-1",
+   "query": "what is the typical cause when a user gets access denied on a mapped network drive but coworkers can access it fine",
+   "expected_family": "SDA",
+   "expected_root_cause": "SDA/missing-ad-security-group-membership",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-SDA-0046",
+     "INC-SDA-0032",
+     "INC-SDA-0020"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.6,
+      "dense_recall": 0.3
+     },
+     "marks": []
+    },
+    "notes": "Synthesis across all three tickets: individual user missing required AD security group membership for shared drive, distinct from server-wide outage."
+   },
+   "expected_ticket_set": [
+    "INC-SDA-0046",
+    "INC-SDA-0032",
+    "INC-SDA-0020"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sib-fix-1",
+   "query": "how to fix software center app not appearing in catalog because user missing intune entitlement group assignment",
+   "expected_family": "SIB",
+   "expected_root_cause": "SIB/missing-entitlement-group-membership",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-SIB-0028"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.5,
+      "dense_recall": 0.4
+     },
+     "marks": []
+    },
+    "notes": "Cause-language phrasing: asker knows the root cause (missing entitlement group) and wants the proven remediation steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sib-syn-2",
+   "query": "why do managed devices keep blocking software center installs when users are missing entitlement group assignments and intune inventory is out of date",
+   "expected_family": "SIB",
+   "expected_root_cause": "SIB/missing-entitlement-plus-stale-inventory",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-SIB-0055",
+     "INC-SIB-0014",
+     "INC-SIB-0056"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.0,
+      "dense_recall": 0.2
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: common pattern of missing AD/Azure entitlement group + stale Intune inventory together causing blocked installs and app invisibility in Software Center."
+   },
+   "expected_ticket_set": [
+    "INC-SIB-0055",
+    "INC-SIB-0014",
+    "INC-SIB-0056"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sml-diag-2",
+   "query": "whole team stuck in mfa loop after group restructure cannot access office 365 or salesforce",
+   "expected_family": "SML",
+   "expected_root_cause": "SML/conditional-access-group-policy-mismatch",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-SML-0060"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.143,
+      "dense_recall": 0.429
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user perspective; cause (stale CA policy group reference) not mentioned"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sml-fix-1",
+   "query": "how to fix azure ad conditional access blocking okta federated users after directory sync changed group memberships",
+   "expected_family": "SML",
+   "expected_root_cause": "SML/conditional-access-group-policy-mismatch",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-SML-0025"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.571,
+      "dense_recall": 0.714
+     },
+     "marks": []
+    },
+    "notes": "Cause-known fix_lookup: asker understands the post-sync group scope mismatch between Okta groups and Azure AD CA policy is the root cause and wants the resolution steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sml-syn-1",
+   "query": "why do okta sso users get stuck in mfa loop after changing phones or device upgrades",
+   "expected_family": "SML",
+   "expected_root_cause": "SML/stale-mfa-factor-enrollment",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-SML-0004",
+     "INC-SML-0011",
+     "INC-SML-0044"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.7,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Synthesizes the common pattern across all three tickets: stale Okta MFA enrollment records following device changes causing repeated MFA challenge loops during SSO."
+   },
+   "expected_ticket_set": [
+    "INC-SML-0004",
+    "INC-SML-0011",
+    "INC-SML-0044"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-sml-syn-2",
+   "query": "okta mfa loop after successful verification what identity policy misconfiguration usually causes repeated challenges across saas apps",
+   "expected_family": "SML",
+   "expected_root_cause": "SML/conditional-access-group-policy-mismatch",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-SML-0019",
+     "INC-SML-0025",
+     "INC-SML-0003"
+    ],
+    "generation": {
+     "attempts": 2,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.143,
+      "dense_recall": 0.143
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: each shows post-MFA loop rooted in a conditional access / sign-on policy scope mismatch (deprecated policy ref, drifted group sync, missing group claims) rather than user-side factor failure."
+   },
+   "expected_ticket_set": [
+    "INC-SML-0019",
+    "INC-SML-0025",
+    "INC-SML-0003"
+   ],
+   "category": "simple"
+  },
+  {
+   "query_id": "q-vda-err-1",
+   "query": "globalprotect vpn drops after 10 seconds showing CERT_EXPIRED in gateway logs",
+   "expected_family": "VDA",
+   "expected_root_cause": "VDA/expired-device-certificate-post-mfa-validation-failure",
+   "metadata": {
+    "intent": "exact_match",
+    "source_tickets": [
+     "INC-VDA-0033"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.9,
+      "dense_recall": 1.0
+     },
+     "marks": []
+    },
+    "notes": "Embeds exact error string naturally while describing the symptom of brief connection then drop.",
+    "error_string": "CERT_EXPIRED"
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-vda-fix-1",
+   "query": "globalprotect vpn drops immediately after mfa success due to stale certificate profile association in local machine store",
+   "expected_family": "VDA",
+   "expected_root_cause": "VDA/stale-vpn-profile-blocking-renewed-certificate",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-VDA-0025"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.0
+     },
+     "marks": []
+    },
+    "notes": "Asker knows the root cause (stale GP profile/cert association post-renewal) and wants the confirmed fix steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-wci-diag-1",
+   "query": "whole office can't get past wi-fi login, 802.1x keeps saying server certificate is expired during handshake",
+   "expected_family": "WCI",
+   "expected_root_cause": "WCI/expired-radius-controller-eap-tls-certificate",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-WCI-0056"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.7
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user perspective; cause (expired RADIUS server cert) is unknown to the asker."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-wci-diag-3",
+   "query": "laptop authenticated to corporate wifi but stuck on guest vlan with no access to internal file shares or crm",
+   "expected_family": "WCI",
+   "expected_root_cause": "WCI/incorrect-nac-policy-assignment",
+   "metadata": {
+    "intent": "diagnosis",
+    "source_tickets": [
+     "INC-WCI-0037"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.667,
+      "dense_recall": 0.667
+     },
+     "marks": []
+    },
+    "notes": "Symptom-phrased from user perspective: successful 802.1X auth but wrong VLAN assignment, cause (NAC policy mapping error) unknown to asker."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-wci-fix-1",
+   "query": "how to fix 802.1x eap failures on corporate wifi after radius server certificate expired on wireless controller",
+   "expected_family": "WCI",
+   "expected_root_cause": "WCI/expired-radius-controller-eap-tls-certificate",
+   "metadata": {
+    "intent": "fix_lookup",
+    "source_tickets": [
+     "INC-WCI-0003"
+    ],
+    "generation": {
+     "attempts": 1,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 1.0,
+      "dense_recall": 0.9
+     },
+     "marks": []
+    },
+    "notes": "Asker knows the cause (expired RADIUS cert on WLC) and wants the proven remediation steps."
+   },
+   "category": "simple"
+  },
+  {
+   "query_id": "q-wci-syn-1",
+   "query": "why do corporate wifi users get certificate errors and fail to get an ip address when the wireless controller certificate expires",
+   "expected_family": "WCI",
+   "expected_root_cause": "WCI/expired-radius-controller-eap-tls-certificate",
+   "metadata": {
+    "intent": "synthesis",
+    "source_tickets": [
+     "INC-WCI-0054",
+     "INC-WCI-0018",
+     "INC-WCI-0063"
+    ],
+    "generation": {
+     "attempts": 3,
+     "verifier": "accept"
+    },
+    "smoke": {
+     "scores": {
+      "bm25_recall": 0.8,
+      "dense_recall": 0.6
+     },
+     "marks": []
+    },
+    "notes": "Spans all three tickets: expired WLC/RADIUS server cert causes 802.1X EAP handshake rejection and no DHCP lease across multiple sites and OS types."
+   },
+   "expected_ticket_set": [
+    "INC-WCI-0054",
+    "INC-WCI-0018",
+    "INC-WCI-0063"
+   ],
+   "category": "simple"
+  }
+ ]
+}

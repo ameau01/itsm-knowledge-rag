@@ -1,0 +1,63 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "required": [
+  "provenance",
+  "queries"
+ ],
+ "properties": {
+  "queries": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "query_id",
+     "query",
+     "expected_family",
+     "expected_root_cause",
+     "metadata"
+    ],
+    "properties": {
+     "query_id": {
+      "type": "string"
+     },
+     "query": {
+      "type": "string"
+     },
+     "category": {
+      "enum": [
+       "simple",
+       "complex",
+       "abstention"
+      ]
+     },
+     "expected_family": {
+      "type": [
+       "string",
+       "array",
+       "null"
+      ]
+     },
+     "expected_root_cause": {
+      "type": [
+       "string",
+       "array",
+       "null"
+      ]
+     },
+     "expected_ticket_set": {
+      "type": "array",
+      "minItems": 2
+     },
+     "metadata": {
+      "type": "object",
+      "required": [
+       "intent",
+       "source_tickets"
+      ]
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,1896 @@
+{
+  "families": [
+    {
+      "family_id": "AIT",
+      "name": "integration-gateway-api-timeouts",
+      "canonical_symptoms": [
+        "HTTP 504 Gateway Timeout responses",
+        "delayed or failed nightly/scheduled sync jobs",
+        "retry accumulation and exhaustion",
+        "timeouts during overnight batch window"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "AIT/expired-api-token-auth-failures",
+          "summary": "An expired API token (often due to failed/missed rotation) caused authentication failures whose retries cascaded into 504 timeouts.",
+          "ticket_ids": [
+            "INC-AIT-0001",
+            "INC-AIT-0002",
+            "INC-AIT-0005",
+            "INC-AIT-0009",
+            "INC-AIT-0012",
+            "INC-AIT-0017",
+            "INC-AIT-0029",
+            "INC-AIT-0030",
+            "INC-AIT-0032",
+            "INC-AIT-0034",
+            "INC-AIT-0037",
+            "INC-AIT-0039",
+            "INC-AIT-0041",
+            "INC-AIT-0045",
+            "INC-AIT-0050",
+            "INC-AIT-0054",
+            "INC-AIT-0057",
+            "INC-AIT-0060"
+          ],
+          "low_confidence": [
+            "INC-AIT-0041",
+            "INC-AIT-0054"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "AIT/downstream-api-latency-exceeds-timeout",
+          "summary": "Elevated downstream/external API response latency exceeded the gateway timeout window, producing 504 responses and failed sync jobs.",
+          "ticket_ids": [
+            "INC-AIT-0004",
+            "INC-AIT-0011",
+            "INC-AIT-0013",
+            "INC-AIT-0016",
+            "INC-AIT-0018",
+            "INC-AIT-0023",
+            "INC-AIT-0024",
+            "INC-AIT-0025",
+            "INC-AIT-0026",
+            "INC-AIT-0028",
+            "INC-AIT-0033",
+            "INC-AIT-0036",
+            "INC-AIT-0042",
+            "INC-AIT-0046",
+            "INC-AIT-0049",
+            "INC-AIT-0052",
+            "INC-AIT-0056",
+            "INC-AIT-0059",
+            "INC-AIT-0061",
+            "INC-AIT-0062",
+            "INC-AIT-0064",
+            "INC-AIT-0065",
+            "INC-AIT-V0031"
+          ],
+          "low_confidence": [
+            "INC-AIT-0016",
+            "INC-AIT-0056"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "AIT/downstream-rate-limiting-throttling",
+          "summary": "Downstream API rate/quota limits produced 429 throttling responses whose retry accumulation exhausted the timeout window.",
+          "ticket_ids": [
+            "INC-AIT-0014",
+            "INC-AIT-V0032"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "AIT/stale-retry-backoff-amplifies-latency",
+          "summary": "A stale/deprecated or insufficient retry-backoff policy extended retries beyond the integration window, amplifying transient latency into timeouts.",
+          "ticket_ids": [
+            "INC-AIT-0010",
+            "INC-AIT-0058"
+          ],
+          "low_confidence": [
+            "INC-AIT-0058"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "AIT/unconfirmed-mixed-credential-latency-throttling",
+          "summary": "Root cause unconfirmed due to missing logs; timeout attributed ambiguously to expired credentials, downstream latency, or rate limiting.",
+          "ticket_ids": [
+            "INC-AIT-0051",
+            "INC-AIT-0063",
+            "INC-AIT-V0033"
+          ],
+          "low_confidence": [
+            "INC-AIT-0051",
+            "INC-AIT-0063",
+            "INC-AIT-V0033"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "ALP",
+      "name": "ad-lockout-from-stale-mobile-cached-credentials-after-password-reset",
+      "canonical_symptoms": [
+        "account relocks after password reset/change",
+        "repeated failed AD authentications from mobile device",
+        "cached/stale old credentials resubmitted by iOS/mobile",
+        "expired self-service password reset token delaying recovery",
+        "new password unusable through SSO until lockout cleared"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "ALP/stale-mobile-cached-credentials",
+          "summary": "Stale cached credentials on the user's mobile device continued submitting the old password after the reset, repeatedly triggering the Active Directory lockout policy as the sole or primary cause.",
+          "ticket_ids": [
+            "INC-ALP-0001",
+            "INC-ALP-0002",
+            "INC-ALP-0005",
+            "INC-ALP-0006",
+            "INC-ALP-0011",
+            "INC-ALP-0012",
+            "INC-ALP-0017",
+            "INC-ALP-0029",
+            "INC-ALP-0030",
+            "INC-ALP-0032",
+            "INC-ALP-0036",
+            "INC-ALP-0038",
+            "INC-ALP-0039",
+            "INC-ALP-0041",
+            "INC-ALP-0042",
+            "INC-ALP-0047",
+            "INC-ALP-0048",
+            "INC-ALP-0051",
+            "INC-ALP-0052",
+            "INC-ALP-0057",
+            "INC-ALP-0060",
+            "INC-ALP-0061",
+            "INC-ALP-0062"
+          ],
+          "low_confidence": [
+            "INC-ALP-0039"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "ALP/stale-mobile-credentials-plus-expired-reset-token",
+          "summary": "Stale cached credentials on the mobile device triggered the AD lockout while a concurrently expired/invalid self-service reset token blocked clean credential recovery and propagation to SSO (including phone-change context where credentials became stale).",
+          "ticket_ids": [
+            "INC-ALP-0003",
+            "INC-ALP-0004",
+            "INC-ALP-0008",
+            "INC-ALP-0010",
+            "INC-ALP-0013",
+            "INC-ALP-0014",
+            "INC-ALP-0015",
+            "INC-ALP-0018",
+            "INC-ALP-0019",
+            "INC-ALP-0020",
+            "INC-ALP-0021",
+            "INC-ALP-0024",
+            "INC-ALP-0025",
+            "INC-ALP-0026",
+            "INC-ALP-0028",
+            "INC-ALP-0033",
+            "INC-ALP-0034",
+            "INC-ALP-0035",
+            "INC-ALP-0037",
+            "INC-ALP-0040",
+            "INC-ALP-0043",
+            "INC-ALP-0044",
+            "INC-ALP-0046",
+            "INC-ALP-0049",
+            "INC-ALP-0050",
+            "INC-ALP-0053",
+            "INC-ALP-0054",
+            "INC-ALP-0055",
+            "INC-ALP-0056",
+            "INC-ALP-0058",
+            "INC-ALP-0063",
+            "INC-ALP-0064",
+            "INC-ALP-0065"
+          ],
+          "low_confidence": [
+            "INC-ALP-0004"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "ALP/expired-reset-token-primary",
+          "summary": "The prior password reset never completed because the reset token was no longer valid, leaving directory credentials only partially updated (no mobile lockout source described).",
+          "ticket_ids": [
+            "INC-ALP-V0004"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "ALP/stale-credentials-unidentified-source",
+          "summary": "Stale credentials on an unidentified endpoint, legacy client, or integrated/background non-mobile application continued authenticating with the old password, triggering AD lockouts.",
+          "ticket_ids": [
+            "INC-ALP-V0005",
+            "INC-ALP-V0006"
+          ],
+          "low_confidence": [
+            "INC-ALP-V0005"
+          ],
+          "label_class": "clean"
+        }
+      ]
+    },
+    {
+      "family_id": "CES",
+      "name": "internal-web-service-load-balancer-tls-certificate-expiry",
+      "canonical_symptoms": [
+        "TLS handshake failures on internal web service over HTTPS",
+        "Load balancer presenting expired or stale certificate chain",
+        "Client certificate validation / trust failures",
+        "Renewal alerting did not fire before expiration",
+        "Intermittent 502 errors from backend TLS validation"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "CES/renewed-chain-not-deployed-to-lb-with-monitoring-gap",
+          "summary": "The certificate expired and the renewed full certificate chain was not (fully) deployed to the load balancer, with certificate renewal monitoring/alerting failing or absent so the lapse was not prevented.",
+          "ticket_ids": [
+            "INC-CES-0001",
+            "INC-CES-0002",
+            "INC-CES-0004",
+            "INC-CES-0006",
+            "INC-CES-0007",
+            "INC-CES-0008",
+            "INC-CES-0009",
+            "INC-CES-0010",
+            "INC-CES-0013",
+            "INC-CES-0014",
+            "INC-CES-0016",
+            "INC-CES-0017",
+            "INC-CES-0018",
+            "INC-CES-0020",
+            "INC-CES-0022",
+            "INC-CES-0023",
+            "INC-CES-0024",
+            "INC-CES-0025",
+            "INC-CES-0026",
+            "INC-CES-0028",
+            "INC-CES-0029",
+            "INC-CES-0030",
+            "INC-CES-0033",
+            "INC-CES-0034",
+            "INC-CES-0036",
+            "INC-CES-0037",
+            "INC-CES-0038",
+            "INC-CES-0039",
+            "INC-CES-0041",
+            "INC-CES-0042",
+            "INC-CES-0043",
+            "INC-CES-0045",
+            "INC-CES-0046",
+            "INC-CES-0048",
+            "INC-CES-0050",
+            "INC-CES-0051",
+            "INC-CES-0053",
+            "INC-CES-0054",
+            "INC-CES-0056",
+            "INC-CES-0058",
+            "INC-CES-0059",
+            "INC-CES-0060",
+            "INC-CES-0061",
+            "INC-CES-0062",
+            "INC-CES-0063",
+            "INC-CES-0064"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "CES/valid-leaf-but-stale-or-missing-intermediate-served",
+          "summary": "The endpoint/leaf certificate was valid or renewed, but the load balancer served an incomplete chain because the intermediate certificate was missing, expired, or not updated.",
+          "ticket_ids": [
+            "INC-CES-0015",
+            "INC-CES-0032",
+            "INC-CES-0052",
+            "INC-CES-0057",
+            "INC-CES-V0017"
+          ],
+          "low_confidence": [
+            "INC-CES-V0017"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "CES/automated-renewal-process-failed-to-complete",
+          "summary": "The automated certificate renewal/issuance process itself failed to complete (e.g. job failed with access-denied/missing permissions, or CA renewal did not complete), so no valid certificate was available to deploy.",
+          "ticket_ids": [
+            "INC-CES-0003",
+            "INC-CES-0012",
+            "INC-CES-0049"
+          ],
+          "low_confidence": [
+            "INC-CES-0049",
+            "INC-CES-0012"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "CES/wrong-certificate-bound-to-endpoint",
+          "summary": "Renewal completed but the wrong certificate asset was bound to the virtual server / hostname, causing endpoint name (hostname) validation to fail rather than an expiry.",
+          "ticket_ids": [
+            "INC-CES-V0016"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "CES/unconfirmed-tls-presentation-issue-evidence-gap",
+          "summary": "Insufficient diagnostic evidence to confirm an expiration outage; possibly a transient or path-specific load balancer certificate presentation issue that could not be verified.",
+          "ticket_ids": [
+            "INC-CES-V0018"
+          ],
+          "low_confidence": [
+            "INC-CES-V0018"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "DCP",
+      "name": "intune-device-noncompliant-encryption-conditional-access-block",
+      "canonical_symptoms": [
+        "Device marked Noncompliant in Intune",
+        "Missing/unreported BitLocker/FileVault encryption signal",
+        "Stale Intune check-in beyond threshold",
+        "Conditional Access blocks Exchange/SharePoint/Teams/M365",
+        "Mismatch between Intune compliant state and CA enforcement"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "DCP/stale-checkin-missing-encryption-signal",
+          "summary": "A stale Intune device check-in prevented the required encryption compliance signal from being reported, so Device Compliance evaluated the device as noncompliant and Conditional Access blocked access.",
+          "ticket_ids": [
+            "INC-DCP-0001",
+            "INC-DCP-0002",
+            "INC-DCP-0005",
+            "INC-DCP-0008",
+            "INC-DCP-0010",
+            "INC-DCP-0011",
+            "INC-DCP-0014",
+            "INC-DCP-0017",
+            "INC-DCP-0018",
+            "INC-DCP-0019",
+            "INC-DCP-0024",
+            "INC-DCP-0026",
+            "INC-DCP-0030",
+            "INC-DCP-0032",
+            "INC-DCP-0037",
+            "INC-DCP-0038",
+            "INC-DCP-0041",
+            "INC-DCP-0042",
+            "INC-DCP-0045",
+            "INC-DCP-0046",
+            "INC-DCP-0051",
+            "INC-DCP-0052",
+            "INC-DCP-0055",
+            "INC-DCP-0056",
+            "INC-DCP-0058",
+            "INC-DCP-0061",
+            "INC-DCP-0062"
+          ],
+          "low_confidence": [
+            "INC-DCP-0018",
+            "INC-DCP-0019",
+            "INC-DCP-0024",
+            "INC-DCP-0055"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DCP/stale-deprecated-compliance-policy-reference",
+          "summary": "Devices continued evaluating against a deprecated/stale compliance policy assignment that lacked the current encryption signal mapping, producing erroneous noncompliant results.",
+          "ticket_ids": [
+            "INC-DCP-0003",
+            "INC-DCP-0013",
+            "INC-DCP-0033",
+            "INC-DCP-0043",
+            "INC-DCP-0053",
+            "INC-DCP-0063",
+            "INC-DCP-V0035"
+          ],
+          "low_confidence": [
+            "INC-DCP-0033",
+            "INC-DCP-0043",
+            "INC-DCP-0053"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DCP/stale-compliance-state-mismatch-ca-cache",
+          "summary": "Intune already showed the device compliant, but Conditional Access consumed a stale/un-propagated compliance signal or token state, creating a temporary enforcement mismatch.",
+          "ticket_ids": [
+            "INC-DCP-0004",
+            "INC-DCP-0029",
+            "INC-DCP-0039",
+            "INC-DCP-0049"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DCP/encryption-telemetry-broken-after-os-or-hardware-change",
+          "summary": "An OS/Windows update or hardware change disrupted consistent encryption telemetry reporting to Intune, so the encryption signal was missing or unreliable and the device was evaluated noncompliant.",
+          "ticket_ids": [
+            "INC-DCP-0028",
+            "INC-DCP-0034",
+            "INC-DCP-0050",
+            "INC-DCP-0065"
+          ],
+          "low_confidence": [
+            "INC-DCP-0050"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DCP/encryption-actually-disabled-or-attestation-failed",
+          "summary": "Encryption was genuinely disabled/suspended or not yet completed, or attestation failed to report a protected state, so the encryption requirement legitimately failed until local remediation completed.",
+          "ticket_ids": [
+            "INC-DCP-0025",
+            "INC-DCP-0057",
+            "INC-DCP-V0034"
+          ],
+          "low_confidence": [
+            "INC-DCP-0057"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DCP/indeterminate-compliance-refresh-failure",
+          "summary": "A failed or incomplete compliance state refresh left Conditional Access enforcing an outdated noncompliant state, without a confirmable single root-cause signal.",
+          "ticket_ids": [
+            "INC-DCP-0036",
+            "INC-DCP-V0036"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        }
+      ]
+    },
+    {
+      "family_id": "DRF",
+      "name": "internal-dns-resolution-failures",
+      "canonical_symptoms": [
+        "Intermittent NXDOMAIN for internal hostnames",
+        "Stale/outdated A record served instead of authoritative IP",
+        "Resolver answers diverge depending on resolver path",
+        "SERVFAIL or lookup timeouts for internal zone",
+        "Resolution failure isolated to specific subnets/resolvers"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "DRF/stale-resolver-cache-after-record-change",
+          "summary": "Recursive/forwarding resolver caches retained stale (positive or negative) entries after the authoritative internal record changed, serving outdated IPs or NXDOMAIN until caches were flushed.",
+          "ticket_ids": [
+            "INC-DRF-0001",
+            "INC-DRF-0008",
+            "INC-DRF-0010",
+            "INC-DRF-0011",
+            "INC-DRF-0016",
+            "INC-DRF-0020",
+            "INC-DRF-0021",
+            "INC-DRF-0023",
+            "INC-DRF-0025",
+            "INC-DRF-0029",
+            "INC-DRF-0030",
+            "INC-DRF-0033",
+            "INC-DRF-0036",
+            "INC-DRF-0043",
+            "INC-DRF-0046",
+            "INC-DRF-0048",
+            "INC-DRF-0049",
+            "INC-DRF-0051",
+            "INC-DRF-0053",
+            "INC-DRF-0056",
+            "INC-DRF-0057",
+            "INC-DRF-0058",
+            "INC-DRF-0060"
+          ],
+          "low_confidence": [
+            "INC-DRF-0036",
+            "INC-DRF-0016",
+            "INC-DRF-0025",
+            "INC-DRF-0030",
+            "INC-DRF-0057"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DRF/stale-authoritative-zone-record",
+          "summary": "An outdated/duplicate A record remained in the authoritative internal DNS zone (often pointing to a decommissioned host/IP), so resolvers served retired addresses or failed lookups.",
+          "ticket_ids": [
+            "INC-DRF-0003",
+            "INC-DRF-0004",
+            "INC-DRF-0013",
+            "INC-DRF-0014",
+            "INC-DRF-0024",
+            "INC-DRF-0028",
+            "INC-DRF-0034",
+            "INC-DRF-0039",
+            "INC-DRF-0041",
+            "INC-DRF-0054",
+            "INC-DRF-0059",
+            "INC-DRF-0061",
+            "INC-DRF-0063",
+            "INC-DRF-V0019"
+          ],
+          "low_confidence": [
+            "INC-DRF-0004",
+            "INC-DRF-0014",
+            "INC-DRF-0054"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DRF/missing-or-incorrect-conditional-forwarder",
+          "summary": "A resolver lacked or had an incorrect conditional forwarder/delegation for the internal zone, routing queries wrongly and caching negative responses so it returned NXDOMAIN/SERVFAIL while correctly-configured resolvers answered.",
+          "ticket_ids": [
+            "INC-DRF-0002",
+            "INC-DRF-0007",
+            "INC-DRF-0018",
+            "INC-DRF-0022",
+            "INC-DRF-0032",
+            "INC-DRF-0037",
+            "INC-DRF-0038",
+            "INC-DRF-0040",
+            "INC-DRF-0045",
+            "INC-DRF-0047",
+            "INC-DRF-0050",
+            "INC-DRF-0052",
+            "INC-DRF-0062"
+          ],
+          "low_confidence": [
+            "INC-DRF-0022",
+            "INC-DRF-0050",
+            "INC-DRF-0052"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "DRF/resolver-path-inconsistency-mixed-cause",
+          "summary": "Intermittent failures attributed broadly to inconsistent internal resolver/forwarder state with no single isolated proximate mechanism (combined stale cache and/or forwarder divergence).",
+          "ticket_ids": [
+            "INC-DRF-0012",
+            "INC-DRF-0017",
+            "INC-DRF-V0020"
+          ],
+          "low_confidence": [
+            "INC-DRF-0012",
+            "INC-DRF-0017",
+            "INC-DRF-V0020"
+          ],
+          "label_class": "ambiguous_zone"
+        },
+        {
+          "root_cause_id": "DRF/no-server-side-fault-client-side-or-transient",
+          "summary": "No fault found in central internal DNS; failure attributed to client-side caching, local network settings, or an already-cleared transient condition.",
+          "ticket_ids": [
+            "INC-DRF-V0021"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        }
+      ]
+    },
+    {
+      "family_id": "EDE",
+      "name": "bitlocker-not-enabled-or-recovery-key-not-escrowed-on-intune-devices",
+      "canonical_symptoms": [
+        "BitLocker not enabling on managed endpoint",
+        "Recovery key not escrowed to Azure AD/Intune",
+        "Device reported noncompliant for disk encryption",
+        "TPM protector in NotInitialized state",
+        "Local encryption state out of sync with Intune compliance"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "EDE/tpm-protector-not-initialized",
+          "summary": "The device TPM/protector was not initialized (unowned, cleared, or not provisioned), so BitLocker could not create the required protector, encryption never started, and the recovery key could not be escrowed; any policy non-application is a downstream effect of the missing protector.",
+          "ticket_ids": [
+            "INC-EDE-0001",
+            "INC-EDE-0003",
+            "INC-EDE-0004",
+            "INC-EDE-0008",
+            "INC-EDE-0009",
+            "INC-EDE-0011",
+            "INC-EDE-0014",
+            "INC-EDE-0016",
+            "INC-EDE-0019",
+            "INC-EDE-0020",
+            "INC-EDE-0021",
+            "INC-EDE-0024",
+            "INC-EDE-0026",
+            "INC-EDE-0028",
+            "INC-EDE-0029",
+            "INC-EDE-0032",
+            "INC-EDE-0036",
+            "INC-EDE-0038",
+            "INC-EDE-0039",
+            "INC-EDE-0041",
+            "INC-EDE-0042",
+            "INC-EDE-0043",
+            "INC-EDE-0046",
+            "INC-EDE-0049",
+            "INC-EDE-0050",
+            "INC-EDE-0051",
+            "INC-EDE-0054",
+            "INC-EDE-0056",
+            "INC-EDE-0059",
+            "INC-EDE-0061",
+            "INC-EDE-0062",
+            "INC-EDE-0064"
+          ],
+          "low_confidence": [
+            "INC-EDE-0003",
+            "INC-EDE-0008",
+            "INC-EDE-0011",
+            "INC-EDE-0026",
+            "INC-EDE-0043",
+            "INC-EDE-0050",
+            "INC-EDE-0059"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "EDE/intune-policy-not-assigned-or-stale-deprecated-policy",
+          "summary": "The required Intune BitLocker/disk-encryption policy was not effectively assigned/applied to the device \u2014 either missing assignment or a stale/deprecated policy reference taking precedence \u2014 so the active encryption configuration never applied and escrow could not complete.",
+          "ticket_ids": [
+            "INC-EDE-0017",
+            "INC-EDE-0034",
+            "INC-EDE-0037",
+            "INC-EDE-0053",
+            "INC-EDE-0057",
+            "INC-EDE-V0025"
+          ],
+          "low_confidence": [
+            "INC-EDE-0034",
+            "INC-EDE-0037",
+            "INC-EDE-0053"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "EDE/recovery-key-escrow-failure-despite-healthy-tpm-and-policy",
+          "summary": "TPM protector was created and policy delivered, but the recovery key upload/escrow to Azure AD/Intune failed or never completed (key-upload errors, enrollment-time escrow failure, or escrow timeout), leaving local encryption present but no key in the management service.",
+          "ticket_ids": [
+            "INC-EDE-0002",
+            "INC-EDE-0013",
+            "INC-EDE-0033",
+            "INC-EDE-0058",
+            "INC-EDE-0063",
+            "INC-EDE-V0026",
+            "INC-EDE-V0027"
+          ],
+          "low_confidence": [
+            "INC-EDE-V0026"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "EDE/mdm-sync-failure-causing-state-desync",
+          "summary": "BitLocker enabled and the key escrowed locally/successfully, but intermittent Intune/MDM sync failures left compliance reporting out of sync so Intune continued to report the device as not encrypted/noncompliant.",
+          "ticket_ids": [
+            "INC-EDE-0018",
+            "INC-EDE-0023",
+            "INC-EDE-0052"
+          ],
+          "low_confidence": [
+            "INC-EDE-0052"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "EDE/inconclusive-evidence-bitlocker-not-fully-enabled",
+          "summary": "BitLocker was not fully enabled and no recovery key was escrowed, but device-side telemetry (TPM/protector readiness, policy application, escrow sync) could not be confirmed, leaving the exact blocking mechanism undetermined.",
+          "ticket_ids": [
+            "INC-EDE-0025",
+            "INC-EDE-0030",
+            "INC-EDE-0060"
+          ],
+          "low_confidence": [
+            "INC-EDE-0025",
+            "INC-EDE-0030",
+            "INC-EDE-0060"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "LPD",
+      "name": "laptop-slow-post-login-cpu-disk-contention",
+      "canonical_symptoms": [
+        "laptop slow immediately after login",
+        "sustained high CPU (MsMpEng.exe)",
+        "delayed application launches",
+        "high disk I/O contention",
+        "critically low free disk space"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "LPD/endpoint-scan-backlog-startup-disk-contention",
+          "summary": "A queued endpoint protection/Defender scan backlog ran at login concurrently with resource-heavy startup items and/or low free disk space, causing sustained post-login CPU and disk contention that delayed application launches.",
+          "ticket_ids": [
+            "INC-LPD-0001",
+            "INC-LPD-0002",
+            "INC-LPD-0003",
+            "INC-LPD-0004",
+            "INC-LPD-0006",
+            "INC-LPD-0007",
+            "INC-LPD-0008",
+            "INC-LPD-0009",
+            "INC-LPD-0010",
+            "INC-LPD-0012",
+            "INC-LPD-0013",
+            "INC-LPD-0014",
+            "INC-LPD-0016",
+            "INC-LPD-0017",
+            "INC-LPD-0018",
+            "INC-LPD-0020",
+            "INC-LPD-0021",
+            "INC-LPD-0022",
+            "INC-LPD-0023",
+            "INC-LPD-0024",
+            "INC-LPD-0025",
+            "INC-LPD-0026",
+            "INC-LPD-0027",
+            "INC-LPD-0028",
+            "INC-LPD-0029",
+            "INC-LPD-0030",
+            "INC-LPD-0031",
+            "INC-LPD-0032",
+            "INC-LPD-0033",
+            "INC-LPD-0036",
+            "INC-LPD-0037",
+            "INC-LPD-0038",
+            "INC-LPD-0039",
+            "INC-LPD-0040",
+            "INC-LPD-0041",
+            "INC-LPD-0042",
+            "INC-LPD-0043",
+            "INC-LPD-0045",
+            "INC-LPD-0046",
+            "INC-LPD-0047",
+            "INC-LPD-0049",
+            "INC-LPD-0050",
+            "INC-LPD-0052",
+            "INC-LPD-0053",
+            "INC-LPD-0054",
+            "INC-LPD-0056",
+            "INC-LPD-0057",
+            "INC-LPD-0058",
+            "INC-LPD-0059",
+            "INC-LPD-0060",
+            "INC-LPD-0061",
+            "INC-LPD-0062",
+            "INC-LPD-0063"
+          ],
+          "low_confidence": [
+            "INC-LPD-0057",
+            "INC-LPD-0021"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "LPD/resource-heavy-startup-policy",
+          "summary": "A recently applied resource-heavy startup/endpoint policy enabled multiple non-essential autostart applications and services that drove sustained post-login CPU usage and delayed application launches, without a scan backlog as a cause.",
+          "ticket_ids": [
+            "INC-LPD-0034",
+            "INC-LPD-0051",
+            "INC-LPD-V0008"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "LPD/low-disk-temp-file-accumulation",
+          "summary": "Critically low free disk space driven by excessive temporary file accumulation caused ongoing disk contention and degraded post-login performance.",
+          "ticket_ids": [
+            "INC-LPD-V0007"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "LPD/unconfirmed-transient-post-login-slowdown",
+          "summary": "Intermittent post-login slowdown that was not reproducible during diagnostics and for which no root cause was confirmed.",
+          "ticket_ids": [
+            "INC-LPD-V0009"
+          ],
+          "low_confidence": [
+            "INC-LPD-V0009"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "OES",
+      "name": "outlook-exchange-online-mailbox-sync-failures",
+      "canonical_symptoms": [
+        "Outlook desktop and/or mobile not syncing Exchange Online mailbox",
+        "Outlook client shows 'Disconnected' state",
+        "Mobile ActiveSync/Outlook mobile blocked while OWA shows current mail",
+        "Intermittent sync delays with HTTP 429 throttling in telemetry",
+        "Autodiscover/reauthentication failures despite healthy mailbox"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "OES/stale-corrupted-outlook-desktop-profile-cache",
+          "summary": "A stale or corrupted Outlook desktop profile and/or local OST cache prevented the client from maintaining a healthy Exchange Online sync session, with any mobile involvement being secondary/minor.",
+          "ticket_ids": [
+            "INC-OES-0001",
+            "INC-OES-0007",
+            "INC-OES-0010",
+            "INC-OES-0025",
+            "INC-OES-0029",
+            "INC-OES-0030",
+            "INC-OES-0046",
+            "INC-OES-0050",
+            "INC-OES-0051",
+            "INC-OES-0055",
+            "INC-OES-0058"
+          ],
+          "low_confidence": [
+            "INC-OES-0007",
+            "INC-OES-0025",
+            "INC-OES-0030",
+            "INC-OES-0046",
+            "INC-OES-0050",
+            "INC-OES-0051",
+            "INC-OES-0058"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "OES/intune-mdm-device-compliance-block",
+          "summary": "Managed devices were marked non-compliant in Intune/MDM (via policy change or OS baseline change), causing Exchange Online to block mobile mail synchronization until compliance was remediated.",
+          "ticket_ids": [
+            "INC-OES-0003",
+            "INC-OES-0005",
+            "INC-OES-0009",
+            "INC-OES-0018",
+            "INC-OES-0019",
+            "INC-OES-0022",
+            "INC-OES-0026",
+            "INC-OES-0033",
+            "INC-OES-0038",
+            "INC-OES-0043",
+            "INC-OES-0047",
+            "INC-OES-0053",
+            "INC-OES-0057",
+            "INC-OES-0061",
+            "INC-OES-V0040",
+            "INC-OES-V0043"
+          ],
+          "low_confidence": [
+            "INC-OES-0009",
+            "INC-OES-0019",
+            "INC-OES-0026",
+            "INC-OES-0053",
+            "INC-OES-0057"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "OES/stale-mobile-sync-partnership",
+          "summary": "A stale or broken Exchange ActiveSync/Outlook-mobile device partnership left the mobile client disconnected and required the sync partnership to be reset or re-established, independent of any compliance block.",
+          "ticket_ids": [
+            "INC-OES-0004",
+            "INC-OES-0015",
+            "INC-OES-0021",
+            "INC-OES-0028",
+            "INC-OES-0042",
+            "INC-OES-0045",
+            "INC-OES-0052",
+            "INC-OES-0059",
+            "INC-OES-V0044"
+          ],
+          "low_confidence": [
+            "INC-OES-0015",
+            "INC-OES-0042"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "OES/exchange-online-mailbox-throttling",
+          "summary": "Exchange Online backend throttling (HTTP 429 / EWS throttling) interrupted client synchronization across Outlook clients as the persistent blocker.",
+          "ticket_ids": [
+            "INC-OES-0002",
+            "INC-OES-0060",
+            "INC-OES-0062"
+          ],
+          "low_confidence": [
+            "INC-OES-0002",
+            "INC-OES-0060",
+            "INC-OES-0062"
+          ],
+          "label_class": "ambiguous_zone"
+        },
+        {
+          "root_cause_id": "OES/unresolved-endpoint-client-sync-state",
+          "summary": "Client-side endpoint sync state was degraded across both desktop profile and mobile partnership/compliance with no confirmed single primary mechanism, and a server-wide outage was ruled out by healthy OWA access.",
+          "ticket_ids": [
+            "INC-OES-0008",
+            "INC-OES-0014",
+            "INC-OES-0017",
+            "INC-OES-0024",
+            "INC-OES-0034",
+            "INC-OES-0054",
+            "INC-OES-0063"
+          ],
+          "low_confidence": [
+            "INC-OES-0008",
+            "INC-OES-0014",
+            "INC-OES-0024",
+            "INC-OES-0034",
+            "INC-OES-0054"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "OES/expired-m365-auth-tokens",
+          "summary": "Corrupted or invalid stored Microsoft 365 authentication tokens caused Outlook to repeatedly fail reauthentication despite a healthy profile and compliant device.",
+          "ticket_ids": [
+            "INC-OES-V0042"
+          ],
+          "low_confidence": [
+            "INC-OES-V0042"
+          ],
+          "label_class": "ambiguous_zone"
+        },
+        {
+          "root_cause_id": "OES/suspected-server-side-mailbox-fault",
+          "summary": "A suspected mailbox-side Exchange Online synchronization fault affecting multiple client sessions for a single user, with insufficient evidence to attribute the failure to client profile, compliance, or partnership state.",
+          "ticket_ids": [
+            "INC-OES-V0041",
+            "INC-OES-V0045"
+          ],
+          "low_confidence": [
+            "INC-OES-V0041",
+            "INC-OES-V0045"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "PDQ",
+      "name": "print-server-stuck-jobs-driver-failure",
+      "canonical_symptoms": [
+        "print jobs stuck in spooler queue at 0%",
+        "'Driver unavailable' errors reported to clients",
+        "shared printer shows offline after driver update",
+        "Print Spooler instability or crash loops",
+        "driver load / checksum-mismatch failures"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "PDQ/corrupt-driver-package-spooler-load-failure",
+          "summary": "A corrupted, mismatched, or checksum-failing printer driver package on the print server prevented the Windows Print Spooler from loading the queue driver, leaving jobs stuck and printers reporting 'driver unavailable'/offline.",
+          "ticket_ids": [
+            "INC-PDQ-0001",
+            "INC-PDQ-0002",
+            "INC-PDQ-0003",
+            "INC-PDQ-0004",
+            "INC-PDQ-0005",
+            "INC-PDQ-0007",
+            "INC-PDQ-0008",
+            "INC-PDQ-0009",
+            "INC-PDQ-0010",
+            "INC-PDQ-0012",
+            "INC-PDQ-0014",
+            "INC-PDQ-0016",
+            "INC-PDQ-0017",
+            "INC-PDQ-0018",
+            "INC-PDQ-0021",
+            "INC-PDQ-0023",
+            "INC-PDQ-0024",
+            "INC-PDQ-0025",
+            "INC-PDQ-0026",
+            "INC-PDQ-0028",
+            "INC-PDQ-0029",
+            "INC-PDQ-0030",
+            "INC-PDQ-0032",
+            "INC-PDQ-0033",
+            "INC-PDQ-0034",
+            "INC-PDQ-0035",
+            "INC-PDQ-0036",
+            "INC-PDQ-0037",
+            "INC-PDQ-0038",
+            "INC-PDQ-0039",
+            "INC-PDQ-0040",
+            "INC-PDQ-0042",
+            "INC-PDQ-0043",
+            "INC-PDQ-0044",
+            "INC-PDQ-0045",
+            "INC-PDQ-0049",
+            "INC-PDQ-0050",
+            "INC-PDQ-0051",
+            "INC-PDQ-0052",
+            "INC-PDQ-0053",
+            "INC-PDQ-0057",
+            "INC-PDQ-0058",
+            "INC-PDQ-0059",
+            "INC-PDQ-0060",
+            "INC-PDQ-0062",
+            "INC-PDQ-0063",
+            "INC-PDQ-0064",
+            "INC-PDQ-0065"
+          ],
+          "low_confidence": [
+            "INC-PDQ-0016",
+            "INC-PDQ-0003",
+            "INC-PDQ-0035",
+            "INC-PDQ-0052"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "PDQ/stale-queue-driver-mapping",
+          "summary": "The printer queue remained bound to a stale, outdated, or incorrect driver/GUID association after a partial reinstall or driver change, so the spooler referenced an unavailable driver even when an approved package was present.",
+          "ticket_ids": [
+            "INC-PDQ-0019",
+            "INC-PDQ-0031",
+            "INC-PDQ-0046",
+            "INC-PDQ-0054",
+            "INC-PDQ-0056",
+            "INC-PDQ-0061"
+          ],
+          "low_confidence": [
+            "INC-PDQ-0054",
+            "INC-PDQ-0056",
+            "INC-PDQ-0061"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "PDQ/spool-directory-permissions",
+          "summary": "Incorrect permissions on the shared printer queue or spool directory prevented the Print Spooler from processing submitted jobs.",
+          "ticket_ids": [
+            "INC-PDQ-V0013"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "PDQ/queue-left-paused",
+          "summary": "The shared printer queue was left in a paused state, preventing queued jobs from processing.",
+          "ticket_ids": [
+            "INC-PDQ-V0015"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "PDQ/unresolved-rendering-escalation-holding",
+          "summary": "Holding category: intermittent job-processing failure not explained by queue state or driver version, with an unconfirmed root cause requiring vendor/platform escalation.",
+          "ticket_ids": [
+            "INC-PDQ-V0014"
+          ],
+          "low_confidence": [
+            "INC-PDQ-V0014"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "SDA",
+      "name": "shared-drive-access-denied",
+      "canonical_symptoms": [
+        "Access denied to department/Finance shared drive",
+        "Repeated SMB/Windows credential prompts on mapped drive",
+        "User SID/token lacks share entitlement",
+        "File server ACL denies authorization despite successful authentication"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "SDA/missing-ad-security-group-membership",
+          "summary": "The user's account was not (or no longer) a member of the AD security group that grants the share/NTFS entitlement, so their logon token lacked the required permission.",
+          "ticket_ids": [
+            "INC-SDA-0001",
+            "INC-SDA-0003",
+            "INC-SDA-0008",
+            "INC-SDA-0010",
+            "INC-SDA-0013",
+            "INC-SDA-0016",
+            "INC-SDA-0020",
+            "INC-SDA-0025",
+            "INC-SDA-0028",
+            "INC-SDA-0030",
+            "INC-SDA-0032",
+            "INC-SDA-0036",
+            "INC-SDA-0038",
+            "INC-SDA-0046",
+            "INC-SDA-0050",
+            "INC-SDA-0051",
+            "INC-SDA-0053",
+            "INC-SDA-0056",
+            "INC-SDA-0058",
+            "INC-SDA-0060",
+            "INC-SDA-0061",
+            "INC-SDA-0064",
+            "INC-SDA-V0029"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SDA/missing-group-plus-stale-credential-or-acl-compound",
+          "summary": "Missing/updated AD group membership combined with a contributing secondary cause (stale cached SMB credentials or broken NTFS inheritance) that jointly produced continued denials and repeated prompts.",
+          "ticket_ids": [
+            "INC-SDA-0014",
+            "INC-SDA-0015",
+            "INC-SDA-0017",
+            "INC-SDA-0018",
+            "INC-SDA-0023",
+            "INC-SDA-0024",
+            "INC-SDA-0033",
+            "INC-SDA-0034",
+            "INC-SDA-0037",
+            "INC-SDA-0039",
+            "INC-SDA-0041",
+            "INC-SDA-0043",
+            "INC-SDA-0045",
+            "INC-SDA-0048",
+            "INC-SDA-0054",
+            "INC-SDA-0059",
+            "INC-SDA-0063"
+          ],
+          "low_confidence": [
+            "INC-SDA-0034",
+            "INC-SDA-0054",
+            "INC-SDA-0059"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SDA/broken-ntfs-acl-inheritance-or-deny-ace",
+          "summary": "File server NTFS/ACL misconfiguration (broken inheritance, missing group ACE, or explicit deny ACE) overrode otherwise valid group-based access.",
+          "ticket_ids": [
+            "INC-SDA-0004",
+            "INC-SDA-0007",
+            "INC-SDA-0042",
+            "INC-SDA-0052",
+            "INC-SDA-0057"
+          ],
+          "low_confidence": [
+            "INC-SDA-0052"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SDA/stale-cached-smb-credentials",
+          "summary": "Valid AD membership was confirmed, but stale/cached Windows or SMB credentials on the mapped drive caused repeated authentication prompts and access denial until remapped with fresh credentials.",
+          "ticket_ids": [
+            "INC-SDA-0002",
+            "INC-SDA-0062"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SDA/stale-or-wrong-mapped-share-path",
+          "summary": "The mapped drive targeted a stale/retired UNC path, producing Access Denied despite valid entitlement.",
+          "ticket_ids": [
+            "INC-SDA-V0028"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SDA/unconfirmed-backend-replication-or-auth-escalated",
+          "summary": "Conflicting directory-versus-SMB evidence pointed to an unconfirmed backend permission-replication or file-service authentication fault requiring higher-tier review; mechanism not definitively diagnosed.",
+          "ticket_ids": [
+            "INC-SDA-V0030"
+          ],
+          "low_confidence": [
+            "INC-SDA-V0030"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "SIB",
+      "name": "software-center-install-blocked-finance-endpoint-protection",
+      "canonical_symptoms": [
+        "Software Center install blocked by policy",
+        "Endpoint Protection quarantines/blocks approved installer",
+        "App not visible/available in Software Center catalog",
+        "Entitlement/policy check failure",
+        "Stale Intune device inventory/policy state"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "SIB/missing-entitlement-group-membership",
+          "summary": "User/device was not a member of the required entitlement group, so the application was not targeted and Software Center failed the entitlement check, with no EP block or stale inventory cited.",
+          "ticket_ids": [
+            "INC-SIB-0001",
+            "INC-SIB-0010",
+            "INC-SIB-0013",
+            "INC-SIB-0028",
+            "INC-SIB-0033",
+            "INC-SIB-0037",
+            "INC-SIB-0050",
+            "INC-SIB-0052",
+            "INC-SIB-0053",
+            "INC-SIB-0058",
+            "INC-SIB-0062"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/missing-entitlement-plus-stale-inventory",
+          "summary": "User/device was missing required entitlement group membership AND the endpoint had stale Intune inventory/policy state delaying visibility, with no Endpoint Protection block involved.",
+          "ticket_ids": [
+            "INC-SIB-0014",
+            "INC-SIB-0024",
+            "INC-SIB-0027",
+            "INC-SIB-0055",
+            "INC-SIB-0056"
+          ],
+          "low_confidence": [
+            "INC-SIB-0024"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/missing-entitlement-group-membership-plus-endpoint-protection-block",
+          "summary": "User/device was missing required entitlement group membership AND the approved installer was blocked/quarantined by Endpoint Protection, with no stale inventory cited.",
+          "ticket_ids": [
+            "INC-SIB-0026",
+            "INC-SIB-0040",
+            "INC-SIB-0043",
+            "INC-SIB-0046",
+            "INC-SIB-0051"
+          ],
+          "low_confidence": [
+            "INC-SIB-0026",
+            "INC-SIB-0051"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/endpoint-protection-app-control-block",
+          "summary": "Endpoint Protection / application control policy blocked the approved installer (unsigned/unapproved publisher/hash/allowlist) causing Software Center policy validation to fail, with no entitlement gap or stale inventory.",
+          "ticket_ids": [
+            "INC-SIB-0015",
+            "INC-SIB-0020",
+            "INC-SIB-0047",
+            "INC-SIB-0048",
+            "INC-SIB-0060",
+            "INC-SIB-0065",
+            "INC-SIB-V0003"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/endpoint-protection-block-plus-stale-inventory",
+          "summary": "Endpoint Protection blocked/quarantined the approved installer (or its approval failed to propagate) AND the device had stale Intune inventory/policy state delaying app visibility, without an independently missing group membership.",
+          "ticket_ids": [
+            "INC-SIB-0002",
+            "INC-SIB-0003",
+            "INC-SIB-0004",
+            "INC-SIB-0005",
+            "INC-SIB-0008",
+            "INC-SIB-0009",
+            "INC-SIB-0011",
+            "INC-SIB-0012",
+            "INC-SIB-0017",
+            "INC-SIB-0019",
+            "INC-SIB-0021",
+            "INC-SIB-0023",
+            "INC-SIB-0025",
+            "INC-SIB-0030",
+            "INC-SIB-0032",
+            "INC-SIB-0036",
+            "INC-SIB-0038",
+            "INC-SIB-0039",
+            "INC-SIB-0049",
+            "INC-SIB-0059",
+            "INC-SIB-0063"
+          ],
+          "low_confidence": [
+            "INC-SIB-0009",
+            "INC-SIB-0021",
+            "INC-SIB-0030",
+            "INC-SIB-0059"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/missing-entitlement-plus-endpoint-protection-and-stale-inventory",
+          "summary": "Three concurrent factors: user/device missing required entitlement group membership, Endpoint Protection blocking the installer, and stale Intune inventory/policy state delaying targeting and visibility.",
+          "ticket_ids": [
+            "INC-SIB-0007",
+            "INC-SIB-0034",
+            "INC-SIB-0042",
+            "INC-SIB-0044",
+            "INC-SIB-0045",
+            "INC-SIB-0061",
+            "INC-SIB-0064"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/stale-inventory-policy-targeting-only",
+          "summary": "Stale Intune/SCCM device inventory and outdated client policy state alone caused entitlement evaluation/targeting to fail and the app not to surface, with no missing membership and no Endpoint Protection block.",
+          "ticket_ids": [
+            "INC-SIB-0018",
+            "INC-SIB-0054"
+          ],
+          "low_confidence": [
+            "INC-SIB-0054"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SIB/indeterminate-incomplete-telemetry",
+          "summary": "Root cause could not be confirmed due to incomplete diagnostic telemetry or an ambiguous management-platform misconfiguration despite valid entitlement.",
+          "ticket_ids": [
+            "INC-SIB-V0001",
+            "INC-SIB-V0002"
+          ],
+          "low_confidence": [
+            "INC-SIB-V0001",
+            "INC-SIB-V0002"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "SML",
+      "name": "sso-mfa-prompt-loop-okta-azuread",
+      "canonical_symptoms": [
+        "repeated MFA prompt loop after primary SSO authentication",
+        "MFA challenge completes but session/token not issued",
+        "SAML/token assertion rejected returning user to MFA prompt",
+        "AUTH-401 / factor_mismatch / MFA_REQUIRED events",
+        "cross-device, multi-user recurrence during SSO portal access"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "SML/stale-mfa-factor-enrollment",
+          "summary": "Stale, duplicate, or out-of-sync MFA factor/device enrollment records in the identity provider cause factor validation to fail and loop the MFA challenge instead of completing the session.",
+          "ticket_ids": [
+            "INC-SML-0002",
+            "INC-SML-0004",
+            "INC-SML-0007",
+            "INC-SML-0011",
+            "INC-SML-0014",
+            "INC-SML-0017",
+            "INC-SML-0018",
+            "INC-SML-0024",
+            "INC-SML-0026",
+            "INC-SML-0033",
+            "INC-SML-0038",
+            "INC-SML-0044",
+            "INC-SML-0046",
+            "INC-SML-0052",
+            "INC-SML-0053",
+            "INC-SML-0054",
+            "INC-SML-0057",
+            "INC-SML-0062",
+            "INC-SML-0064",
+            "INC-SML-V0038"
+          ],
+          "low_confidence": [
+            "INC-SML-0017",
+            "INC-SML-0026",
+            "INC-SML-0052",
+            "INC-SML-0057",
+            "INC-SML-0062",
+            "INC-SML-V0038"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SML/conditional-access-group-policy-mismatch",
+          "summary": "Conditional access / group-to-policy targeting between Okta and Azure AD is misscoped (missing group claim, deprecated policy reference, or excluded group) so users are evaluated against incorrect policy and repeatedly challenged or denied despite valid MFA.",
+          "ticket_ids": [
+            "INC-SML-0003",
+            "INC-SML-0019",
+            "INC-SML-0025",
+            "INC-SML-0042",
+            "INC-SML-0050",
+            "INC-SML-0060",
+            "INC-SML-V0037"
+          ],
+          "low_confidence": [
+            "INC-SML-0042",
+            "INC-SML-0050"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SML/combined-stale-enrollment-and-policy-desync",
+          "summary": "COMPOUND BUCKET (not a single mechanism): tickets where both stale MFA enrollment AND a conditional-access/group-policy mismatch are stated as co-equal/co-required causes, typically following an identity sync; each warrants future root-cause decomposition.",
+          "ticket_ids": [
+            "INC-SML-0001",
+            "INC-SML-0005",
+            "INC-SML-0010",
+            "INC-SML-0015",
+            "INC-SML-0021",
+            "INC-SML-0029",
+            "INC-SML-0030",
+            "INC-SML-0034",
+            "INC-SML-0039",
+            "INC-SML-0049",
+            "INC-SML-0051",
+            "INC-SML-0055",
+            "INC-SML-0058",
+            "INC-SML-0061",
+            "INC-SML-0063"
+          ],
+          "low_confidence": [
+            "INC-SML-0005",
+            "INC-SML-0051",
+            "INC-SML-0061"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SML/authenticator-clock-drift-totp-mismatch",
+          "summary": "Time/clock drift on the user's authenticator device generates out-of-sync TOTP codes that fail validation, producing repeated MFA failures and an SSO prompt loop.",
+          "ticket_ids": [
+            "INC-SML-0031",
+            "INC-SML-0043",
+            "INC-SML-0047"
+          ],
+          "low_confidence": [
+            "INC-SML-0043",
+            "INC-SML-0047"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "SML/post-mfa-federation-session-fault",
+          "summary": "PROVISIONAL/UNCONFIRMED: an upstream federated SSO processing fault after MFA completion prevents session establishment and redirects users back to sign-in, mimicking an MFA loop despite valid enrollment and policy.",
+          "ticket_ids": [
+            "INC-SML-V0039"
+          ],
+          "low_confidence": [
+            "INC-SML-V0039"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "VDA",
+      "name": "globalprotect-vpn-immediate-post-mfa-disconnect",
+      "canonical_symptoms": [
+        "VPN tunnel terminates immediately after successful Okta MFA",
+        "GlobalProtect connects then drops within seconds",
+        "post-authentication certificate/TLS validation failure",
+        "repeated disconnect and re-authentication loops",
+        "loss of access to internal applications after authentication"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "VDA/expired-device-certificate-post-mfa-validation-failure",
+          "summary": "An expired endpoint device certificate caused GlobalProtect post-authentication certificate/TLS validation to fail after successful Okta MFA, tearing down the tunnel; on a subset of endpoints a stale VPN profile additionally contributed to recurring disconnects.",
+          "ticket_ids": [
+            "INC-VDA-0001",
+            "INC-VDA-0002",
+            "INC-VDA-0003",
+            "INC-VDA-0004",
+            "INC-VDA-0005",
+            "INC-VDA-0007",
+            "INC-VDA-0008",
+            "INC-VDA-0009",
+            "INC-VDA-0011",
+            "INC-VDA-0012",
+            "INC-VDA-0013",
+            "INC-VDA-0014",
+            "INC-VDA-0015",
+            "INC-VDA-0016",
+            "INC-VDA-0017",
+            "INC-VDA-0018",
+            "INC-VDA-0019",
+            "INC-VDA-0021",
+            "INC-VDA-0024",
+            "INC-VDA-0026",
+            "INC-VDA-0028",
+            "INC-VDA-0029",
+            "INC-VDA-0030",
+            "INC-VDA-0031",
+            "INC-VDA-0033",
+            "INC-VDA-0034",
+            "INC-VDA-0037",
+            "INC-VDA-0038",
+            "INC-VDA-0039",
+            "INC-VDA-0041",
+            "INC-VDA-0042",
+            "INC-VDA-0043",
+            "INC-VDA-0044",
+            "INC-VDA-0046",
+            "INC-VDA-0047",
+            "INC-VDA-0048",
+            "INC-VDA-0049",
+            "INC-VDA-0050",
+            "INC-VDA-0051",
+            "INC-VDA-0052",
+            "INC-VDA-0053",
+            "INC-VDA-0054",
+            "INC-VDA-0055",
+            "INC-VDA-0056",
+            "INC-VDA-0057",
+            "INC-VDA-0058",
+            "INC-VDA-0059",
+            "INC-VDA-0060",
+            "INC-VDA-0061",
+            "INC-VDA-0062",
+            "INC-VDA-0063",
+            "INC-VDA-0064",
+            "INC-VDA-0065"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "VDA/stale-vpn-profile-blocking-renewed-certificate",
+          "summary": "The device certificate was already renewed, but GlobalProtect retained a stale local certificate/profile association that prevented the renewed certificate from being presented, causing post-MFA validation mismatch and tunnel teardown.",
+          "ticket_ids": [
+            "INC-VDA-0025",
+            "INC-VDA-0035"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "VDA/globalprotect-profile-cert-mapping-misconfiguration",
+          "summary": "A GlobalProtect profile misconfiguration caused the client to use a certificate mapping that did not match the active enrolled device certificate, triggering post-auth policy disconnects after successful Okta MFA.",
+          "ticket_ids": [
+            "INC-VDA-V0010"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "VDA/gateway-portal-post-auth-instability",
+          "summary": "Post-authentication GlobalProtect gateway/portal instability terminated sessions after successful Okta MFA despite valid endpoint certificate configuration.",
+          "ticket_ids": [
+            "INC-VDA-V0012"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "VDA/indeterminate-intermittent-disconnect",
+          "summary": "No definitive root cause could be established; certificate-related causes were not supported and the remaining disconnect behavior appeared intermittent.",
+          "ticket_ids": [
+            "INC-VDA-V0011"
+          ],
+          "low_confidence": [
+            "INC-VDA-V0011"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    },
+    {
+      "family_id": "WCI",
+      "name": "corporate-wifi-8021x-authentication-failures",
+      "canonical_symptoms": [
+        "EAP-TLS certificate validation failures during 802.1X authentication",
+        "RADIUS Access-Reject / NAC denial after SSID association",
+        "Clients associate but cannot obtain DHCP/network access",
+        "Intermittent disconnects after successful authentication",
+        "Users placed in wrong VLAN / quarantine role despite valid auth"
+      ],
+      "root_causes": [
+        {
+          "root_cause_id": "WCI/expired-radius-controller-eap-tls-certificate",
+          "summary": "The server certificate on the RADIUS/Wireless Controller path expired, causing EAP-TLS validation failures and NAC/RADIUS rejection; any stale-profile mentions are post-renewal remediation context, not co-equal root causes.",
+          "ticket_ids": [
+            "INC-WCI-0001",
+            "INC-WCI-0003",
+            "INC-WCI-0004",
+            "INC-WCI-0006",
+            "INC-WCI-0013",
+            "INC-WCI-0014",
+            "INC-WCI-0016",
+            "INC-WCI-0018",
+            "INC-WCI-0021",
+            "INC-WCI-0023",
+            "INC-WCI-0026",
+            "INC-WCI-0030",
+            "INC-WCI-0033",
+            "INC-WCI-0034",
+            "INC-WCI-0036",
+            "INC-WCI-0038",
+            "INC-WCI-0039",
+            "INC-WCI-0041",
+            "INC-WCI-0045",
+            "INC-WCI-0046",
+            "INC-WCI-0048",
+            "INC-WCI-0049",
+            "INC-WCI-0050",
+            "INC-WCI-0051",
+            "INC-WCI-0052",
+            "INC-WCI-0053",
+            "INC-WCI-0054",
+            "INC-WCI-0056",
+            "INC-WCI-0057",
+            "INC-WCI-0058",
+            "INC-WCI-0060",
+            "INC-WCI-0061",
+            "INC-WCI-0063",
+            "INC-WCI-0064"
+          ],
+          "low_confidence": [
+            "INC-WCI-0013",
+            "INC-WCI-0021",
+            "INC-WCI-0023",
+            "INC-WCI-0030",
+            "INC-WCI-0033",
+            "INC-WCI-0038",
+            "INC-WCI-0046",
+            "INC-WCI-0049",
+            "INC-WCI-0050",
+            "INC-WCI-0053",
+            "INC-WCI-0057",
+            "INC-WCI-0061"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "WCI/cert-rollover-incomplete-trust-propagation",
+          "summary": "Distinct from isolated expiry: the renewed certificate/trust chain was not fully propagated across all controller/ISE cluster nodes or to managed endpoints, leaving authentication paths validating against stale/expired trust state after the renewal.",
+          "ticket_ids": [
+            "INC-WCI-0008",
+            "INC-WCI-0010",
+            "INC-WCI-0017",
+            "INC-WCI-0027",
+            "INC-WCI-0032"
+          ],
+          "low_confidence": [
+            "INC-WCI-0008",
+            "INC-WCI-0010",
+            "INC-WCI-0017",
+            "INC-WCI-0027",
+            "INC-WCI-0032"
+          ],
+          "label_class": "ambiguous_zone"
+        },
+        {
+          "root_cause_id": "WCI/stale-or-corrupt-client-wifi-profile",
+          "summary": "Corrupt or stale client-side Corporate Wi-Fi profile / cached supplicant or credential state on the endpoint is the primary cause of inconsistent 802.1X authentication and NAC rejection, independent of any server certificate issue.",
+          "ticket_ids": [
+            "INC-WCI-0025",
+            "INC-WCI-0028",
+            "INC-WCI-0043",
+            "INC-WCI-0062",
+            "INC-WCI-V0022"
+          ],
+          "low_confidence": [
+            "INC-WCI-0028",
+            "INC-WCI-0062"
+          ],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "WCI/incorrect-nac-policy-assignment",
+          "summary": "A misconfigured NAC/AD-group policy mapping (often from a config push) placed successfully authenticated devices into a quarantine/guest/deny role or wrong VLAN instead of the intended corporate access policy.",
+          "ticket_ids": [
+            "INC-WCI-0012",
+            "INC-WCI-0020",
+            "INC-WCI-0024",
+            "INC-WCI-0029",
+            "INC-WCI-0037",
+            "INC-WCI-0042"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "WCI/wireless-rf-controller-instability",
+          "summary": "Access point or controller radio instability caused repeated client deauthentication and session drops after otherwise successful Wi-Fi authentication.",
+          "ticket_ids": [
+            "INC-WCI-V0023"
+          ],
+          "low_confidence": [],
+          "label_class": "clean"
+        },
+        {
+          "root_cause_id": "WCI/unclassified-insufficient-evidence",
+          "summary": "Tickets whose root cause cannot be confidently attributed to a single mechanism, including unconfirmed evidence and genuine multi-cause cases spanning incomplete cert propagation, stale client profiles, and NAC policy misalignment.",
+          "ticket_ids": [
+            "INC-WCI-0002",
+            "INC-WCI-V0024"
+          ],
+          "low_confidence": [
+            "INC-WCI-0002",
+            "INC-WCI-V0024"
+          ],
+          "label_class": "ambiguous_zone"
+        }
+      ]
+    }
+  ],
+  "out_of_corpus_entry": "none-of-these",
+  "provenance": {
+    "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+    "model": "claude-opus-4-8",
+    "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+    "date": "2026-06-11",
+    "review_not_converged": [],
+    "merges": [
+      {
+        "date": "2026-06-11",
+        "families": [
+          "ALP"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "CES"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "DCP"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "DRF"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "EDE"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "OES"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "PDQ"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "SDA"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "SIB"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "SML"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "VDA"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      },
+      {
+        "date": "2026-06-11",
+        "families": [
+          "WCI"
+        ],
+        "source_provenance": {
+          "dataset_revision": "6e9ec80b75462199968fa0183559042a8821996d",
+          "model": "claude-opus-4-8",
+          "reviewed_by": "in-loop independent review: claude-sonnet-4-6",
+          "date": "2026-06-11",
+          "review_not_converged": []
+        }
+      }
+    ]
+  }
+}

@@ -24,6 +24,7 @@ Personal identifiers are removed and replaced with a token. Technical and system
 | Personal or client IP | Redact | `<IP>` | Identifying, full replace |
 | Personal-device hostname | Redact | `<HOSTNAME>` | Maps to a person |
 | System or app name | Retain | | Describes the system |
+| Third-party vendor/partner organization | Retain | | System landscape; name, domain, URL, portal travel together as one entity |
 | Shared service hostname or URL | Retain | | Identifies a system |
 | Infrastructure facility | Retain | | A system facility |
 | Error or event IDs | Retain | | Technical signal |
@@ -42,9 +43,13 @@ Only the redact rows appear in the sidecar. Retain entities are never in the sid
 
 **Username inside email.** A username is often the email local part. The username inside the email is part of `<EMAIL>`, not a separate `<USER>`. Span consumption is longest-match-first: the email is matched and consumed before the bare username, so it is not double counted. A standalone username elsewhere still counts.
 
+**Domain inside email.** The corporate domain inside an email address (`@corplabs.com`) is consumed by `<EMAIL>` along with the local part. The entire string `xx@corplabs.com` is one redacted value. The domain class itself is RETAIN wherever it occurs without the `@` context: service URLs (`sso.corplabs.com`), hostnames (`*.corplabs.internal`), and directory components (`DC=corplabs`). Partial email redaction (`<USER>@corplabs.com`) was considered and rejected: the surviving domain carries no knowledge value (every employee email shares it) and whole-string replacement is the simpler, stronger guarantee.
+
 **IP, full replace.** IPs are fully replaced with `<IP>`, not masked. A public client IP is identifying, and one uniform rule keeps the absence check simple.
 
 **Facilities.** An occupant location (building, floor, office) is redacted; it locates a person. An infrastructure facility (a datacenter, a server room) is retained; it locates equipment, like a hostname.
+
+**Vendor identity is atomic.** A third-party vendor/partner's name, domain, service URL, and portal reference are one entity and share one classification: Retain. Retaining `api.meridiandata.io` while redacting "Meridian Data Services" (or vice versa) would be incoherent. The domain reveals the name. Which vendor's token expires is exactly the organization-specific knowledge this system exists to preserve.
 
 
 ## False-positive traps (retain these)
