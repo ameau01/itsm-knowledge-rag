@@ -11,8 +11,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Project root = two levels up from this file (src/itsm_rag/config.py).
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+# Project root = one level up from this file (src/config.py).
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 load_dotenv(PROJECT_ROOT / ".env")
 
