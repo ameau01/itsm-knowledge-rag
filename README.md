@@ -2,11 +2,15 @@
 
 [![Status](https://img.shields.io/badge/status-v0.0.2%20initial%20design-orange)](#project-status)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org)
-[![Dataset](https://img.shields.io/badge/Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
+[![Hugging Face Dataset](https://img.shields.io/badge/Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
 [![PII](https://img.shields.io/badge/PII-Presidio%20%2B%20custom%20recognizers-orange)](https://microsoft.github.io/presidio/)
 [![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20dense%20%2B%20sparse-blueviolet)](https://qdrant.tech)
 [![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://github.com/confident-ai/deepeval)
+[![CI](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml/badge.svg)](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 
 **Turns a company's closed IT tickets into searchable, verifiable answers, so problems that have already been solved don't get solved from scratch again. It recommends; the agent decides.**
 
