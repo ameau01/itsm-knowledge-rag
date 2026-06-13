@@ -6,6 +6,10 @@ INTERNAL_*
 # Reset with `rm -rf .hf_cache`.
 .hf_cache/
 
+# --- Operational data store (SQLite, populated at runtime, not source) ---
+# Reset with `rm -rf .operational_store`.
+.operational_store/
+
 # --- Secrets and environment ---
 .env
 .env.*

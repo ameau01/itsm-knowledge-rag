@@ -30,6 +30,11 @@ class Settings:
     hf_home: Path = field(default_factory=lambda: _path(os.getenv("HF_HOME", ".hf_cache")))
     hf_token: str | None = field(default_factory=lambda: os.getenv("HF_TOKEN"))
 
+    # Operational data store (SQLite)
+    operational_store: Path = field(
+        default_factory=lambda: _path(os.getenv("OPERATIONAL_STORE", ".operational_store"))
+    )
+
     # Mode: "mock" replays fixtures, "live" calls real models.
     pipeline_mode: str = field(default_factory=lambda: os.getenv("PIPELINE_MODE", "mock"))
 
