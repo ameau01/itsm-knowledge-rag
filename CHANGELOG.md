@@ -25,3 +25,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 - `ARCHITECTURE.md`, `README.md`, `docs/datataset.md`, `docs/evaluation.md`, `docs/redaction-policy.md`, `docs/retrieval.md`, `docs/running.md`
+
+## [Initial ingest code with redaction]
+
+### Changed
+- update design doc to include sqlite operational store.
+- refactory src code to flatten itsm_rag.
+
+### Added
+- Added initial ingest code to download from huggingface
+- Add redaction_policy.yaml to remove PII
+- Add test scripts to run presidio redaction and examine pii.json and retention.json from dataset.
+
+### Documentation
+-- `docs/operational-store.md`, `ARCHITECTURE.md`

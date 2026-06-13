@@ -19,7 +19,7 @@ from typing import Any
 import pandas as pd
 from huggingface_hub import snapshot_download
 
-from itsm_rag.config import settings
+from config import settings
 
 PARQUET_FILENAME = "data/train.parquet"
 PII_SIDECAR_FILENAME = "pii.json"

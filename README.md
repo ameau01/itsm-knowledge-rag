@@ -39,7 +39,7 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 **Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
 
-**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query, so the two signals combine in the engine. The overview is precomputed per family. A search returns a prepared answer instead of generating one on every query. The cached overview is the same idea as a Google "AI overview." It is precomputed because the corpus is bounded. See [docs/retrieval.md](docs/retrieval.md).
+**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query, so the two signals combine in the engine. The overview is precomputed per family. A search returns a prepared answer instead of generating one on every query. The cached overview is the same idea as a Google "AI overview." It is precomputed because the corpus is bounded. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
 
 **Two surfaces share one pipeline.** Support agents get the full search: the overview plus ranked source tickets they are authorized to read. General employees get a redaction-safe, browse-only version of the same curated knowledge.
 
@@ -98,7 +98,7 @@ A synthetic ITSM corpus of 745 tickets across 14 issue families. PII is injected
 ```
 README.md            this file
 ARCHITECTURE.md      system design, diagram, the why behind each layer
-docs/                retrieval, evaluation, decisions, dataset, redaction-policy, running
+docs/                retrieval, evaluation, decisions, dataset, redaction-policy, operational-store, running
 src/                 pipeline: redaction, curation, retrieval, serving
 eval/                eval harness and results
 examples/            real worked outputs: query, overview, source tickets, redaction

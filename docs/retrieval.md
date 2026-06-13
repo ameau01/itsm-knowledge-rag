@@ -32,7 +32,7 @@ L2 is the curated wiki page for an issue family, built once during ingest.
 
 A bounded corpus clusters into a finite set of issue families. For each family, curation consolidates the many ways users described that problem into one common issue statement, then attaches the golden root cause and resolution surfaced verbatim. That page is the overview. It is computed once and cached.
 
-At query time the matched family's overview is read from cache, not generated. This is the key efficiency choice. The alternative, zero-shot synthesis, would run an LLM over retrieved tickets on every query: slow, costly, and lower quality because it synthesizes in one rushed pass with no cross-ticket consolidation. The cached overview pays that cost once, offline, and amortizes it across every future query.
+At query time the matched family's overview is read from cache, not generated. This is the key efficiency choice. The alternative, zero-shot synthesis, would run an LLM over retrieved tickets on every query: slow, costly, and lower quality because it synthesizes in one rushed pass with no cross-ticket consolidation. The cached overview pays that cost once, offline, and amortizes it across every future query. The cache is the relational store; how it is read at build and query time is in [operational-store.md](operational-store.md).
 
 The experience matches a Google "AI overview": a synthesized answer on top, sources below. The difference is that a web overview must be generated live because the web is unbounded. This corpus is bounded, so the overview can be precomputed. The latency and cost win over zero-shot is measured head to head. See [evaluation.md](evaluation.md).
 
