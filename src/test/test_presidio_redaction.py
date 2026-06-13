@@ -196,7 +196,7 @@ def _scan_with_presidio(text: str, recognizers) -> list[dict[str, Any]]:
     from presidio_analyzer.nlp_engine import NlpArtifacts
 
     nlp_artifacts = NlpArtifacts(
-        entities=[], tokens=[], tokens_indices=[], lemmas=[],
+        entities=[], tokens=[], tokens_indices=[], lemmas=[],  # type: ignore[arg-type]
         nlp_engine=None, language="en",
     )
 
@@ -367,7 +367,7 @@ def run_ticket(
     }
     anonymizer = AnonymizerEngine()
     nlp_artifacts = NlpArtifacts(
-        entities=[], tokens=[], tokens_indices=[], lemmas=[],
+        entities=[], tokens=[], tokens_indices=[], lemmas=[],  # type: ignore[arg-type]
         nlp_engine=None, language="en",
     )
 
@@ -394,7 +394,7 @@ def run_ticket(
                 for entity in token_map
             }
             anon_result = anonymizer.anonymize(
-                text=ftext, analyzer_results=all_results, operators=operators
+                text=ftext, analyzer_results=all_results, operators=operators  # type: ignore[arg-type]
             )
             final_fields[fname] = anon_result.text
         else:
@@ -455,7 +455,7 @@ def _print_ticket_result(r: TicketResult, verbose: bool = False) -> None:
     print(f"  Gate 2 (vocab)    : {g2}  {len(r.vocab_violations)} violation(s)")
     print(f"  Gate 3 (retention): {ret_str}  ← report only")
     print(f"  Presidio pattern  : {presidio_str}")
-    print(f"    (NER types — PERSON, USER, LOCATION — covered by Gate 1 only)")
+    print("    (NER types — PERSON, USER, LOCATION — covered by Gate 1 only)")
 
     if r.leaks:
         print("  Leaks:")
@@ -512,7 +512,7 @@ def _print_summary(results: list[TicketResult]) -> int:
     print(f"  ↳ dropped by type: {dict(dropped_by_type) or 'none'}")
     print(f"Presidio pattern  : {total_raw_hits} hits in raw text  →  "
           f"{total_surviving} surviving in redacted output")
-    print(f"  ↳ (PERSON/USER/LOCATION require NER — covered by Gate 1 only)")
+    print("  ↳ (PERSON/USER/LOCATION require NER — covered by Gate 1 only)")
     print(f"{'═' * 64}")
 
     overall = "PASS" if not g1_fails and not g2_fails else "FAIL"

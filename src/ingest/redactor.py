@@ -43,8 +43,6 @@ def build_sidecar_index(pii_records: list[dict[str, Any]]) -> dict[str, dict[str
     Longest values are matched first to handle substrings correctly.
     """
     index: dict[str, dict[str, str]] = {}
-    policy = load_policy()
-    entity_map = _build_entity_map(policy)
 
     for ticket in pii_records:
         tid = ticket["ticket_id"]
