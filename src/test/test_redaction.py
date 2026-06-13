@@ -424,7 +424,7 @@ def test_retention_report(retention_records, df, sidecar_index):
 
     rate = (total - dropped) / total
     print(f"\nRetention rate: {rate:.4f} ({total - dropped}/{total} retained)")
-    print(f"Target: ≥ 0.98 (report-only, pipeline does not block on this)")
+    print("Target: ≥ 0.98 (report-only, pipeline does not block on this)")
 
     if dropped_examples:
         print("Over-redaction examples:")
