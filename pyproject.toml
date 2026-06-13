@@ -45,3 +45,7 @@ src = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["src/test"]
+filterwarnings = [
+    # hf_xet internal deprecation — not our code, can't fix upstream
+    "ignore::DeprecationWarning:huggingface_hub",
+]
