@@ -37,6 +37,19 @@ banner "2/3  Type checking (mypy src)"
 uv run mypy src
 
 banner "3/3  Tests (pytest -q)"
+
+# Extraction tests require the HF dataset — download if not cached.
+HF_CACHE="${HF_HOME:-.hf_cache}"
+HF_SNAPSHOTS="$HF_CACHE/datasets--ameau01--synthetic-it-support-tickets/snapshots"
+if [ ! -d "$HF_SNAPSHOTS" ] || [ -z "$(ls -A "$HF_SNAPSHOTS" 2>/dev/null)" ]; then
+  echo "HF dataset not found at $HF_SNAPSHOTS"
+  echo "Downloading now..."
+  uv run sh scripts/test_hf_download.sh || {
+    echo "Download failed. Run manually: uv run sh scripts/test_hf_download.sh"
+    exit 1
+  }
+fi
+
 uv run python -m pytest -q
 
 banner "All CI checks passed locally. Safe to push."

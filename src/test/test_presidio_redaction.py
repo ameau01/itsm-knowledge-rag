@@ -60,6 +60,7 @@ import pandas as pd
 # Allow imports from src/
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from corpus.extractor import extract_text_fields
 from ingest.redactor import (
     build_sidecar_index,
     get_allowed_tokens,
@@ -230,71 +231,6 @@ def _scan_with_presidio(text: str, recognizers) -> list[dict[str, Any]]:
     return sorted(findings, key=lambda x: x["start"])
 
 
-# ── Text extraction (mirrors test_redaction.py) ────────────────────────────────
-
-def _to_list(val) -> list:
-    if val is None:
-        return []
-    if hasattr(val, "tolist"):
-        return val.tolist()
-    return list(val) if isinstance(val, (list, tuple)) else []
-
-
-def _str_or_empty(val) -> str:
-    if val is None or (isinstance(val, float)):
-        return ""
-    return str(val)
-
-
-def _extract_text_fields(row: pd.Series) -> dict[str, str]:
-    parts: dict[str, str] = {}
-
-    ticket = row.get("ticket")
-    if isinstance(ticket, dict):
-        parts["submitted_description"] = _str_or_empty(ticket.get("submitted_description", ""))
-
-    corr = _to_list(row.get("correspondence"))
-    if corr:
-        messages = []
-        for c in corr:
-            msg = c.get("message", "") if hasattr(c, "get") else (
-                c._asdict().get("message", "") if hasattr(c, "_asdict") else ""
-            )
-            if msg:
-                messages.append(_str_or_empty(msg))
-        parts["correspondence"] = "\n".join(messages)
-
-    diag = row.get("diagnostics")
-    if isinstance(diag, dict):
-        parts["diagnostics_summary"] = _str_or_empty(diag.get("summary", ""))
-        step_texts = []
-        for step in _to_list(diag.get("steps")):
-            step_d = step._asdict() if hasattr(step, "_asdict") else (
-                dict(step) if isinstance(step, dict) else {}
-            )
-            for key in ("description", "expected_result", "observed_result", "evidence"):
-                v = step_d.get(key)
-                if v:
-                    step_texts.append(_str_or_empty(v))
-        parts["diagnostics_steps"] = "\n".join(step_texts)
-
-    res = row.get("resolution")
-    if isinstance(res, dict):
-        parts["resolution_steps"] = "\n".join(
-            _str_or_empty(s) for s in _to_list(res.get("steps")) if s
-        )
-    elif res is not None:
-        parts["resolution_steps"] = "\n".join(
-            _str_or_empty(s) for s in _to_list(res) if s
-        )
-
-    rc = row.get("root_cause")
-    if isinstance(rc, dict):
-        parts["observations"] = _str_or_empty(rc.get("observations", ""))
-
-    return {k: v for k, v in parts.items() if v}
-
-
 def _all_text(fields: dict[str, str]) -> str:
     return "\n".join(fields.values())
 
@@ -339,7 +275,7 @@ def run_ticket(
     allowed_tokens: set[str],
 ) -> TicketResult:
     result = TicketResult(ticket_id=ticket_id)
-    fields = _extract_text_fields(row)
+    fields = extract_text_fields(row)
     raw_text = _all_text(fields)
 
     # ── Presidio scan on RAW text (informational) ──────────────────────────────

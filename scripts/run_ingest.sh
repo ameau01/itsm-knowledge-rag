@@ -63,5 +63,24 @@ uv run python3 -c "import pandas" 2>/dev/null || {
   exit 1
 }
 
+# ── HF cache check ─────────────────────────────────────────────────────────────
+HF_CACHE="${HF_HOME:-.hf_cache}"
+HF_SNAPSHOTS="$HF_CACHE/datasets--ameau01--synthetic-it-support-tickets/snapshots"
+
+if [ ! -d "$HF_SNAPSHOTS" ] || [ -z "$(ls -A "$HF_SNAPSHOTS" 2>/dev/null)" ]; then
+  echo "HF dataset not found at $HF_SNAPSHOTS"
+  echo "Downloading now..."
+  uv run sh scripts/test_hf_download.sh || {
+    echo "Download failed. Run manually: uv run sh scripts/test_hf_download.sh"
+    exit 1
+  }
+fi
+
+# ── Operational store ──────────────────────────────────────────────────────────
+# init_db() in store.py creates the DB and tables if they don't exist.
+# We just ensure the directory exists here so SQLite can write the file.
+STORE_DIR="${OPERATIONAL_STORE:-.operational_store}"
+mkdir -p "$STORE_DIR"
+
 # ── Run ────────────────────────────────────────────────────────────────────────
 uv run python3 src/ingest/run_ingest.py "$@"

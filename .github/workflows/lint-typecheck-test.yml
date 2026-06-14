@@ -37,6 +37,15 @@ jobs:
           restore-keys: |
             hf-cache-
 
+      - name: Download HF dataset (if not cached)
+        run: |
+          HF_SNAPSHOTS=".hf_cache/datasets--ameau01--synthetic-it-support-tickets/snapshots"
+          if [ ! -d "$HF_SNAPSHOTS" ] || [ -z "$(ls -A "$HF_SNAPSHOTS" 2>/dev/null)" ]; then
+            uv run sh scripts/test_hf_download.sh
+          else
+            echo "HF dataset found in cache — skipping download."
+          fi
+
       - name: Run linting (ruff)
         run: uv run ruff check .
 

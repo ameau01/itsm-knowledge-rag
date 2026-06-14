@@ -36,6 +36,7 @@ import pytest
 # Allow imports from src/
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from corpus.extractor import extract_text_fields
 from ingest.redactor import (
     build_sidecar_index,
     get_allowed_tokens,
@@ -112,100 +113,6 @@ def sidecar_index(pii_records) -> dict:
     return build_sidecar_index(pii_records)
 
 
-# ── Text extraction ────────────────────────────────────────────────────────────
-
-def _to_list(val) -> list:
-    """Coerce numpy arrays and None to plain Python list."""
-    if val is None:
-        return []
-    if hasattr(val, "tolist"):
-        return val.tolist()
-    if isinstance(val, (list, tuple)):
-        return list(val)
-    return []
-
-
-def _str_or_empty(val) -> str:
-    if val is None:
-        return ""
-    if isinstance(val, float):  # NaN
-        return ""
-    return str(val)
-
-
-def _extract_text_fields(row: pd.Series) -> dict[str, str]:
-    """
-    Flatten all free-text fields of a parquet row into named string fields
-    for passing to redact_ticket().
-
-    Returns a flat dict:
-      'submitted_description' → str
-      'correspondence'        → str  (all messages concatenated)
-      'diagnostics_summary'   → str
-      'diagnostics_steps'     → str  (all step fields concatenated)
-      'resolution_steps'      → str
-      'observations'          → str
-
-    Note: parquet nested fields come back as numpy structured arrays; use
-    _to_list() before iterating to avoid numpy truth-value errors.
-    """
-    parts: dict[str, str] = {}
-
-    # ticket.submitted_description
-    ticket = row.get("ticket")
-    if isinstance(ticket, dict):
-        parts["submitted_description"] = _str_or_empty(
-            ticket.get("submitted_description", "")
-        )
-
-    # correspondence[*].message
-    corr = _to_list(row.get("correspondence"))
-    if corr:
-        messages = []
-        for c in corr:
-            if hasattr(c, "get"):
-                msg = c.get("message", "")
-            elif hasattr(c, "_asdict"):
-                msg = c._asdict().get("message", "")
-            else:
-                msg = ""
-            if msg:
-                messages.append(_str_or_empty(msg))
-        parts["correspondence"] = "\n".join(messages)
-
-    # diagnostics
-    diag = row.get("diagnostics")
-    if isinstance(diag, dict):
-        parts["diagnostics_summary"] = _str_or_empty(diag.get("summary", ""))
-        steps = _to_list(diag.get("steps"))
-        step_texts = []
-        for step in steps:
-            step_d = step._asdict() if hasattr(step, "_asdict") else (
-                dict(step) if isinstance(step, dict) else {}
-            )
-            for key in ("description", "expected_result", "observed_result", "evidence"):
-                val = step_d.get(key)
-                if val:
-                    step_texts.append(_str_or_empty(val))
-        parts["diagnostics_steps"] = "\n".join(step_texts)
-
-    # resolution
-    res = row.get("resolution")
-    if isinstance(res, dict):
-        steps = _to_list(res.get("steps"))
-        parts["resolution_steps"] = "\n".join(_str_or_empty(s) for s in steps if s)
-    elif res is not None:
-        steps = _to_list(res)
-        parts["resolution_steps"] = "\n".join(_str_or_empty(s) for s in steps if s)
-
-    # root_cause observations (if present)
-    rc = row.get("root_cause")
-    if isinstance(rc, dict):
-        parts["observations"] = _str_or_empty(rc.get("observations", ""))
-
-    return {k: v for k, v in parts.items() if v}
-
-
 def _all_text(redacted_fields: dict[str, str]) -> str:
     """Concatenate all redacted field values for absence checking."""
     return "\n".join(redacted_fields.values())
@@ -257,7 +164,7 @@ def test_absence_anywhere_spot_check(pii_records, df, sidecar_index):
             pytest.skip(f"{ticket_id} not found in parquet")
         row = row.iloc[0]
 
-        fields = _extract_text_fields(row)
+        fields = extract_text_fields(row)
         redacted = redact_ticket(
             ticket_id=ticket_id,
             fields=fields,
@@ -303,7 +210,7 @@ def test_absence_anywhere_full_corpus(pii_records, df, sidecar_index):
         if ticket_id not in pii_by_id:
             continue
 
-        fields = _extract_text_fields(row)
+        fields = extract_text_fields(row)
         redacted = redact_ticket(
             ticket_id=ticket_id,
             fields=fields,
@@ -355,7 +262,7 @@ def test_token_vocabulary(pii_records, df, sidecar_index):
             continue
         row = row.iloc[0]
 
-        fields = _extract_text_fields(row)
+        fields = extract_text_fields(row)
         redacted = redact_ticket(
             ticket_id=ticket_id,
             fields=fields,
@@ -400,7 +307,7 @@ def test_retention_report(retention_records, df, sidecar_index):
             continue
         row = row.iloc[0]
 
-        fields = _extract_text_fields(row)
+        fields = extract_text_fields(row)
         redacted = redact_ticket(
             ticket_id=ticket_id,
             fields=fields,
