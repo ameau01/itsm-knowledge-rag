@@ -337,10 +337,11 @@ def test_diag_cardinality(_data: dict[str, Any]) -> None:
         for step in steps:
             redacted_step = {}
             for k, v in step.items():
-                if k == "expected_result" and v and replacements:
-                    redacted_val = redact_with_sidecar(v, replacements)
+                v_str = str(v)  # values are always str; cast for mypy (dict[str, object])
+                if k == "expected_result" and v_str and replacements:
+                    redacted_val = redact_with_sidecar(v_str, replacements)
                 else:
-                    redacted_val = v
+                    redacted_val = v_str
                 redacted_step[k] = redacted_val
             redacted_steps.append(redacted_step)
 
