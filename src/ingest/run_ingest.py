@@ -2,25 +2,20 @@
 Ingest pipeline: load HF dataset → redact → write to operational store.
 
 For each ticket in the corpus:
-  1. Extract text fields from the parquet row
-  2. Apply two-layer redaction (sidecar + Presidio)
-  3. Write the redacted fields to the SQLite operational store
+  1. Extract text fields (corpus.extractor)
+  2. Extract structured metadata (corpus.extractor + corpus.catalog)
+  3. Apply two-layer PII redaction (sidecar + Presidio)
+  4. Write to SQLite operational store (ingest.store)
 
-The full reimport is atomic: the tickets table is truncated and all
-inserts happen inside a single SQLite transaction. A failure mid-run
-rolls back, leaving the previous complete state intact.
+The full reimport is atomic: the tickets table is truncated and all inserts
+happen inside a single SQLite transaction.  A failure mid-run rolls back,
+leaving the previous complete state intact.
 
 Usage
 -----
-    uv run python src/ingest/run_ingest.py              # all 745 tickets
-    uv run python src/ingest/run_ingest.py --limit 10   # first N tickets (dev)
-    uv run python src/ingest/run_ingest.py --dry-run     # redact only, no DB write
-    uv run python src/ingest/run_ingest.py --help
-
-Or via the shell wrapper (recommended):
-    uv run sh scripts/run_ingest.sh
-    uv run sh scripts/run_ingest.sh --limit 10
-    uv run sh scripts/run_ingest.sh --dry-run
+    uv run sh scripts/run_ingest.sh              # all 745 tickets
+    uv run sh scripts/run_ingest.sh --limit 10   # first N tickets (dev)
+    uv run sh scripts/run_ingest.sh --dry-run    # redact only, no DB write
 """
 
 from __future__ import annotations
@@ -37,13 +32,18 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from config import settings
+from corpus.catalog import build_rc_map
+from corpus.extractor import (
+    extract_metadata,
+    extract_observed_errors,
+    extract_text_fields,
+)
 from ingest.redactor import build_sidecar_index, redact_ticket
 from ingest.store import (
     count_tickets,
     get_connection,
-    init_db,
     insert_redacted_tickets,
-    truncate_tks_table,
+    reset_tickets_table,
 )
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -92,93 +92,6 @@ def _find_sidecar(filename: str) -> Path:
     )
 
 
-# ── Text extraction (mirrors test_presidio_redaction.py) ──────────────────────
-
-def _to_list(val) -> list:  # type: ignore[type-arg]
-    if val is None:
-        return []
-    if hasattr(val, "tolist"):
-        return val.tolist()
-    return list(val) if isinstance(val, (list, tuple)) else []
-
-
-def _str_or_empty(val: object) -> str:
-    if val is None or isinstance(val, float):
-        return ""
-    return str(val)
-
-
-def _extract_text_fields(row: pd.Series) -> dict[str, str]:  # type: ignore[type-arg]
-    parts: dict[str, str] = {}
-
-    ticket = row.get("ticket")
-    if isinstance(ticket, dict):
-        parts["submitted_description"] = _str_or_empty(
-            ticket.get("submitted_description", "")
-        )
-
-    corr = _to_list(row.get("correspondence"))
-    if corr:
-        messages = []
-        for c in corr:
-            msg = (
-                c.get("message", "")
-                if hasattr(c, "get")
-                else (c._asdict().get("message", "") if hasattr(c, "_asdict") else "")
-            )
-            if msg:
-                messages.append(_str_or_empty(msg))
-        parts["correspondence"] = "\n".join(messages)
-
-    diag = row.get("diagnostics")
-    if isinstance(diag, dict):
-        parts["diagnostics_summary"] = _str_or_empty(diag.get("summary", ""))
-        step_texts = []
-        for step in _to_list(diag.get("steps")):
-            step_d = (
-                step._asdict()
-                if hasattr(step, "_asdict")
-                else (dict(step) if isinstance(step, dict) else {})
-            )
-            for key in ("description", "expected_result", "observed_result", "evidence"):
-                v = step_d.get(key)
-                if v:
-                    step_texts.append(_str_or_empty(v))
-        parts["diagnostics_steps"] = "\n".join(step_texts)
-
-    res = row.get("resolution")
-    if isinstance(res, dict):
-        parts["resolution_steps"] = "\n".join(
-            _str_or_empty(s) for s in _to_list(res.get("steps")) if s
-        )
-    elif res is not None:
-        parts["resolution_steps"] = "\n".join(
-            _str_or_empty(s) for s in _to_list(res) if s
-        )
-
-    rc = row.get("root_cause")
-    if isinstance(rc, dict):
-        parts["observations"] = _str_or_empty(rc.get("observations", ""))
-
-    return {k: v for k, v in parts.items() if v}
-
-
-def _extract_metadata(row: pd.Series) -> dict[str, object]:  # type: ignore[type-arg]
-    """Pull family and root_cause_id from the parquet row."""
-    family = ""
-    root_cause_id = None
-
-    ticket = row.get("ticket")
-    if isinstance(ticket, dict):
-        family = str(ticket.get("category", "") or "")
-
-    rc = row.get("root_cause")
-    if isinstance(rc, dict):
-        root_cause_id = rc.get("id") or rc.get("root_cause_id")
-
-    return {"family": family, "root_cause_id": root_cause_id}
-
-
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main(argv: list[str] | None = None) -> int:
@@ -212,11 +125,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # ── Load dataset ───────────────────────────────────────────────────────────
+    # ── Load dataset and lookup maps ───────────────────────────────────────────
     snap = _ensure_dataset()
     df = pd.read_parquet(snap / "data" / "train.parquet")
     pii_records: list[dict] = json.loads(_find_sidecar("pii.json").read_text())
     sidecar_index = build_sidecar_index(pii_records)
+    rc_map = build_rc_map()  # ticket_id → root_cause_id from catalog.json
 
     ticket_ids: list[str] = df["record_id"].tolist()
     if args.limit:
@@ -233,7 +147,11 @@ def main(argv: list[str] | None = None) -> int:
     conn = None
     if not args.dry_run:
         conn = get_connection()
-        init_db(conn)
+        # Drop and recreate tickets table so the live schema always matches the
+        # current DDL — prevents silent schema-mismatch bugs during refactoring.
+        # wiki_pages is left intact (populated by the separate curation step).
+        reset_tickets_table(conn)
+        print("Tickets table reset (dropped + recreated with current schema).")
 
     # ── Redact + insert in one transaction ────────────────────────────────────
     t0 = time.monotonic()
@@ -241,8 +159,6 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.dry_run and conn is not None:
         with conn:                          # atomic: commit on success, rollback on error
-            deleted = truncate_tks_table(conn)
-            print(f"Cleared {deleted} existing row(s) from tickets table.")
 
             for tid in ticket_ids:
                 rows = df[df["record_id"] == tid]
@@ -251,14 +167,26 @@ def main(argv: list[str] | None = None) -> int:
                     skipped += 1
                     continue
                 row = rows.iloc[0]
-                fields = _extract_text_fields(row)
-                metadata = _extract_metadata(row)
+
+                # Extract text fields (redactable) and metadata (not redacted)
+                text_fields = extract_text_fields(row)
+                metadata = extract_metadata(row, rc_map)
+                observed_errors = extract_observed_errors(row)
+
+                # Apply PII redaction to text fields
                 redacted = redact_ticket(
                     ticket_id=tid,
-                    fields=fields,
+                    fields=text_fields,
                     sidecar_index=sidecar_index,
                     use_presidio_fallback=False,
                 )
+
+                # Merge observed_errors (not redacted) into the redacted dict
+                if observed_errors:
+                    redacted["observed_errors"] = json.dumps(
+                        observed_errors, ensure_ascii=False
+                    )
+
                 insert_redacted_tickets(conn, tid, metadata, redacted, _PIPELINE_VERSION)
                 processed += 1
     else:
@@ -269,10 +197,10 @@ def main(argv: list[str] | None = None) -> int:
                 skipped += 1
                 continue
             row = rows.iloc[0]
-            fields = _extract_text_fields(row)
+            text_fields = extract_text_fields(row)
             redact_ticket(
                 ticket_id=tid,
-                fields=fields,
+                fields=text_fields,
                 sidecar_index=sidecar_index,
                 use_presidio_fallback=False,
             )
