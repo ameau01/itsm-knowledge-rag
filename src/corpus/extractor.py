@@ -9,6 +9,7 @@ This module is the only place extraction logic lives.  Consumers:
   src/test/test_extraction.py
 
 Schema decisions are documented in src/corpus/DECISION.md.
+Primitive helpers (to_list, str_or_empty) live in src/corpus/utils.py.
 
 Phase 2 fixes applied here (all bugs from Phase 1 resolved):
   - extract_metadata: family from record_id.split('-')[1]
@@ -23,38 +24,71 @@ Phase 3 additions:
   - extract_diag_steps_raw: all 8 step fields for L1 context + retention test
   - extract_diag_steps_procedure: lean {step, action, expected_result} for wiki LLM
   - extract_text_fields: emits all three diagnostic columns; resolution_steps as JSON array
+
+Refactor (cleanup):
+  - to_list / str_or_empty moved to corpus.utils (no behaviour change)
+  - Three extract_diag_steps* functions unified via _extract_steps() private helper
 """
 
 from __future__ import annotations
 
 import json
-from typing import Any
 
 import pandas as pd
 
-
-# ── Primitive helpers ──────────────────────────────────────────────────────────
-
-def to_list(val: Any) -> list:  # type: ignore[type-arg]
-    if val is None:
-        return []
-    if hasattr(val, "tolist"):
-        return val.tolist()
-    return list(val) if isinstance(val, (list, tuple)) else []
+from corpus.utils import str_or_empty, to_list
 
 
-def str_or_empty(val: object) -> str:
-    if val is None or isinstance(val, float):
-        return ""
-    return str(val)
+# ── Diagnostic step extraction (shared base) ───────────────────────────────────
+
+# Field lists for each public step-extraction variant.
+# Order determines JSON key order in the output.
+_FIELDS_CANONICAL  = ["playbook_step_id", "expected_result", "result_status", "performed_by"]
+_FIELDS_RAW        = ["playbook_step_id", "action", "expected_result",
+                      "observed_result", "evidence", "result_status", "performed_by"]
+_FIELDS_PROCEDURE  = ["action", "expected_result"]
 
 
-# ── Diagnostic step extraction ─────────────────────────────────────────────────
-
-def extract_diag_steps(row: pd.Series) -> list[dict[str, str]]:  # type: ignore[type-arg]
+def _extract_steps(
+    row: pd.Series,  # type: ignore[type-arg]
+    fields: list[str],
+    *,
+    include_step_number: bool = False,
+) -> list[dict[str, object]]:
     """
-    Extract diagnostic steps as structured dicts keeping only the fields that
-    define the canonical step-set for cardinality / dedup.
+    Shared step-extraction loop used by all three public variants.
+
+    Args:
+        row:                 pandas Series from the HF parquet file.
+        fields:              Step attribute names to include (in order).
+        include_step_number: If True, prepend {"step": <1-based int>} to each dict.
+
+    Returns [] if diagnostics is absent or has no steps.
+    """
+    diag = row.get("diagnostics")
+    if not isinstance(diag, dict):
+        return []
+
+    result = []
+    for i, step in enumerate(to_list(diag.get("steps"))):
+        step_d = (
+            step._asdict()
+            if hasattr(step, "_asdict")
+            else (dict(step) if isinstance(step, dict) else {})
+        )
+        entry: dict[str, object] = {}
+        if include_step_number:
+            entry["step"] = i + 1
+        for field in fields:
+            entry[field] = str_or_empty(step_d.get(field, ""))
+        result.append(entry)
+    return result
+
+
+def extract_diag_steps(row: pd.Series) -> list[dict[str, object]]:  # type: ignore[type-arg]
+    """
+    Extract diagnostic steps keeping only the fields that define the canonical
+    step-set for cardinality / dedup / embedding.
 
     Fields KEPT (match corpus-cardinality.xlsx exclusion rule):
         playbook_step_id  — canonical playbook step identifier (strongest dedup signal)
@@ -68,28 +102,8 @@ def extract_diag_steps(row: pd.Series) -> list[dict[str, str]]:  # type: ignore[
         evidence          — per-incident artefacts
         step_id           — per-row serial, not meaningful for dedup
     """
-    diag = row.get("diagnostics")
-    if not isinstance(diag, dict):
-        return []
+    return _extract_steps(row, _FIELDS_CANONICAL)
 
-    steps = to_list(diag.get("steps"))
-    result = []
-    for step in steps:
-        step_d = (
-            step._asdict()
-            if hasattr(step, "_asdict")
-            else (dict(step) if isinstance(step, dict) else {})
-        )
-        result.append({
-            "playbook_step_id": str_or_empty(step_d.get("playbook_step_id", "")),
-            "expected_result":  str_or_empty(step_d.get("expected_result", "")),
-            "result_status":    str_or_empty(step_d.get("result_status", "")),
-            "performed_by":     str_or_empty(step_d.get("performed_by", "")),
-        })
-    return result
-
-
-# ── Raw diagnostic step extraction ────────────────────────────────────────────
 
 def extract_diag_steps_raw(row: pd.Series) -> list[dict[str, object]]:  # type: ignore[type-arg]
     """
@@ -103,32 +117,8 @@ def extract_diag_steps_raw(row: pd.Series) -> list[dict[str, object]]:  # type: 
     retention.json — including them ensures retention test coverage.
     See DECISION.md for the full rationale.
     """
-    diag = row.get("diagnostics")
-    if not isinstance(diag, dict):
-        return []
+    return _extract_steps(row, _FIELDS_RAW, include_step_number=True)
 
-    steps = to_list(diag.get("steps"))
-    result = []
-    for i, step in enumerate(steps):
-        step_d = (
-            step._asdict()
-            if hasattr(step, "_asdict")
-            else (dict(step) if isinstance(step, dict) else {})
-        )
-        result.append({
-            "step":             i + 1,
-            "playbook_step_id": str_or_empty(step_d.get("playbook_step_id", "")),
-            "action":           str_or_empty(step_d.get("action", "")),
-            "expected_result":  str_or_empty(step_d.get("expected_result", "")),
-            "observed_result":  str_or_empty(step_d.get("observed_result", "")),
-            "evidence":         str_or_empty(step_d.get("evidence", "")),
-            "result_status":    str_or_empty(step_d.get("result_status", "")),
-            "performed_by":     str_or_empty(step_d.get("performed_by", "")),
-        })
-    return result
-
-
-# ── Procedure diagnostic step extraction ──────────────────────────────────────
 
 def extract_diag_steps_procedure(row: pd.Series) -> list[dict[str, object]]:  # type: ignore[type-arg]
     """
@@ -141,24 +131,7 @@ def extract_diag_steps_procedure(row: pd.Series) -> list[dict[str, object]]:  # 
     procedure.  All other fields are noise that wastes context tokens.
     See DECISION.md for the full rationale.
     """
-    diag = row.get("diagnostics")
-    if not isinstance(diag, dict):
-        return []
-
-    steps = to_list(diag.get("steps"))
-    result = []
-    for i, step in enumerate(steps):
-        step_d = (
-            step._asdict()
-            if hasattr(step, "_asdict")
-            else (dict(step) if isinstance(step, dict) else {})
-        )
-        result.append({
-            "step":            i + 1,
-            "action":          str_or_empty(step_d.get("action", "")),
-            "expected_result": str_or_empty(step_d.get("expected_result", "")),
-        })
-    return result
+    return _extract_steps(row, _FIELDS_PROCEDURE, include_step_number=True)
 
 
 # ── Observed errors extraction ─────────────────────────────────────────────────
