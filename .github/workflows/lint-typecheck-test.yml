@@ -35,6 +35,8 @@ jobs:
             hf-cache-v2-
 
       - name: Download HF dataset (if not cached)
+        env:
+          HF_HOME: .hf_cache
         run: |
           HF_SNAPSHOTS=".hf_cache/datasets--ameau01--synthetic-it-support-tickets/snapshots"
           # Require users_directory.json to be present — old v1 snapshots lacked it.
@@ -53,6 +55,8 @@ jobs:
         run: uv run mypy src
 
       - name: Run tests
+        env:
+          HF_HOME: .hf_cache
         run: uv run pytest -q --junitxml=test-results.xml
 
       - name: Test summary
