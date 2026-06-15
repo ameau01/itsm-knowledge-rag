@@ -1,9 +1,5 @@
 """
-Extraction oracle tests (Phase 2 safety net).
-
-These tests assert the CORRECT post-fix behaviour of corpus.extractor.
-They are written BEFORE the fixes, so they must RED against the Phase 1
-(buggy) implementation and GREEN only after Phase 2 fixes are applied.
+Extraction measurement tests
 
 Five assertions:
   1. family        — non-empty, equals record_id.split('-')[1]
@@ -31,13 +27,43 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+import re
+
 from corpus.extractor import (
     extract_diag_steps,
     extract_metadata,
     extract_observed_errors,
     extract_text_fields,
 )
-from ingest.redactor import build_sidecar_index, redact_with_sidecar
+
+
+# ── Sidecar helpers (used only by test_diag_cardinality) ──────────────────────
+# These are self-contained eval utilities — not part of the production redactor.
+
+def _build_sidecar_index(pii_records: list[dict]) -> dict[str, dict[str, str]]:
+    """ticket_id → {value: token}, longest-value-first."""
+    index: dict[str, dict[str, str]] = {}
+    for ticket in pii_records:
+        tid = ticket["ticket_id"]
+        replacements = sorted(
+            [(inst["value"], inst["expected_after_redaction"])
+             for inst in ticket["pii_instances"]],
+            key=lambda x: len(x[0]), reverse=True,
+        )
+        index[tid] = dict(replacements)
+    return index
+
+
+def _redact_with_sidecar(text: str, replacements: dict[str, str]) -> str:
+    """Apply sidecar replacements to a single text field (longest-first)."""
+    for value, token in replacements.items():
+        escaped = re.escape(value)
+        if re.match(r"^[a-zA-Z0-9]", value) and re.search(r"[a-zA-Z0-9]$", value):
+            pattern = r"(?<![a-zA-Z0-9])" + escaped + r"(?![a-zA-Z0-9])"
+        else:
+            pattern = escaped
+        text = re.sub(pattern, token, text)
+    return text
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 
@@ -161,7 +187,7 @@ def _data() -> dict[str, Any]:
 
     df = pd.read_parquet(snap / "data" / "train.parquet")
     pii_records: list[dict] = json.loads(_find_sidecar("pii.json").read_text())
-    sidecar_index = build_sidecar_index(pii_records)
+    sidecar_index = _build_sidecar_index(pii_records)
 
     # Build ticket_id → root_cause_id from catalog (the authoritative source)
     catalog = json.loads((_EVAL_REDACTION / "catalog.json").read_text())
@@ -186,10 +212,6 @@ def test_family_non_empty(_data: dict[str, Any]) -> None:
     """
     extract_metadata must return a non-empty family equal to the 2nd segment
     of record_id for every ticket.
-
-    PHASE 1: RED — extract_metadata reads ticket['category'] which is absent,
-    so family is always ''.
-    PHASE 2: GREEN — family = record_id.split('-')[1].
     """
     df = _data["df"]
     failures: list[str] = []
@@ -213,10 +235,6 @@ def test_family_non_empty(_data: dict[str, Any]) -> None:
 def test_root_cause_id_non_null(_data: dict[str, Any]) -> None:
     """
     extract_metadata must return a non-null root_cause_id for every ticket.
-
-    PHASE 1: RED — extract_metadata treats root_cause as a dict (it's a string),
-    so root_cause_id is always None.
-    PHASE 2: GREEN — root_cause_id comes from catalog.json inversion.
     """
     df = _data["df"]
     rc_map = _data["rc_map"]
@@ -239,13 +257,6 @@ def test_root_cause_narrative_present(_data: dict[str, Any]) -> None:
     """
     extract_text_fields must include a non-empty 'root_cause_narrative' key
     (the root_cause free-text string) for every ticket that has root_cause content.
-
-    PHASE 1: RED — extract_text_fields reads root_cause as a dict and checks
-    isinstance(rc, dict) which is always False (rc is a string), so the field
-    is never populated.  Also, the key is named 'observations', not
-    'root_cause_narrative'.
-    PHASE 2: GREEN — field is extracted from the string root_cause column and
-    stored under the key 'root_cause_narrative'.
     """
     df = _data["df"]
     failures: list[str] = []
@@ -271,9 +282,6 @@ def test_observed_errors_extracted(_data: dict[str, Any]) -> None:
     """
     extract_observed_errors must return a non-empty list for every ticket that
     has diagnostic observed_errors entries.
-
-    PHASE 1: RED — extract_observed_errors is a stub that always returns [].
-    PHASE 2: GREEN — returns diagnostics['observed_errors'].tolist().
     """
     df = _data["df"]
     failures: list[str] = []
@@ -309,13 +317,6 @@ def test_diag_cardinality(_data: dict[str, Any]) -> None:
     evidence; keep playbook_step_id, expected_result, result_status,
     performed_by) and PII redaction, the number of unique diagnostic step-sets
     per root_cause_id must match corpus-cardinality.xlsx for all 76 root causes.
-
-    PHASE 1: RED — extract_diag_steps keeps the wrong fields (observed_result,
-    evidence included; playbook_step_id and result_status excluded), so the
-    unique-set counts will not match the spreadsheet oracle.
-    PHASE 2: GREEN — extract_diag_steps returns the correct field set, and
-    redaction of expected_result collapses per-ticket variance to the expected
-    counts.
     """
     df = _data["df"]
     sidecar_index = _data["sidecar_index"]
@@ -339,7 +340,7 @@ def test_diag_cardinality(_data: dict[str, Any]) -> None:
             for k, v in step.items():
                 v_str = str(v)  # values are always str; cast for mypy (dict[str, object])
                 if k == "expected_result" and v_str and replacements:
-                    redacted_val = redact_with_sidecar(v_str, replacements)
+                    redacted_val = _redact_with_sidecar(v_str, replacements)
                 else:
                     redacted_val = v_str
                 redacted_step[k] = redacted_val

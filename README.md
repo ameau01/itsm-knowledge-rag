@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 [![Hugging Face Dataset](https://img.shields.io/badge/Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
-[![PII](https://img.shields.io/badge/PII-Presidio%20%2B%20custom%20recognizers-orange)](https://microsoft.github.io/presidio/)
+[![PII](https://img.shields.io/badge/PII-AD%20directory%20%2B%20format%20rules%20%2B%20Presidio-orange)](https://microsoft.github.io/presidio/)
 [![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20dense%20%2B%20sparse-blueviolet)](https://qdrant.tech)
 [![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://github.com/confident-ai/deepeval)
 [![CI](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml/badge.svg)](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml)
@@ -39,7 +39,7 @@ The distinction from a general-purpose model matters here. A general model can d
 
 Closed tickets run through a pipeline. The result is served through a search interface modeled on the familiar "AI overview, then sources" pattern. The full design is in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-**Redaction runs first, over the whole ticket.** No personal data reaches the searchable layer or any published surface. A declarative policy is enforced with Presidio plus custom recognizers for corporate identifier formats that off-the-shelf detection misses. Redacting first also removes the person-specific tokens that would otherwise stop curation from generalizing. See [docs/redaction-policy.md](docs/redaction-policy.md).
+**Redaction runs first, over the whole ticket.** No personal data reaches the searchable layer or any published surface. A declarative policy drives three layers: exact match against the corporate user directory shipped with the dataset, format rules for structured identifiers, and Presidio NER as a catch-all. The directory is the primary control on identity recall, the same pattern as a periodic AD pull in production. Redacting first also removes the person-specific tokens that would otherwise stop curation from generalizing. See [docs/redaction-policy.md](docs/redaction-policy.md).
 
 **Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
 
@@ -54,8 +54,8 @@ Measured on a synthetic corpus of 745 tickets across 14 issue families. The eval
 
 | Axis | Metric | Result |
 |---|---|---|
-| PII leakage (deterministic) | leak rate vs. authored sidecar | TBD |
-| Technical retention | RETAIN-class strings preserved | TBD |
+| PII leakage (deterministic) | recall vs. authored sidecar | 98.9% |
+| Technical retention | RETAIN-class strings preserved | 97.6% |
 | Retrieval | recall@k, nDCG@k | TBD |
 | Curation quality (judge-based) | faithfulness, citation accuracy | TBD |
 | Cache vs. zero-shot | latency, cost per query | TBD |
@@ -111,7 +111,7 @@ examples/            real worked outputs: query, overview, source tickets, redac
 
 ## Stack
 
-Python, LlamaIndex, Qdrant (native dense + sparse fusion), Presidio (with custom recognizers), DeepEval / G-Eval, MkDocs-Material, Docker.
+Python, LlamaIndex, Qdrant (native dense + sparse fusion), AD directory match + format rules + Presidio, DeepEval / G-Eval, MkDocs-Material, Docker.
 
 
 ## Project status

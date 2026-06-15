@@ -38,4 +38,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add test scripts to run presidio redaction and examine pii.json and retention.json from dataset.
 
 ### Documentation
--- `docs/operational-store.md`, `ARCHITECTURE.md`
+- `docs/operational-store.md`, `ARCHITECTURE.md`
+
+## [Redaction Code Refactory]
+- Modify redaction policy to use AD dictectory user list for redaction.
+
+### Added
+- Add measurement script to score redaction effectiveness with PII and rentetion score
+- Add more columns from ticket corpus to operation store
+
+### Changed
+- redaction-policy updated to use AD directory list.
+- update redactor code to use AD directory, and then custom policy and then presidio.
+
+### Documentation
+- `docs/evaluation.md`, `docs/redaction-policy.md`, `README.md`
+

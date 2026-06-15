@@ -16,9 +16,6 @@
 # Prerequisites:
 #   uv sync
 #   uv run sh scripts/test_hf_download.sh
-#
-# Phase 1: tests FAIL (oracle RED — proves bugs exist)
-# Phase 2: tests PASS (GREEN — proves fixes are correct)
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -e
@@ -48,8 +45,8 @@ PREREQUISITES
     uv run sh scripts/test_hf_download.sh
 
 EXIT CODES
-    0   All oracle tests pass (Phase 2 complete)
-    1   One or more tests fail (expected in Phase 1; fix bugs in Phase 2)
+    0   All oracle tests pass 
+    1   One or more tests fail
 EOF
     exit 0
     ;;

@@ -1,22 +1,28 @@
-# Redaction policy for the ITSM RAG ingest pipeline.
+# ── Redaction Workflow───────────────────────────────────────────────────────────
 #
-# This file drives the Presidio-based redactor. It maps entity types to
-# replacement tokens, and documents composite and retain cases.
+#   Layer 1: AD identity lookup (exact match)
+#     Source: users_directory.json — the synthesised corporate AD export,
+#             hosted on HuggingFace and Kaggle alongside the ticket corpus.
+#             At runtime run_ingest.py loads it from the HF snapshot and
+#             passes it to PolicyRedactor(directory=...).
+#             In production: replace with live Get-ADUser export or LDAP query.
+#     Attributes → tokens:
+#       username      (sAMAccountName) → <USER>
+#       display_name  (displayName)    → <PERSON>
+#       email         (mail)           → <EMAIL>
 #
-# Ground truth: the pii.json sidecar was authored independently of this file.
-# The redactor is graded against pii.json — it cannot grade itself.
-# See docs/redaction-policy.md for the policy rationale.
+#   Layer 2: Format-based rules (regex)
+#     Covers PII with a structural signature AD does not supply.
 #
-# Layer attribution used throughout this file:
-#   Layer 1 (sidecar): deterministic lookup against pii.json; precision = 1.0
-#                      for all injected values. This is the real eval guarantee.
-#   Layer 2 (Presidio): pattern-based fallback for residual PII not in the
-#                       sidecar. Best-effort; does NOT raise the eval bar.
-# Rules marked "Layer 1 only" are enforced by sidecar text replacement and
-# are NOT wired into the Presidio pipeline.
+#   Layer 3: Presidio NER (catch-all)
+#     Informal name references, international phone formats, residual PII.
+#
+# ── Evaluation ────────────────────────────────────────────────────────────────
+#   pii.json / retention.json are eval yardsticks — NOT runtime inputs.
+#   Run: uv run python3 -m ingest.score   to score against the eval set.
 
-# ── Token vocabulary ──────────────────────────────────────────────────────────
-# Exactly these 8 tokens. Any other <TOKEN> string is a vocab mismatch failure.
+version: "2.0"
+
 token_vocabulary:
   - <PERSON>
   - <USER>
@@ -27,252 +33,177 @@ token_vocabulary:
   - <IP>
   - <HOSTNAME>
 
-# ── Entity → token mapping ────────────────────────────────────────────────────
-# sidecar_type: the "type" field in pii.json
-# presidio_entity: the Presidio entity type; "SIDECAR_ONLY" means no Layer 2
-# token: replacement token emitted by both layers
-# layer2: true if a Layer 2 (Presidio) recognizer is wired for this type
-entities:
-  - sidecar_type: email
-    presidio_entity: EMAIL_ADDRESS
-    token: <EMAIL>
-    layer2: true
-    notes: >
-      Whole-string replacement. Consumes local-part + domain together.
-      Built-in Presidio recognizer — no custom recognizer needed.
+# ── Layer 1: AD identity ──────────────────────────────────────────────────────
+# Source path is a fallback for local dev only; at runtime the caller passes
+# the pre-loaded directory dict via PolicyRedactor(directory=...).
+ad_identity:
+  # source is unused at runtime — run_ingest.py and score.py load users_directory.json
+  # from the HF snapshot and pass it via PolicyRedactor(directory=...).
+  source: "users_directory.json"
 
-  - sidecar_type: person
-    presidio_entity: PERSON
-    token: <PERSON>
-    layer2: true
-    notes: >
-      Built-in spaCy NER. Unreliable on technical text; sidecar is the
-      authoritative source. Layer 2 catches bare names the sidecar misses.
+  attributes:
+    # email MUST run first — it consumes the full "local@domain" string before
+    # the username rule can match the local part alone (which would leave @domain
+    # dangling as <USER>@corplabs.com instead of the correct <EMAIL> token).
+    - ad_attr: mail
+      yaml_key: email
+      token: <EMAIL>
+      case_sensitive: false
+      whole_word: false
 
-  - sidecar_type: username
-    presidio_entity: SIDECAR_ONLY
-    token: <USER>
-    layer2: false
-    notes: >
-      USERNAME is NOT wired into Layer 2. No pattern-based recognizer can
-      reliably distinguish corporate usernames (mwilliams, pnair) from
-      ordinary English words without a known-username allowlist. Any regex
-      broad enough to catch short lowercase usernames fires on 'connected',
-      'session', 'certificate', etc. — the technical vocabulary that is the
-      entire knowledge value of this system. Layer 1 (sidecar) covers all
-      injected usernames with precision = 1.0. Residual bare usernames that
-      are absent from the sidecar are accepted as a known gap.
+    - ad_attr: displayName
+      yaml_key: display_name
+      token: <PERSON>
+      case_sensitive: false
+      whole_word: true
 
-  - sidecar_type: emp_id
-    presidio_entity: EMPLOYEE_ID
+    - ad_attr: sAMAccountName
+      yaml_key: username
+      token: <USER>
+      case_sensitive: true
+      whole_word: true
+
+# ── Layer 2: Format-based rules ───────────────────────────────────────────────
+format_rules:
+
+  # Email format rule removed: AD Layer 1 covers all personal emails at 100%.
+  # Any email surviving Layer 1 is a service/infrastructure address and must
+  # be retained. See Presidio false_positive_suppressions for the email guard.
+
+  - name: emp_id
     token: <EMP_ID>
-    layer2: false
-    notes: >
-      EMPLOYEE_ID is NOT wired into Layer 2. All 925 injected EMP_IDs are
-      captured by the pii.json sidecar (Layer 1) — Gate 1 confirms zero leaks.
-      The [A-Z]{1,4}-\d{4,6} pattern is too broad: it falsely matches change
-      tickets (CHG-XXXXX), incident IDs (INC-PDQ-XXXX substrings), error codes
-      (RST-XXXXX), structured hostnames (WKS-PDX-41827 → PDX-41827 matches),
-      and region-prefixed identifiers (EMEA-4417). Removing from Layer 2
-      eliminates ~155 retention false-positives with no Gate 1 coverage loss.
+    priority: 20
+    patterns:
+      - '\b(E|EMP|DI|DVP|AE|ENG|EP|EXT|FIN|LPT|MKT|NE|NET|N|S|SE|SLS|WS)-\d{5,6}\b'
+      - '\b(E|EMP|DI|DVP|AE|EXT|FIN|MKT|NE|NET|N|S|SE|SLS)-\d{4}\b'
+      - '\bE\d{5}\b'
+      - '\bEP-[A-Z]{2}-\d{4,6}\b'
 
-  - sidecar_type: hostname
-    presidio_entity: PERSONAL_HOSTNAME
+  - name: hostname
     token: <HOSTNAME>
-    layer2: true
-    notes: >
-      Custom recognizer for WORKSTATION-*/LAPTOP-* style fused tokens.
-      Lowercase personal hostnames (mreeves-pc.corplabs.internal) are NOT
-      caught by this recognizer — they are accepted as a known Layer 2 gap.
-      The sidecar covers all injected personal hostnames.
+    priority: 30
+    patterns:
+      - '\b(WORKSTATION|LAPTOP|DESKTOP|APPNODE|IPHONE|IPAD|ANDROID)-[A-Z0-9][A-Z0-9\-]{2,}\b'
+      - '\b[a-z]{3,12}-(pc|laptop|ws|wks|desktop)\.[a-z][a-z0-9.\-]+\b'
 
-  - sidecar_type: ip
-    presidio_entity: IP_ADDRESS
+  - name: ip
     token: <IP>
-    layer2: false
-    notes: >
-      IP_ADDRESS is NOT wired into Layer 2. All PII IPs (personal workstation
-      and laptop addresses) are captured by the pii.json sidecar (Layer 1) —
-      Gate 1 confirms zero leaks. Infrastructure server IPs (DNS resolvers,
-      gateways, domain controllers) appear in retention.json as service_hostname
-      values and must be retained. The IP pattern cannot distinguish personal vs.
-      infrastructure IPs, so Layer 2 would cause ~11 false-positive retention
-      drops with no coverage gain. Same design rationale as EMPLOYEE_ID.
+    priority: 40
+    patterns:
+      - '\b(?:\d{1,3}\.){3}\d{1,3}\b'
 
-  - sidecar_type: location
-    presidio_entity: LOCATION
-    token: <LOCATION>
-    layer2: true
-    notes: Built-in spaCy NER; city/locality names.
-
-  - sidecar_type: phone
-    presidio_entity: PHONE_NUMBER
+  - name: phone
     token: <PHONE>
-    layer2: true
-    notes: >
-      Built-in Presidio recognizer. Extensions (x4417) are not caught;
-      accepted as a known Layer 2 gap. Sidecar covers injected phone values.
-
-# ── Composite and hard-case rules ─────────────────────────────────────────────
-# Documents how each composite case is handled, and which layer enforces it.
-composite_rules:
-
-  - name: dn_cn_extract
-    layer: Layer 1 only
-    description: >
-      Distinguished Name: CN=mdelgado,OU=Corp Users → CN=<USER>,OU=Corp Users.
-      The pii.json sidecar stores the bare CN value ('mdelgado'), not the full
-      DN string. Layer 1 replaces the value wherever it appears; because the CN
-      value appears verbatim inside the DN string, the replacement fires there
-      too. The OU= and DC= components are not in the sidecar and survive.
-      Layer 2 (Presidio) does NOT do group-level DN extraction — no regex
-      targeting CN= is wired into _build_presidio_analyzer.
-    enforced_by: Layer 1 sidecar lookup (value = bare CN string)
-
-  - name: personal_hostname_fused
-    layer: Layer 2 (PERSONAL_HOSTNAME recognizer) + Layer 1
-    description: >
-      Uppercase fused hostname (WORKSTATION-PNAIR-L14): whole token replaced
-      with <HOSTNAME>. Layer 2 fires for WORKSTATION-*/LAPTOP-*/DESKTOP-*
-      prefixes. Lowercase personal hostnames (mreeves-pc.corplabs.internal)
-      rely on Layer 1 only — the Layer 2 recognizer does not cover them.
-    enforced_by: Layer 2 PersonalHostnameRecognizer + Layer 1 sidecar
-
-  - name: email_consumes_username
-    layer: Layer 1 only
-    description: >
-      The username local-part of an email is consumed by <EMAIL> whole-string.
-      In Layer 1 this is enforced by longest-value-first ordering: the full
-      email address (longer) is replaced before the bare username (shorter).
-      Layer 2 uses Presidio's built-in EMAIL_ADDRESS recognizer, which also
-      consumes the whole string. There is no USERNAME recognizer in Layer 2
-      to conflict with it.
-    enforced_by: Layer 1 longest-value-first; Layer 2 EMAIL_ADDRESS spans
-
-  - name: domain_inside_email
-    layer: Layer 1 only
-    description: >
-      The corporate domain inside an email is consumed with the local-part
-      (whole-string replacement). Bare domain occurrences outside email
-      context (sso.corplabs.com, DC=corplabs) are RETAIN — they are not in
-      the sidecar and the Layer 2 suppression list protects service URLs.
-    enforced_by: Layer 1 sidecar (email stored as full address string)
-
-# ── Retain classes (must NOT be redacted) ─────────────────────────────────────
-retain_classes:
-  - type: system_or_app_name
-    examples: [GlobalProtect, Active Directory, Intune, Azure AD, Okta]
-
-  - type: vendor_identity
-    description: >
-      Vendor name, domain, service URL, and portal reference are atomic.
-      Retain all or none.
-    examples: [Meridian, Meridian API, api.meridiandata.io]
-
-  - type: shared_service_hostname
-    examples: ["DC-EAST-03.corplabs.internal", "sso.corplabs.com", "ldap.corp.local"]
-
-  - type: error_or_event_id
-    examples: ["0xC0000234", AUTH_EXPIRED, "VPN-ERR-201", "504 Gateway Timeout"]
-
-  - type: cert_serial
-    examples: ["4A:7C:91:DE", "01:FD:6D:30"]
-
-  - type: os_or_device_class
-    examples: ["Windows 11", "macOS Ventura", "Dell Latitude"]
-
-  - type: region
-    description: >
-      Organizational region or group names. Corpus values are word-form
-      (Americas, EMEA, EMEA-Sales) not cloud-style codes (us-east-1).
-    examples: [Americas, EMEA, "EMEA-Sales", "Eng-US-East", "Finance-US-East"]
-
-  - type: facility
-    description: Infrastructure locations — locate equipment, not people.
-    examples: ["DNS Resolver cluster", "Driver Package repository", "EMEA RemoteWorkers"]
-
-# ── False-positive suppressions (Layer 2 only) ───────────────────────────────
-# Applied to Presidio results before anonymization.
-# Suppression uses re.fullmatch on the matched span — be precise.
-# An over-broad suppression is a leak path: it can silently drop a true PII
-# detection. Every pattern here must be verified against real corpus values.
-#
-# Note: USERNAME is not in Layer 2, so no suppression is needed for it.
-# EMP_ID format overlaps are not a concern here because the EmployeeIdRecognizer
-# patterns are specific enough not to fire on the values below.
-false_positive_suppressions:
-
-  - pattern: '0x[0-9A-Fa-f]+'
-    reason: Hex error codes (0xC0000234, 0x000006BA) flagged as PERSON by spaCy
-    must_retain: true
-
-  - pattern: 'https?://\S+'
-    reason: Service URLs — retain unless URL embeds personal data
-    must_retain: true
-
-  - pattern: '[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2})+'
-    reason: Cert serials and MAC addresses
-    must_retain: true
-
-  - pattern: '(Americas|EMEA|EMEA-Sales|Eng-US-East|Finance-US-East|Finance-US-East-Win11-Compliance|APAC|AMER)'
-    reason: >
-      Explicit allowlist of organization region names from the corpus.
-      Replaced the shape-based [A-Z]{2,6} pattern which matched PERSON,
-      ADMIN, VPN, OKTA and was a leak path.
-    must_retain: true
-
-  - pattern: '(us-east-1|us-west-2|eu-west-1|ap-southeast-1)'
-    reason: AWS-style region codes (not currently in corpus but reserved)
-    must_retain: true
-
-  - pattern: '[a-zA-Z0-9._%+\-]+@(corplabs\.com|corp\.internal|example\.corp|partnerservices\.net|corplabs\.internal|corp\.local|externalpay\.io|databridge\.io)'
-    reason: >
-      Infrastructure and service-team email addresses (infra-alerts@corplabs.com,
-      dns-ops@corp.internal, etc.) — not personal PII. All personal emails in the
-      corpus are captured by the pii.json sidecar (Layer 1); any email still
-      present after Layer 1 ran is a service address and must be retained.
-      Pattern covers all known corpus infrastructure domains.
-    must_retain: true
-
-# ── Custom recognizer specs (Layer 2) ─────────────────────────────────────────
-# Each entry is a PatternRecognizer wired into _build_presidio_analyzer().
-# Patterns verified against the actual corpus (pii.json, 213 EMP_ID values).
-custom_recognizers:
-
-  - name: EmployeeIdRecognizer
-    entity: EMPLOYEE_ID
-    description: >
-      Corporate employee ID. Three formats observed in the corpus (213 values):
-        Standard hyphenated:   E-12345, EMP-40821, DVP-2294   (91%)
-        Two-segment hyphenated: EP-NA-04821                    (<1%)
-        No-hyphen:             E20481, E50832                  (3%)
-      Pattern verified against all 213 corpus EMP_IDs — 100% coverage.
+    priority: 50
     patterns:
-      - name: emp_id_standard
-        regex: '\b[A-Z]{1,4}-\d{4,6}\b'
-        score: 0.92
-        notes: Covers E-12345, EMP-40821, DVP-2294, AE-40218
+      - '\+1[-.\s]\d{3}[-.\s]\d{3}[-.\s]\d{4}\b'
+      - '\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b'
+      - '\(\d{3}\)\s?\d{3}[-.\s]\d{4}\b'
+      - '\bext(?:ension)?\.?\s+\d{3,5}(?:-\d{1,4})?\b'
 
-      - name: emp_id_two_segment
-        regex: '\b[A-Z]{1,4}-[A-Z]{2}-\d{4,6}\b'
-        score: 0.92
-        notes: Covers EP-NA-04821 style
-
-      - name: emp_id_no_hyphen
-        regex: '\b[A-Z]\d{5}\b'
-        score: 0.85
-        notes: Covers E20481, E50832 — lower score, shorter pattern
-
-  - name: PersonalHostnameRecognizer
-    entity: PERSONAL_HOSTNAME
-    description: >
-      Hostnames that fuse a person's name into the token (uppercase prefix style).
-      Lowercase personal hostnames (mreeves-pc.corplabs.internal) are a known
-      gap — Layer 1 sidecar covers the injected instances.
+  - name: location
+    token: <LOCATION>
+    priority: 60
     patterns:
-      - name: workstation_prefix
-        regex: '\b(WORKSTATION|LAPTOP|DESKTOP|WS|PC)-[A-Z][A-Z0-9\-]{2,}\b'
-        score: 0.90
-        notes: >
-          Deliberately conservative threshold. Better to miss an edge-case
-          personal hostname than to redact a service hostname like DC-EAST-03.
+      - '\b(Arlington|Ashburn|Atlanta|Austin|Bangalore|Birmingham|Boston|Bristol|Budapest|Charlotte|Chicago|Columbus|Dallas|Denver|Dubai|Dublin|Durham|Edinburgh|Frankfurt|Houston|Leeds|London|Lyon|Manhattan|Milan|Minneapolis|Munich|Newark|Philadelphia|Phoenix|Portland|Raleigh|Reading|Reston|Richmond|Sacramento|Seattle|Singapore|Stockholm|Toronto|Zagreb|Zurich)\b'
+      - 'NYC'
+      - 'New York'
+      - 'São Paulo'
+      - 'EMEA-Office-1'
+      - 'Building 3'
+      - 'Building 4'
+      - 'Floor2'
+      - 'HQ - Building A, Floor 3'
+
+# ── Layer 3: Presidio NER ─────────────────────────────────────────────────────
+presidio:
+  # Per-entity confidence thresholds applied after Presidio returns results.
+  # score_threshold=None lets each recognizer use its own built-in floor
+  # (important for PHONE: international formats score below 0.5 but above
+  # the phone recognizer's floor). Only entities listed here get an extra floor.
+  per_entity_threshold:
+    PERSON: 0.75
+
+  entities:
+    - presidio_entity: PERSON
+      token: <PERSON>
+      notes: >
+        Catch-all for informal name references not in AD ("talked to John").
+        AD display_name exact match already achieves 100% recall on formal names.
+        Threshold 0.75 filters technical-term FPs (Linux, Kubernetes, etc.).
+    - presidio_entity: EMAIL_ADDRESS
+      token: <EMAIL>
+      notes: >
+        Catch-all for personal emails not in the AD export (contractors, etc.).
+        AD email attribute already achieves 100% recall for known corporate emails.
+    - presidio_entity: PHONE_NUMBER
+      token: <PHONE>
+      notes: >
+        Primary value of Presidio in this corpus: international phone formats
+        (+65-9173-4028 etc.) that format rules don't cover.
+    # LOCATION excluded from Presidio — L2 format rules cover the office location
+    # list at 99.9% recall. Presidio LOCATION over-fires on cloud region codes
+    # (us-east-1) and infrastructure names, dropping region retention to 82.7%.
+
+  custom_recognizers:
+    - name: PersonalHostnameRecognizer
+      entity: PERSONAL_HOSTNAME
+      token: <HOSTNAME>
+      patterns:
+        - name: device_prefix
+          regex: '\b(WORKSTATION|LAPTOP|DESKTOP|IPHONE|IPAD|ANDROID|WS|PC)-[A-Z][A-Z0-9\-]{2,}\b'
+          score: 0.90
+
+  false_positive_suppressions:
+    - pattern: '<[A-Z_]+>'
+      reason: Already-redacted tokens — do not re-process
+
+    - pattern: '\d{8,}'
+      reason: >
+        8+ digit all-numeric strings are date-based event IDs and timestamps,
+        not phone numbers. Real phone numbers have separators.
+
+    - pattern: '0x[0-9A-Fa-f]+'
+      reason: Hex error codes (0xC0000234) flagged as PERSON by spaCy
+
+    - pattern: '[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2})+'
+      reason: Cert serials and MAC addresses
+
+    - pattern: 'https?://\S+'
+      reason: Service URLs — retain unless URL embeds personal data
+
+    # NOTE: no email suppression here.
+    # The AD directory has an intentional 8.2% gap (contractors, recent leavers, service accounts).
+    # Personal emails of gap users are not caught by L1 and must fall through to Presidio.
+    # Service/infrastructure emails (dns-ops@corplabs.com etc.) will also be redacted — small
+    # retention cost (~11 entries), acceptable given the PII recall requirement.
+
+    - pattern: '(?:DC|OU|CN)=[a-zA-Z0-9][a-zA-Z0-9.\-]*'
+      reason: LDAP distinguished name components
+
+    - pattern: '(Americas|EMEA|EMEA-Sales|Eng-US-East|Finance-US-East|Finance-US-East-Win11-Compliance|APAC|AMER)'
+      reason: Organizational region and group names
+
+    - pattern: '[a-z]{2,3}-[a-z]+-\d+'
+      reason: Cloud region codes (us-east-1, eu-west-2, ap-southeast-1, etc.)
+
+    - pattern: '[a-z]{2,3}-[a-z]+-\d+-[a-z0-9]+'
+      reason: Datacenter sub-region codes (us-east-1-dc1, us-east-1a, etc.)
+
+    - pattern: '(Linux|Kubernetes|Windows|macOS|Android|iOS|Ubuntu|Debian|CentOS|RHEL|Fedora)'
+      reason: OS names that spaCy NER flags as PERSON or ORG
+
+    - pattern: '(Mail|Outlook|Chrome|Firefox|Safari|Teams|Slack|Zoom|Excel|Word|PowerPoint)'
+      reason: Application names flagged as PERSON by spaCy
+
+    - pattern: '(ADUC|SCCM|WSUS|SCOM|LAPS|BitLocker|Intune|Azure|Okta|GlobalProtect)'
+      reason: IT system/tool names flagged as PERSON or ORG
+
+    - pattern: '[A-Z]{2,6}_[A-Z][A-Z_]+'
+      reason: SCREAMING_SNAKE_CASE error/event codes (AUTH_EXPIRED, MDM_EncryptionSignalMissing)
+
+    - pattern: '[A-Z]{2,6}-\d{4,6}'
+      reason: >
+        Event/error ID format (RST-88501, SYNC-4402) — emp_id rules run before
+        Presidio so true emp_ids are already <EMP_ID> by this point; anything
+        matching here is a non-emp_id technical code that must be retained.

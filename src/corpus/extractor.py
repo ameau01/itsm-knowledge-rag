@@ -2,32 +2,8 @@
 Corpus extraction helpers — single source of truth for pulling fields out of
 HF parquet rows for use by the ingest pipeline and test scripts.
 
-This module is the only place extraction logic lives.  Consumers:
-  src/ingest/run_ingest.py
-  src/test/test_presidio_redaction.py
-  src/test/test_redaction.py
-  src/test/test_extraction.py
-
 Schema decisions are documented in src/corpus/DECISION.md.
 Primitive helpers (to_list, str_or_empty) live in src/corpus/utils.py.
-
-Phase 2 fixes applied here (all bugs from Phase 1 resolved):
-  - extract_metadata: family from record_id.split('-')[1]
-  - extract_metadata: root_cause_id from caller-supplied rc_map (catalog.json inversion)
-  - extract_text_fields: root_cause_narrative from root_cause string (not dict)
-  - extract_text_fields: diagnostics_steps uses correct field set (see extract_diag_steps)
-  - extract_observed_errors: returns diagnostics['observed_errors'] list
-  - extract_diag_steps: keeps playbook_step_id, expected_result, result_status,
-    performed_by; drops action, observed_result, evidence, step_id
-
-Phase 3 additions:
-  - extract_diag_steps_raw: all 8 step fields for L1 context + retention test
-  - extract_diag_steps_procedure: lean {step, action, expected_result} for wiki LLM
-  - extract_text_fields: emits all three diagnostic columns; resolution_steps as JSON array
-
-Refactor (cleanup):
-  - to_list / str_or_empty moved to corpus.utils (no behaviour change)
-  - Three extract_diag_steps* functions unified via _extract_steps() private helper
 """
 
 from __future__ import annotations

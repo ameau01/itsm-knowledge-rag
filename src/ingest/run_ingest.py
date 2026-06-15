@@ -4,7 +4,10 @@ Ingest pipeline: load HF dataset → redact → write to operational store.
 For each ticket in the corpus:
   1. Extract text fields (corpus.extractor)
   2. Extract structured metadata (corpus.extractor + corpus.catalog)
-  3. Apply two-layer PII redaction (sidecar + Presidio)
+  3. Apply three-layer PII redaction (PolicyRedactor)
+       L1: AD identity exact match   (users_directory.json from HF snapshot)
+       L2: Format-based regex rules  (redaction_policy.yaml)
+       L3: Presidio NER              (residual names, international phones)
   4. Write to SQLite operational store (ingest.store)
 
 The full reimport is atomic: the tickets table is truncated and all inserts
@@ -16,6 +19,7 @@ Usage
     uv run sh scripts/run_ingest.sh              # all 745 tickets
     uv run sh scripts/run_ingest.sh --limit 10   # first N tickets (dev)
     uv run sh scripts/run_ingest.sh --dry-run    # redact only, no DB write
+    uv run sh scripts/run_ingest.sh --no-presidio  # L1+L2 only (faster)
 """
 
 from __future__ import annotations
@@ -38,7 +42,7 @@ from corpus.extractor import (
     extract_observed_errors,
     extract_text_fields,
 )
-from ingest.redactor import build_sidecar_index, redact_ticket
+from ingest.redactor import PolicyRedactor
 from ingest.store import (
     count_tickets,
     get_connection,
@@ -48,7 +52,7 @@ from ingest.store import (
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 
-_PIPELINE_VERSION = "0.0.2"   # keep in sync with pyproject.toml
+_PIPELINE_VERSION = "0.1.0"
 
 _HF_CACHE = Path(__file__).parent.parent.parent / ".hf_cache"
 _SNAPSHOTS = (
@@ -56,7 +60,7 @@ _SNAPSHOTS = (
     / "datasets--ameau01--synthetic-it-support-tickets"
     / "snapshots"
 )
-_EVAL_REDACTION = Path(__file__).parent.parent.parent / "eval-set" / "redaction"
+_POLICY_PATH = Path(__file__).parent / "redaction_policy.yaml"
 
 
 # ── Dataset helpers ────────────────────────────────────────────────────────────
@@ -77,17 +81,16 @@ def _ensure_dataset() -> Path:
     return download_dataset()
 
 
-def _find_sidecar(filename: str) -> Path:
-    local = _EVAL_REDACTION / filename
-    if local.exists():
-        return local
-    snap = _latest_snapshot()
-    if snap:
-        candidate = snap / filename
-        if candidate.exists():
-            return candidate
+def _load_users_directory(snap: Path) -> dict:
+    """
+    Load users_directory.json from the HF snapshot.
+    Canonical source is HuggingFace — run scripts/test_hf_download.sh first.
+    """
+    candidate = snap / "users_directory.json"
+    if candidate.exists():
+        return json.loads(candidate.read_text())
     raise FileNotFoundError(
-        f"{filename} not found in {_EVAL_REDACTION} or HF cache.\n"
+        "users_directory.json not found in HF snapshot.\n"
         "Run: uv run sh scripts/test_hf_download.sh"
     )
 
@@ -97,8 +100,9 @@ def _find_sidecar(filename: str) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Ingest pipeline: load the HF ticket corpus, apply two-layer PII "
-            "redaction, and write redacted tickets to the SQLite operational store. "
+            "Ingest pipeline: load the HF ticket corpus, apply three-layer PII "
+            "redaction (AD identity + format rules + Presidio NER), and write "
+            "redacted tickets to the SQLite operational store. "
             "The tickets table is truncated then fully repopulated in one atomic "
             "transaction — a failure mid-run leaves the previous state intact."
         ),
@@ -123,14 +127,33 @@ def main(argv: list[str] | None = None) -> int:
             "Useful for verifying redaction without touching the store."
         ),
     )
+    parser.add_argument(
+        "--no-presidio",
+        action="store_true",
+        help="Disable Layer 3 Presidio NER (AD + format rules only, faster).",
+    )
     args = parser.parse_args(argv)
 
-    # ── Load dataset and lookup maps ───────────────────────────────────────────
-    snap = _ensure_dataset()
-    df = pd.read_parquet(snap / "data" / "train.parquet")
-    pii_records: list[dict] = json.loads(_find_sidecar("pii.json").read_text())
-    sidecar_index = build_sidecar_index(pii_records)
-    rc_map = build_rc_map()  # ticket_id → root_cause_id from catalog.json
+    # ── Load dataset ───────────────────────────────────────────────────────────
+    snap   = _ensure_dataset()
+    df     = pd.read_parquet(snap / "data" / "train.parquet")
+    rc_map = build_rc_map()
+
+    # ── Build redactor (once, before the ticket loop) ──────────────────────────
+    directory    = _load_users_directory(snap)
+    use_presidio = not args.no_presidio
+    n_users      = len(directory.get("users", []))
+    print(
+        f"\nBuilding PolicyRedactor  "
+        f"(L1 AD={n_users} users | L2 format rules | "
+        f"L3 Presidio={'yes' if use_presidio else 'no'}) …"
+    )
+    redactor = PolicyRedactor(
+        policy_path=_POLICY_PATH,
+        use_presidio=use_presidio,
+        directory=directory,
+    )
+    print("  Redactor ready.\n")
 
     ticket_ids: list[str] = df["record_id"].tolist()
     if args.limit:
@@ -138,18 +161,15 @@ def main(argv: list[str] | None = None) -> int:
 
     total = len(ticket_ids)
     label = f"first {total}" if args.limit else f"all {total}"
-    mode = "DRY RUN — no DB writes" if args.dry_run else f"→ {settings.operational_store}"
-    print(f"\nIngest pipeline  |  {label} ticket(s)  |  {mode}")
-    print(f"Sidecar : {_find_sidecar('pii.json')}")
-    print(f"Version : {_PIPELINE_VERSION}\n")
+    mode  = "DRY RUN — no DB writes" if args.dry_run else f"→ {settings.operational_store}"
+    print(f"Ingest pipeline  |  {label} ticket(s)  |  {mode}")
+    print(f"HF snapshot : {snap}")
+    print(f"Version     : {_PIPELINE_VERSION}\n")
 
     # ── Open DB (skip if dry-run) ──────────────────────────────────────────────
     conn = None
     if not args.dry_run:
         conn = get_connection()
-        # Drop and recreate tickets table so the live schema always matches the
-        # current DDL — prevents silent schema-mismatch bugs during refactoring.
-        # wiki_pages is left intact (populated by the separate curation step).
         reset_tickets_table(conn)
         print("Tickets table reset (dropped + recreated with current schema).")
 
@@ -168,20 +188,12 @@ def main(argv: list[str] | None = None) -> int:
                     continue
                 row = rows.iloc[0]
 
-                # Extract text fields (redactable) and metadata (not redacted)
-                text_fields = extract_text_fields(row)
-                metadata = extract_metadata(row, rc_map)
+                text_fields     = extract_text_fields(row)
+                metadata        = extract_metadata(row, rc_map)
                 observed_errors = extract_observed_errors(row)
 
-                # Apply PII redaction to text fields
-                redacted = redact_ticket(
-                    ticket_id=tid,
-                    fields=text_fields,
-                    sidecar_index=sidecar_index,
-                    use_presidio_fallback=False,
-                )
+                redacted = redactor.redact_fields(text_fields)
 
-                # Merge observed_errors (not redacted) into the redacted dict
                 if observed_errors:
                     redacted["observed_errors"] = json.dumps(
                         observed_errors, ensure_ascii=False
@@ -189,8 +201,10 @@ def main(argv: list[str] | None = None) -> int:
 
                 insert_redacted_tickets(conn, tid, metadata, redacted, _PIPELINE_VERSION)
                 processed += 1
+
+                if processed % 50 == 0:
+                    print(f"  {processed}/{total} …")
     else:
-        # Dry run: redact only, no DB writes
         for tid in ticket_ids:
             rows = df[df["record_id"] == tid]
             if rows.empty:
@@ -198,13 +212,11 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             row = rows.iloc[0]
             text_fields = extract_text_fields(row)
-            redact_ticket(
-                ticket_id=tid,
-                fields=text_fields,
-                sidecar_index=sidecar_index,
-                use_presidio_fallback=False,
-            )
+            redactor.redact_fields(text_fields)
             processed += 1
+
+            if processed % 50 == 0:
+                print(f"  {processed}/{total} …")
 
     elapsed = time.monotonic() - t0
 

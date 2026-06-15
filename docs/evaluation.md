@@ -44,21 +44,46 @@ Each artifact records its provenance: the dataset revision it was built against,
 
 The headline axis. For each value in a ticket's sidecar, the check asserts the value is gone from the entire redacted document and replaced by its expected token. A leak anywhere is caught, including at sites the author did not enumerate. The gate is absence-anywhere, not per-occurrence.
 
-This number is non-circular. The sidecar was authored upstream, during data generation, with no detector involved. The redactor being tested is a separate Presidio pipeline in this project. So the redactor is graded against a key it did not write. The full classification rules and the gate are in [redaction-policy.md](redaction-policy.md). The corpus and sidecar shape are in [dataset.md](dataset.md).
+This number is non-circular. The sidecar was authored upstream, during data generation, with no detector involved. The redactor being tested is a separate three-layer pipeline in this project: directory exact match, format rules, then Presidio. It never reads the sidecar at runtime. So the redactor is graded against a key it did not write. Scored over all 745 tickets, PII recall is 98.9% and technical retention is 97.6%. The full classification rules, the layers, and the per-class results are in [redaction-policy.md](redaction-policy.md). The corpus and sidecar shape are in [dataset.md](dataset.md).
 
-Reported per type (person, username, email, phone, emp_id, location, ip, hostname).
+Per-class recall, scored over all 745 tickets:
 
-| Type | Leak rate | Retention error |
+| Class | Recall | Caught / total |
 |---|---|---|
-| person | TBD | TBD |
-| username | TBD | TBD |
-| email | TBD | TBD |
-| (all types) | TBD | TBD |
+| person | 100.0% | 2178 / 2178 |
+| ip | 100.0% | 985 / 985 |
+| location | 99.8% | 832 / 834 |
+| email | 99.7% | 912 / 915 |
+| emp_id | 99.6% | 921 / 925 |
+| username | 98.3% | 1643 / 1671 |
+| hostname | 97.6% | 1011 / 1036 |
+| phone | 87.7% | 257 / 293 |
+| **overall** | **98.9%** | **8739 / 8837** |
+
+Phone is the one class below 95%. International formats such as `+65-9173-4028` match no format rule, and Presidio recovers only some.
 
 
 ## Technical retention (deterministic)
 
 The other side of redaction. A redactor that strips error codes and hostnames to look safe is failing, not passing. This axis asserts RETAIN-class strings (system names, service hostnames, error codes, cert serials, region codes) survive redaction. Over-redaction is scored against the system. The RETAIN list is defined in [redaction-policy.md](redaction-policy.md).
+
+Per-class retention, scored over all 745 tickets:
+
+| Class | Retention | Survived / total |
+|---|---|---|
+| vendor_name | 100.0% | 4 / 4 |
+| region | 99.4% | 178 / 179 |
+| app_name | 99.3% | 4197 / 4227 |
+| cert_serial | 99.1% | 209 / 211 |
+| error_code | 99.1% | 981 / 990 |
+| event_id | 97.4% | 494 / 507 |
+| facility | 96.2% | 50 / 52 |
+| service_hostname | 94.8% | 1233 / 1300 |
+| os_device | 94.0% | 723 / 769 |
+| service_url | 88.6% | 303 / 342 |
+| **overall** | **97.6%** | **8372 / 8581** |
+
+All ten classes clear the 80% floor. service_url is lowest at 88.6%, where infrastructure hostnames that share the personal-device naming shape are over-redacted. It is an accepted format tradeoff.
 
 
 ## Retrieval, L1 (label-based)
