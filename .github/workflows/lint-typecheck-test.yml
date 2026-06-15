@@ -26,24 +26,24 @@ jobs:
 
       # Cache the HF dataset snapshot across CI runs. Without this, every
       # push fetches the dataset fresh, which trips HF's rate limit
-      # (HTTP 429) on the wire-layer MCP integration tests. The cache key
-      # is bound to data_loader.py so a change there (different revision,
-      # different repo) invalidates the cache correctly.
       - name: Cache HF dataset
         uses: actions/cache@v4
         with:
           path: .hf_cache
-          key: hf-cache-${{ hashFiles('src/data_loader.py') }}
+          key: hf-cache-v2-${{ hashFiles('src/data_loader.py') }}
           restore-keys: |
-            hf-cache-
+            hf-cache-v2-
 
       - name: Download HF dataset (if not cached)
         run: |
           HF_SNAPSHOTS=".hf_cache/datasets--ameau01--synthetic-it-support-tickets/snapshots"
-          if [ ! -d "$HF_SNAPSHOTS" ] || [ -z "$(ls -A "$HF_SNAPSHOTS" 2>/dev/null)" ]; then
+          # Require users_directory.json to be present — old v1 snapshots lacked it.
+          USERS_FILE=$(find "$HF_SNAPSHOTS" -name "users_directory.json" 2>/dev/null | head -1)
+          if [ -z "$USERS_FILE" ]; then
+            echo "HF snapshot missing or outdated — downloading."
             uv run sh scripts/test_hf_download.sh
           else
-            echo "HF dataset found in cache — skipping download."
+            echo "HF dataset found in cache (users_directory.json present) — skipping download."
           fi
 
       - name: Run linting (ruff)
