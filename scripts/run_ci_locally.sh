@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # Run the same checks GitHub Actions runs, locally and in the same order.
 # Pre-push gate: if this passes, the workflow_dispatch CI run will pass.
 #
@@ -15,10 +15,12 @@
 # Flags:
 #   -h, --help          Show this help message and exit.
 
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
-  exit 0
-fi
+case "${1:-}" in
+  -h|--help)
+    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'
+    exit 0
+    ;;
+esac
 
 set -e
 cd "$(dirname "$0")/.."
@@ -53,4 +55,3 @@ fi
 uv run python -m pytest -q
 
 banner "All CI checks passed locally. Safe to push."
-

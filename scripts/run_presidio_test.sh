@@ -1,28 +1,27 @@
-#!/usr/bin/env bash
-# Run the Presidio-layer redaction test.
+#!/usr/bin/env sh
+# Run the full three-layer redaction test (L1+L2+L3 Presidio).
 #
 # Usage:
-#   ./scripts/run_presidio_test.sh                      # sample: first ticket only
-#   ./scripts/run_presidio_test.sh --all                # full 745-ticket corpus
-#   ./scripts/run_presidio_test.sh --ticket INC-VDA-0001
-#   ./scripts/run_presidio_test.sh --verbose            # show retention drops + Presidio hits
-#   ./scripts/run_presidio_test.sh --all --verbose
+#   uv run sh scripts/run_presidio_test.sh                      # sample: first ticket only
+#   uv run sh scripts/run_presidio_test.sh --all                # full 745-ticket corpus
+#   uv run sh scripts/run_presidio_test.sh --ticket INC-VDA-0001
+#   uv run sh scripts/run_presidio_test.sh --verbose
 #
 # Stdout only. No files written. No operational store touched.
 # Exit 0 on pass, 1 on any Gate 1 or Gate 2 failure.
 
-set -euo pipefail
+set -eu
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# ── Help ──────────────────────────────────────────────────────────────────────
-if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+case "${1:-}" in
+  -h|--help)
     cat <<'EOF'
 Usage: scripts/run_presidio_test.sh [OPTIONS]
 
-Run the two-layer PII redaction test (Layer 1 sidecar + Layer 2 Presidio
-pattern recognizers) against the synthetic IT-support ticket corpus.
+Run the full three-layer PII redaction test (AD identity + format rules +
+Presidio NER) against the synthetic IT-support ticket corpus.
 
 Modes (mutually exclusive):
   (default)            Test the first ticket only (fast sanity check)
@@ -31,30 +30,30 @@ Modes (mutually exclusive):
 
 Options:
   --verbose, -v        Print over-redacted values and surviving Presidio hits
-                       per ticket (useful with --all to diagnose retention drops)
   --help, -h           Show this help and exit
 
 Gates:
   Gate 1  ABSENCE-ANYWHERE  [hard fail]   Every pii.json value must be absent
   Gate 2  TOKEN VOCABULARY  [hard fail]   Only the 8 pinned <TOKEN>s may appear
-  Gate 3  RETENTION         [report only] ≥0.98 of retention.json values survive
+  Gate 3  RETENTION         [report only] target >= 0.98
 
 Exit codes:
   0  All hard gates pass
   1  Gate 1 or Gate 2 failure
 
 Prerequisites:
-  uv sync          Install dependencies (presidio-analyzer, presidio-anonymizer)
-  .env             Must contain HF_HOME and HF_TOKEN (for dataset download)
+  uv sync
+  uv run sh scripts/test_hf_download.sh
 
 Examples:
-  sh scripts/run_presidio_test.sh
-  sh scripts/run_presidio_test.sh --all
-  sh scripts/run_presidio_test.sh --ticket INC-VDA-0001
-  sh scripts/run_presidio_test.sh --all --verbose
+  uv run sh scripts/run_presidio_test.sh
+  uv run sh scripts/run_presidio_test.sh --all
+  uv run sh scripts/run_presidio_test.sh --ticket INC-VDA-0001
+  uv run sh scripts/run_presidio_test.sh --all --verbose
 EOF
     exit 0
-fi
+    ;;
+esac
 
 # ── Dependency check ──────────────────────────────────────────────────────────
 check_dep() {
@@ -70,5 +69,4 @@ check_dep pandas
 check_dep yaml
 
 # ── Run ───────────────────────────────────────────────────────────────────────
-# Pass all arguments directly through to the test script.
 PYTHONPATH="$REPO_ROOT/src" uv run python3 "$REPO_ROOT/src/test/test_presidio_redaction.py" "$@"

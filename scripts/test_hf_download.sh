@@ -1,10 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # Download the HF dataset into the cache folder configured in .env (HF_HOME)
 # and print absolute file paths for local viewing. Safe to re-run: second
-# run is a cache hit. Run from anywhere:  bash scripts/test_hf_download.sh
-set -euo pipefail
+# run is a cache hit. Run from anywhere:  sh scripts/test_hf_download.sh
+set -eu
 
-if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+case "${1:-}" in
+  -h|--help)
     cat <<'EOF'
 Usage: scripts/test_hf_download.sh [--help]
 
@@ -20,7 +21,7 @@ Expected files verified:
   retention.json       Over-redaction answer key
 
 Prerequisites:
-  .env                 Must contain HF_HOME (cache dir) and HF_TOKEN
+  .env                 Must contain HF_HOME (cache dir)
   uv sync              Installs dependencies automatically on first run
 
 Exit codes:
@@ -28,7 +29,8 @@ Exit codes:
   1  One or more files missing
 EOF
     exit 0
-fi
+    ;;
+esac
 
 cd "$(dirname "$0")/.."
 uv sync -q
