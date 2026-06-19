@@ -5,7 +5,7 @@
 [![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face%20Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
 [![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20hybrid%20%2B%20reranker-blueviolet)](https://qdrant.tech)
 [![PII](https://img.shields.io/badge/PII-AD%20directory%20%2B%20format%20rules%20%2B%20Presidio-orange)](https://microsoft.github.io/presidio/)
-[![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://github.com/confident-ai/deepeval)
+[![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://deepeval.com/guides/guides-rag-evaluation)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 [![CI](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml/badge.svg)](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
