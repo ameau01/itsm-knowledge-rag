@@ -1,18 +1,20 @@
-# ITSM Knowledge RAG with Hybrid Retrieval
+# ITSM Knowledge RAG
 
 [![Status](https://img.shields.io/badge/status-v0.0.2%20initial%20design-orange)](#project-status)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
-[![Hugging Face Dataset](https://img.shields.io/badge/Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
+[![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face%20Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
+[![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20hybrid%20%2B%20reranker-blueviolet)](https://qdrant.tech)
 [![PII](https://img.shields.io/badge/PII-AD%20directory%20%2B%20format%20rules%20%2B%20Presidio-orange)](https://microsoft.github.io/presidio/)
-[![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20dense%20%2B%20sparse-blueviolet)](https://qdrant.tech)
 [![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://github.com/confident-ai/deepeval)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 [![CI](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml/badge.svg)](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 
 **Turns a company's closed IT tickets into searchable, verifiable answers, so problems that have already been solved don't get solved from scratch again. It recommends; the agent decides.**
+
+Similarity is not relevance. A search engine ranks tickets that look alike, but two tickets can read the same and be different problems. So this system does not stop at search. It curates an organization's own resolution history into verified answers, then surfaces the source tickets underneath so an agent can confirm before acting. A general model can describe standard VPN troubleshooting. It cannot know that in this company the disconnect was an expired device certificate fixed through the internal enrollment service. That fact lives only in the company's tickets.
 
 
 ## The problem
@@ -28,12 +30,11 @@ The cost lands on both sides. Agents re-solve known issues. Employees wait on an
 
 This project makes an organization's own resolution history usable again. It is a recommender for human agents, not an auto-resolver.
 
-The system never sees the new ticket. The agent does. When a new ticket arrives, the agent reads it, searches the system for the issue it resembles, and gets back a concise overview of how this company resolved that issue before. The overview gives the common symptoms, the root cause its engineers identified, and the steps that worked. Beneath it sit the original source tickets. The agent reviews them, decides whether the new ticket is genuinely the same problem, and reuses the proven resolution if it fits.
+When a new support ticket arrives, the human support agent can search this system for similar issues. The system returns a quick overview of past resolutions. This summary highlights common symptoms, root causes, and successful fixes. Links to the original source tickets are also provided. The agent decides whether the new ticket is genuinely the same problem and reuses the proven resolution if it fits.
 
-The judgment stays with the agent. The system surfaces prior knowledge and ranks the evidence. It does not classify the new ticket, declare a match, or apply a fix. That separation is deliberate. Deciding whether two tickets are the same problem is exactly the call a human should make before touching a system.
+This system never sees the new ticket. The judgment stays with the agent. The system surfaces prior knowledge and ranks the evidence. It does not classify the new ticket, declare a match, or apply a fix. That separation is deliberate. Deciding whether two tickets are the same problem is exactly the call a human should make before applying a fix.
 
-The distinction from a general-purpose model matters here. A general model can describe standard VPN troubleshooting. It cannot know that in this corporate environment the disconnect was an expired device certificate fixed through the internal enrollment service. That fact exists only in the company's own tickets. This project surfaces that organization-specific, proven knowledge. It exists nowhere else.
-
+A general-purpose model only knows generic troubleshooting. It does not hold an organization's specific, proven resolutions. This project establishes a knowledge pipeline to turn corporate records into useful, actionable information.
 
 ## How it works
 
@@ -43,7 +44,7 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 **Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
 
-**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query, so the two signals combine in the engine. The overview is precomputed per family. A search returns a prepared answer instead of generating one on every query. The cached overview is the same idea as a Google "AI overview." It is precomputed because the corpus is bounded. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
+**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query with Reciprocal Rank Fusion, and a cross-encoder reranker re-scores the result. The overview body is precomputed per family. A search returns a prepared answer instead of synthesizing one on every query. The cached overview is the same idea as a Google "AI overview." Precomputing it maximizes response speed and eliminates redundant LLM inference costs. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
 
 **Two surfaces share one pipeline.** Support agents get the full search: the overview plus ranked source tickets they are authorized to read. General employees get a redaction-safe, browse-only version of the same curated knowledge.
 
@@ -111,7 +112,7 @@ examples/            real worked outputs: query, overview, source tickets, redac
 
 ## Stack
 
-Python, LlamaIndex, Qdrant (native dense + sparse fusion), AD directory match + format rules + Presidio, DeepEval / G-Eval, MkDocs-Material, Docker.
+Python, Qdrant (native dense + sparse fusion), cross-encoder reranker, AD directory match + format rules + Presidio, DeepEval / G-Eval, MkDocs-Material, Docker.
 
 
 ## Project status
@@ -123,6 +124,7 @@ Early stage: The dataset is published and the design is documented. Implementati
 
 - Published dataset with an authored PII sidecar: [`ameau01/synthetic-it-support-tickets`](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets).
 - Initial design documentation on docs/ folder.
+- Add Presidio redaction code to ingestion process, and deepeval for curation evaluation.
 
 ## License
 

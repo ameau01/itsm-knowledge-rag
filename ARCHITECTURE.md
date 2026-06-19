@@ -78,7 +78,7 @@ flowchart LR
     L2 --> ANS
 ```
 
-**Retrieval is hybrid.** Dense vectors catch semantic matches. Sparse vectors catch exact identifiers and error codes that dense embeddings blur. Qdrant fuses the two natively in a single query. Whether the hybrid beats either component alone is an ablation, not an assumption. See [docs/evaluation.md](docs/evaluation.md).
+**Retrieval is hybrid.** Dense vectors catch semantic matches. Sparse vectors catch exact identifiers and error codes that dense embeddings blur. Qdrant fuses the two natively in a single query with Reciprocal Rank Fusion, and a cross-encoder reranker re-scores the result. Whether the hybrid and the reranker each beat the simpler arms is measured, not assumed. See [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md).
 
 **The overview is precomputed, not generated per query (L2).** A bounded corpus clusters into a finite set of issue families. The overview for each family is built once, during ingest, and cached. A search returns a prepared answer instead of paying for synthesis every time. This is the same experience as a Google "AI overview," but precomputed, which a live web search cannot do. The efficiency claim is measured head to head against per-query synthesis. See [docs/evaluation.md](docs/evaluation.md). The cached pages live in a relational store that is the source of truth, with the index built from it; how that store is read during ingest and query is in [docs/operational-store.md](docs/operational-store.md).
 
@@ -101,7 +101,7 @@ flowchart LR
     RT --> GATE
 ```
 
-The eval is split by what can be checked deterministically and what needs judgment. The leakage check is deterministic, graded against an authored sidecar, and non-circular: the ground truth is written upstream, independently of the redactor being tested. The curation metrics are judge-based and reported as such. The eval is also designed to localize failures. Retrieval metrics catch the wrong tickets being surfaced. Curation metrics catch a faithful overview not being produced from the right ones. Full methodology, the hybrid ablation, and results are in [docs/evaluation.md](docs/evaluation.md).
+The eval is split by what can be checked deterministically and what needs judgment. The leakage check is deterministic, graded against an authored sidecar, and non-circular: the ground truth is written upstream, independently of the redactor being tested. The curation metrics are judge-based and reported as such. The eval is also designed to localize failures. Retrieval metrics catch the wrong tickets being surfaced. Curation metrics catch a faithful overview not being produced from the right ones. The full methodology and results, axis by axis, are in [docs/evaluation.md](docs/evaluation.md).
 
 Lint is also where wiki maintenance lives. For this corpus, frozen and bounded, lint runs once: it is the quality gate above. In a deployment where new tickets keep arriving, the same operation runs periodically. New tickets re-curate the affected families, the leakage and faithfulness checks re-run on the changed pages, and any page that is low-confidence or contradicted by a newer ticket is surfaced for a human to review before it stays published. The frozen corpus is a scope choice for the portfolio, not a claim that a real wiki needs no upkeep. The periodic loop is the maintenance and human-oversight path, and lint is where it belongs.
 

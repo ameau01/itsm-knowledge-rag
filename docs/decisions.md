@@ -3,6 +3,13 @@
 A few choices in this design are deliberate but not obvious. Each one is local to a part of the system, not a global property. This document explains the reasoning behind them. For the system as a whole, see [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 
+## Why there is a second layer at all: similarity is not relevance
+
+A retriever ranks by similarity. Similarity is not relevance. Two tickets can read alike and be different problems. Two can read differently and be the same root cause. So even good hybrid search returns a list that can include the wrong family, or the right family with a different observed error. That is the ceiling of a pure matching layer.
+
+L2 exists to address that ceiling. Rather than hand the agent a ranked pile and ask them to reconcile it, curation consolidates the conflicting descriptions of one root cause into a single coherent page at build time. The matching layer does its best with similarity. The knowledge layer is the answer to what similarity alone cannot resolve. This is the reason the system is two layers, not one. See [retrieval.md](retrieval.md).
+
+
 ## At the query surface: it recommends, the agent decides
 
 The serving layer is a recommender, not an auto-resolver. This is a choice about the query surface specifically, not the whole pipeline.
@@ -12,13 +19,15 @@ When a new ticket arrives, the agent reads it, writes a query, and reviews what 
 This is deliberate. Deciding whether two tickets are the same problem has real consequences if it is wrong, so that judgment stays with the human. The system makes the prior knowledge fast to find and easy to verify. The agent makes the call. Keeping the human in the loop here is the right boundary for an action that touches a live system. See the query path in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 
-## At L2: the overview is precomputed, not generated per query
+## At L2: the expensive work is precomputed, the relevance is added per query
 
-The overview for each issue family is built once during ingest and cached. This choice is local to L2. L1 retrieval still runs per query.
+The body of each overview is built once during ingest and cached. The expensive part, consolidating many ticket descriptions into one coherent issue statement, happens at build time, not on every search. This choice is local to L2. L1 retrieval still runs per query.
 
-The alternative is zero-shot synthesis: run an LLM over the retrieved tickets on every query. That pays the synthesis cost every time, adds latency to each search, and produces a rushed single-pass answer with no cross-ticket consolidation.
+The alternative is zero-shot synthesis: run an LLM over the retrieved tickets on every query. That pays the consolidation cost every time, adds latency to each search, and produces a rushed single-pass answer with no cross-ticket consolidation.
 
-Precompute is available here because the corpus is bounded. A finite set of issue families means each overview can be built ahead of time and reused. A live web search cannot do this, because the web is unbounded. So the experience matches a Google AI overview, but the mechanism is a cache lookup, not live generation. The latency and cost gain is measured head to head against zero-shot in [evaluation.md](evaluation.md).
+Precompute is available here because the corpus is bounded. A finite set of issue families means each overview body can be built ahead of time and reused. A live web search cannot do this, because the web is unbounded. So the experience matches a Google AI overview, with the heavy consolidation paid once.
+
+This is not a static lookup. On top of the cached body, a planned serving step generates a short per-query line: why this page answers the question asked, and which diagnostic steps apply. That step is a small generation grounded in the already-curated page, not a fresh synthesis from raw tickets. The heavy work is reused; only the thin relevance framing is produced per query. The latency and cost gain over zero-shot is measured head to head in [wiki-evaluation.md](wiki-evaluation.md).
 
 
 ## At ingest: redaction runs first, and it does more than protect

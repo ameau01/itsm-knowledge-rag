@@ -23,13 +23,17 @@ dev = [
     "pytest>=8",
     "ruff>=0.8",
     "mypy>=1.10",
-    # spacy intentionally omitted: the redactor uses PatternRecognizer directly
-    # with empty NlpArtifacts, bypassing AnalyzerEngine and its NLP model download.
+]
+app = [
+    "streamlit>=1.35",
+]
+eval = [
+    "numpy>=1.26",
 ]
 
 [tool.mypy]
 python_version = "3.11"
-ignore_missing_imports = true   # presidio, pandas, pyarrow, huggingface-hub lack stubs
+ignore_missing_imports = true
 
 [build-system]
 requires = ["hatchling"]
