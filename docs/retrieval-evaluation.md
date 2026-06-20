@@ -58,7 +58,9 @@ A judge-based cross-check, run with DeepEval across the same four arms. These ar
 | Hybrid | TBD | TBD |
 | Hybrid + reranker | TBD | TBD |
 
-Contextual Precision asks whether relevant context is ranked above irrelevant context. It is the judged view of what the reranker is meant to do. Contextual Relevancy asks whether the retrieved context fits the query, and needs no ground truth. The judge is a different model from any used in the pipeline. Temperature is zero, three runs, variance reported.
+Contextual Precision asks whether relevant context is ranked above irrelevant context. It is the judged view of what the reranker is meant to do. Contextual Relevancy asks whether the retrieved context fits the query, and needs no ground truth. The judge is a different model from any used in the pipeline. Temperature is zero. LLM judges vary run to run, so each score is measured at three runs and the variance is reported.
+
+These two metrics pull apart in a way that restates the central point. No single section of a ticket scores highest on both. The section most on topic for the query is often not the section that names the cause. Similarity and relevance are not the same measurement, which is the reason retrieval spans several section points and a second layer sits on top.
 
 
 ## Table 3: reranker depth
@@ -97,7 +99,7 @@ Scored on the 15 abstention queries, also pure held-out test. These have no answ
 
 Abstention here is calibration, not classification. Semantic retrieval always returns something with some score, so there is no built-in signal for no match. The decision is made on the fused RRF score, before the reranker runs. A reranker orders whatever it is given and will rank its best candidate highly even when nothing fits, so its score is a poor signal for declining. The fused score reflects how well the query matched the corpus, so it is the signal that drops on an out-of-corpus query.
 
-The threshold is set from the in-corpus score distribution, the floor below which a legitimate match does not fall, read off the training queries. The abstention set only tests that threshold. It is never used to tune it.
+The threshold is set from the in-corpus score distribution, the floor below which a legitimate match does not fall. The abstention set only tests that threshold. It is never used to tune it.
 
 | Metric | Result |
 |---|---|

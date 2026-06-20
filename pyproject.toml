@@ -28,7 +28,10 @@ app = [
     "streamlit>=1.35",
 ]
 eval = [
+    # numpy backs the bootstrap CIs; deepeval + openai power the judge path
     "numpy>=1.26",
+    "deepeval>=1.0",
+    "openai>=1.40",
 ]
 
 [tool.mypy]

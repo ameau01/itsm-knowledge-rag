@@ -54,3 +54,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - `docs/evaluation.md`, `docs/redaction-policy.md`, `README.md`
 
+## [Retrieval Evaluatoin implementation]
+
+### Added
+- Using the eval-set, add code to run recall using root-cause as measurement without LLM.
+- Using the eval-set, add code to run contextual evaluation with DeepEval framework with OpenAI LLM.
+
+### Changed
+- Change the evaluation script into two scripts: run_classic_evaluation.sh, run_deepeval_evaluation.s
+
+### Documentation
+- `docs/evaluation.md`, `docs/redaction-evaluation.md`, `docs/retrieval-evaluation.md`

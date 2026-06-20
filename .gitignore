@@ -70,3 +70,11 @@ qdrant_data/
 # --- Logs ---
 *.log
 logs/
+evaluation-experiment/
+
+# --- DeepEval (telemetry + caches, created at import time; not source) ---
+# The folder name `.deepeval` is hardcoded in deepeval (constants.HIDDEN_DIR) and the
+# folder is created when deepeval is first imported, so it cannot be renamed via config.
+.deepeval/
+.deepeval-cache.json
+.deepeval-prompt-cache.json

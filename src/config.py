@@ -23,6 +23,13 @@ def _path(value: str) -> Path:
     return p if p.is_absolute() else PROJECT_ROOT / p
 
 
+def _env(name: str, default: str) -> str:
+    """Env var with a default, guarding against an empty value or a leftover inline
+    comment (e.g. `JUDGE_MODEL=  # decision pending`) being read as the value."""
+    value = (os.getenv(name) or "").strip()
+    return default if not value or value.startswith("#") else value
+
+
 @dataclass(frozen=True)
 class Settings:
     # Dataset
@@ -48,13 +55,17 @@ class Settings:
 
     # Models
     anthropic_api_key: str | None = field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY"))
+    openai_api_key: str | None = field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
     curation_model: str = field(
         default_factory=lambda: os.getenv("CURATION_MODEL", "claude-haiku-4-5-20251001")
     )
-    judge_model: str | None = field(default_factory=lambda: os.getenv("JUDGE_MODEL") or None)
+    # DeepEval judge: OpenAI frontier by default
+    judge_provider: str = field(default_factory=lambda: os.getenv("JUDGE_PROVIDER", "openai"))
+    judge_model: str = field(default_factory=lambda: _env("JUDGE_MODEL", "gpt-5.4"))
+    judge_n_runs: int = field(default_factory=lambda: int(_env("JUDGE_N_RUNS", "3")))
     embedding_model: str = field(
         default_factory=lambda: os.getenv(
-            "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+            "EMBEDDING_MODEL", "Snowflake/snowflake-arctic-embed-l-v2.0"
         )
     )
 
