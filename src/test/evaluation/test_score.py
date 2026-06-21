@@ -59,11 +59,17 @@ def test_deepeval_scores_with_mock_judge(simple_queries):
     assert judge.calls == 2 * 3  # two metrics × n_runs
 
 
-def test_main_no_tickets_hits_retriever_stub(monkeypatch):
+def test_main_no_tickets_uses_live_path(monkeypatch):
+    # No --tickets -> live retriever. If the retriever can't be built (deps/Qdrant/index),
+    # main() must surface it as one clean SystemExit. Force the failure so the test is
+    # deterministic whether or not retrieval deps happen to be installed here.
+    def _boom(*a, **k):
+        raise RuntimeError("simulated: retrieval backend unavailable")
+    monkeypatch.setattr("retrieval.build_arms", _boom)
     monkeypatch.setattr(sys, "argv", ["score", "--mode", "classic", "--query", QID])
     with pytest.raises(SystemExit) as exc:
         score.main()
-    assert "Live retriever not built" in str(exc.value)
+    assert "Live retrieval unavailable" in str(exc.value)
 
 
 def test_main_classic_manual_runs(monkeypatch, capsys, oracle, simple_queries):

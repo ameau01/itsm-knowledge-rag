@@ -16,7 +16,7 @@ TABLE1_K = 10
 
 @dataclass(frozen=True)
 class Column:
-    metric: str  # "recall" | "ndcg"
+    metric: str  # "recall"
     level: str   # STRICT | LENIENT
     label: str   # column header, e.g. "Recall@10 (strict)"
 
@@ -24,7 +24,6 @@ class Column:
 # The golden Table 1 columns (docs/retrieval-evaluation.md). Hit Rate is not here.
 TABLE1_COLUMNS: tuple[Column, ...] = (
     Column("recall", STRICT, "Recall@10 (strict)"),
-    Column("ndcg", STRICT, "nDCG@10 (strict)"),
     Column("recall", LENIENT, "Recall@10 (family)"),
 )
 

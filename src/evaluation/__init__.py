@@ -5,7 +5,7 @@ Layout:
   common/      shared pure foundation (queries, relevance, bootstrap, retriever, contracts)
   label_based/ deterministic metrics + global harness + Table 1   (no LLM)
   deepeval/    judge-based metrics: DeepEval ContextualPrecision/Relevancy + Table 2
-  adapter/     the only IO — corpus reader (SQLite) and the Qdrant retriever (stub)
+  adapter/     the only IO — corpus reader (SQLite)
 """
 
 from .common.bootstrap import CI, bootstrap_ci

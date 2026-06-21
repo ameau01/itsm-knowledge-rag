@@ -5,7 +5,6 @@ Rank-based retrieval metrics (pure functions).
 
 from __future__ import annotations
 
-import math
 from collections.abc import Iterable, Sequence
 
 
@@ -36,20 +35,6 @@ def precision_at_k(ranked: Sequence[str], relevant: Iterable[str], k: int) -> fl
     if denom == 0:
         return 0.0
     return _hits_in_top_k(ranked, relevant, k) / denom
-
-
-def ndcg_at_k(ranked: Sequence[str], relevant: Iterable[str], k: int) -> float:
-    """Binary-gain nDCG@k. IDCG is the best achievable given min(k, n_relevant) ones."""
-    rel = set(relevant)
-    if not rel:
-        return 0.0
-    dcg = 0.0
-    for i, ticket in enumerate(ranked[:k]):
-        if ticket in rel:
-            dcg += 1.0 / math.log2(i + 2)  # gain 1, position discount (i is 0-based)
-    ideal_hits = min(k, len(rel))
-    idcg = sum(1.0 / math.log2(i + 2) for i in range(ideal_hits))
-    return dcg / idcg if idcg > 0 else 0.0
 
 
 def reciprocal_rank(ranked: Sequence[str], relevant: Iterable[str]) -> float:

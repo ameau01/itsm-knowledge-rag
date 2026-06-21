@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import math
-
 import pytest
 
 from evaluation.label_based import metrics_rank as mr
@@ -38,21 +36,6 @@ def test_precision_at_k():
     # one relevant, one not, in a 2-result list.
     assert mr.precision_at_k(["R1", "x1"], RELEVANT_10, 10) == pytest.approx(0.5)
     assert mr.precision_at_k([], RELEVANT_10, 10) == 0.0
-
-
-def test_ndcg_at_k_handcomputed():
-    # ranked top-3 = [R, x, R], relevant cluster size 2.
-    ranked = ["R1", "x1", "R2"]
-    relevant = {"R1", "R2"}
-    dcg = 1 / math.log2(2) + 0 + 1 / math.log2(4)        # 1.0 + 0.5
-    idcg = 1 / math.log2(2) + 1 / math.log2(3)           # ideal: two ones up front
-    assert mr.ndcg_at_k(ranked, relevant, 3) == pytest.approx(dcg / idcg)
-
-
-def test_ndcg_perfect_is_one():
-    ranked = ["R1", "R2", "R3"]
-    relevant = {"R1", "R2", "R3"}
-    assert mr.ndcg_at_k(ranked, relevant, 3) == pytest.approx(1.0)
 
 
 def test_reciprocal_rank():

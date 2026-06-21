@@ -128,13 +128,12 @@ class DemoCorpus:
 
 
 def build_mock_arms(oracle: RelevanceOracle) -> Mapping[str, Retriever]:
-    """Quality arms with increasing hits (dense < bm25 < hybrid < rerank) so assembled
+    """Quality arms with increasing hits (dense < bm25 < hybrid) so assembled
     tables are non-degenerate."""
     return {
         "dense": QualityRetriever(oracle, hits_in_top_k=3, name="dense"),
         "bm25": QualityRetriever(oracle, hits_in_top_k=4, name="bm25"),
         "hybrid": QualityRetriever(oracle, hits_in_top_k=6, name="hybrid"),
-        "hybrid+rerank": QualityRetriever(oracle, hits_in_top_k=8, name="hybrid+rerank"),
     }
 
 

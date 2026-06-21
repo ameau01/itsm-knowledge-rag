@@ -58,4 +58,4 @@ class DeepEvalJudge:
         )
         m = self._metrics[metric]
         m.measure(tc)
-        return JudgeScore(metric, float(m.score))
+        return JudgeScore(metric, float(m.score or 0.0))

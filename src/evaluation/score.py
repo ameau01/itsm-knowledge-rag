@@ -1,14 +1,14 @@
 """
-Evaluation driver — score one query (or, once the retriever exists, the whole eval-set)
-in two modes:
+Evaluation driver — score retrieval results for one query in two modes:
 
-  classic   label-based, NO LLM. precision@k / recall@k / nDCG@k at strict + family.
+  classic   label-based, NO LLM. precision@k / recall@k at strict + family.
   deepeval  LLM judge. ContextualPrecision + ContextualRelevancy on the retrieved context.
 
 
 Sample usage:
-    uv run sh scripts/run_classic_evaluation.sh  --query q-ait-diag-1 --tickets INC-AIT-0032,INC-AIT-0001,INC-WCI-0001
-    uv run sh scripts/run_deepeval_evaluation.sh --query q-ait-diag-1 --tickets INC-AIT-0032 --section resolution
+    uv run sh scripts/run_classic_evaluation.sh  --query q-ait-diag-1 --arm hybrid
+    uv run sh scripts/run_classic_evaluation.sh  --query q-ait-diag-1 --tickets INC-AIT-0032
+    uv run sh scripts/run_deepeval_evaluation.sh --query q-ait-diag-1 --tickets INC-AIT-0032
 
 """
 
@@ -33,20 +33,13 @@ from evaluation.deepeval.expected_output import build_expected_output  # noqa: E
 from evaluation.label_based import metrics_rank as mr               # noqa: E402
 
 DEFAULT_K = 10
-DEFAULT_ARMS = ("dense", "bm25", "hybrid")  # reranker deferred
-
-_RETRIEVER_STUB = (
-    "Live retriever not built yet (src/retrieval/ pending) — cannot run the "
-    f"{', '.join(DEFAULT_ARMS)} arms.\n"
-    "  Pass --query <id> --tickets <id,...> to score a manual ranking now."
-)
 
 
 # ── scoring cores (pure; reused by the tests with mock inputs) ─────────────────────
 def classic_scores(
     query: Query, ranked_ids: list[str], oracle: RelevanceOracle, k: int = DEFAULT_K
 ) -> dict[str, dict[str, float]]:
-    """precision@k / recall@k / nDCG@k at strict and family, for one query's ranking."""
+    """precision@k / recall@k at strict and family, for one query's ranking."""
     out: dict[str, dict[str, float]] = {}
     for level, name in ((STRICT, "strict"), (LENIENT, "family")):
         relevant = oracle.relevant_tickets(query, level)
@@ -54,7 +47,6 @@ def classic_scores(
         out[name] = {
             "precision": mr.precision_at_k(ranked_ids, relevant, k),
             "recall": mr.recall_at_k(ranked_ids, relevant, k, n_relevant=n_rel),
-            "ndcg": mr.ndcg_at_k(ranked_ids, relevant, k),
             "n_relevant": float(n_rel),
         }
     return out
@@ -120,7 +112,7 @@ def _print_classic(query: Query, ranked: list[str], oracle: RelevanceOracle, k: 
     for level in ("strict", "family"):
         s = scores[level]
         print(f"  {level:7}: precision@{k}={s['precision']:.3f}  recall@{k}={s['recall']:.3f}  "
-              f"nDCG@{k}={s['ndcg']:.3f}  (n_relevant={int(s['n_relevant'])})")
+              f"(n_relevant={int(s['n_relevant'])})")
 
 
 def _print_deepeval(query: Query, ranked: list[str], section: str, k: int) -> None:
@@ -145,30 +137,72 @@ def _print_deepeval(query: Query, ranked: list[str], section: str, k: int) -> No
     print(f"  ContextualRelevancy : {scores['contextual_relevancy']:.3f}")
 
 
+def _run_live(query: Query, arm_name: str, mode: str, k: int) -> None:
+    """Score one query against the live retriever arm."""
+    from evaluation.adapter.corpus import CorpusReader
+    try:
+        from retrieval import build_arms
+        corpus = CorpusReader()
+        arms = build_arms()
+    except Exception as e:  # noqa: BLE001 — surface deps/Qdrant issues as a clean message
+        raise SystemExit(
+            f"Live retrieval unavailable ({type(e).__name__}: {e}).\n"
+            "  Install deps (uv sync --group retrieval), start Qdrant (docker compose up -d "
+            "qdrant), build the index (scripts/build_retrieval_index.sh),\n"
+            "  or pass --tickets <id,...> to score a manual ranking.")
+    arm = arms.get(arm_name)
+    if arm is None:
+        raise SystemExit(f"arm {arm_name!r} unavailable.")
+
+    if mode == "classic":
+        oracle = RelevanceOracle.from_catalog(PROJECT_ROOT / "eval-set" / "catalog.json")
+        ranked = [t.ticket_id for t in arm.rank(query, k)]
+        print(f"Classic evaluation — query {query.query_id}, arm {arm_name} (k={k})")
+        print(f"  ranked: {', '.join(ranked)}")
+        scores = classic_scores(query, ranked, oracle, k)
+        for level in ("strict", "family"):
+            s = scores[level]
+            print(f"  {level:7}: precision@{k}={s['precision']:.3f}  recall@{k}={s['recall']:.3f}  "
+                  f"(n_relevant={int(s['n_relevant'])})")
+    else:
+        points = arm.retrieve_points(query, k)
+        texts = [corpus.section_text(p.ticket_id, p.section_name) for p in points]
+        judge = _build_real_judge()
+        n = settings.judge_n_runs
+        print(f"DeepEval evaluation — query {query.query_id}, arm {arm_name}, "
+              f"judge {settings.judge_model} (n={n})")
+        ev = deepeval_scores(query, points, texts, corpus.narratives(query.source_tickets),
+                             judge, n)
+        print(f"  ContextualPrecision : {ev['contextual_precision']:.3f}")
+        print(f"  ContextualRelevancy : {ev['contextual_relevancy']:.3f}")
+    corpus.close()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Score one query, classic (no LLM) or deepeval.")
     ap.add_argument("--mode", choices=["classic", "deepeval"], required=True)
     ap.add_argument("--query", default=None, help="query_id from the frozen eval-set")
     ap.add_argument("--tickets", default=None,
                     help="comma-separated ticket ids = a MANUAL ranking (no retriever needed)")
+    ap.add_argument("--arm", choices=["dense", "bm25", "hybrid"],
+                    default="hybrid", help="live retriever arm to use when --tickets is omitted")
     ap.add_argument("--section", default="description",
-                    help="deepeval: which ticket section to score (default: description)")
+                    help="deepeval (manual): which ticket section to score (default: description)")
     ap.add_argument("--k", type=int, default=DEFAULT_K)
     args = ap.parse_args()
 
-    if not args.tickets:
-        # Every non-manual path (one query via the arms, or the whole eval-set) needs the
-        # live retriever, which does not exist yet.
-        raise SystemExit(_RETRIEVER_STUB)
     if not args.query:
-        raise SystemExit("Manual scoring needs --query <id> (to resolve the ground-truth label).")
-
+        raise SystemExit("Provide --query <id> (add --tickets <id,...> for a manual ranking).")
     queries = _load_all_queries()
     if args.query not in queries:
         raise SystemExit(f"query {args.query!r} not found in the frozen eval-set.")
     query = queries[args.query]
-    ranked = _parse_tickets(args.tickets)
 
+    if not args.tickets:                       # live retriever path
+        _run_live(query, args.arm, args.mode, args.k)
+        return
+
+    ranked = _parse_tickets(args.tickets)       # manual ranking path
     if args.mode == "classic":
         oracle = RelevanceOracle.from_catalog(PROJECT_ROOT / "eval-set" / "catalog.json")
         _print_classic(query, ranked, oracle, args.k)

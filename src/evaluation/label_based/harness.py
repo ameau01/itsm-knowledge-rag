@@ -16,7 +16,7 @@ from ..common.queries import Query
 from ..common.relevance import LENIENT, STRICT, RelevanceOracle
 from ..common.retriever import Retriever, ticket_ids
 
-RANKING_METRICS = ("recall", "ndcg")
+RANKING_METRICS = ("recall",)
 
 
 @dataclass(frozen=True)
@@ -36,11 +36,11 @@ def run_simple(
     ks: Sequence[int] = (5, 10),
     levels: Sequence[str] = (STRICT, LENIENT),
 ) -> list[PerQueryResult]:
-    """Per-query recall@k and nDCG@k at each level, plus a strict reciprocal rank.
+    """Per-query recall@k at each level, plus a strict reciprocal rank.
 
     No intent routing — the same metrics are computed for every query. This same path
     is reused for the complex set (its strict relevant set is the union of the query's
-    expected_root_cause clusters), giving complex recall@k / nDCG@k for free."""
+    expected_root_cause clusters), giving complex recall@k for free."""
     out: list[PerQueryResult] = []
     max_k = max(ks)
     for arm in arms:
@@ -52,8 +52,6 @@ def run_simple(
                 for k in ks:
                     out.append(PerQueryResult(arm.name, q.query_id, "recall", k, level,
                                               mr.recall_at_k(ranked, relevant, k, n_relevant=n_rel)))
-                    out.append(PerQueryResult(arm.name, q.query_id, "ndcg", k, level,
-                                              mr.ndcg_at_k(ranked, relevant, k)))
             # MRR: one reciprocal rank per query, strict relevance, full retrieved depth.
             rr = mr.reciprocal_rank(ranked, oracle.relevant_tickets(q, STRICT))
             out.append(PerQueryResult(arm.name, q.query_id, "rr", max_k, STRICT, rr))
@@ -86,8 +84,8 @@ def run_complex(
     arm: Retriever, queries: Sequence[Query], oracle: RelevanceOracle, k: int = 10
 ) -> dict[str, CandidateSetScore]:
     """Candidate-set score per complex query for one arm (recall over the expected
-    root-cause set, with an over-hedging penalty). Ticket-level recall@k / nDCG@k for
-    the complex set come from run_simple, whose strict relevant set already unions the
+    root-cause set, with an over-hedging penalty). Ticket-level recall@k for
+    the complex set comes from run_simple, whose strict relevant set already unions the
     query's multiple expected_root_cause clusters."""
     scores: dict[str, CandidateSetScore] = {}
     for q in queries:

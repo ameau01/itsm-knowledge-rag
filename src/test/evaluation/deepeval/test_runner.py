@@ -40,9 +40,9 @@ def _judge():
 
 
 def test_run_judge_eval_shape_and_aggregate():
-    arms = ["dense", "bm25", "hybrid", "hybrid+rerank"]
+    arms = ["dense", "bm25", "hybrid"]
     res = run_judge_eval(arms, _queries(), _retrieve, FakeCorpus(), _judge(), n_runs=3)
-    assert len(res) == 4 * 2 * 2 * 3  # arms × queries × metrics × runs
+    assert len(res) == 3 * 2 * 2 * 3  # arms × queries × metrics × runs
 
     agg = aggregate_judge(res)
     mean, sd = agg[("dense", CONTEXTUAL_PRECISION)]

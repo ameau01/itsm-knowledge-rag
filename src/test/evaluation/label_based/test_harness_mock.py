@@ -21,7 +21,7 @@ def test_perfect_retriever_scores_one(simple_queries, oracle):
     records = run_simple([perfect], simple_queries, oracle, ks=(5, 10), levels=(STRICT,))
     agg = aggregate(records)
     for (arm, metric, k, level), ci in agg.items():
-        if metric in ("recall", "ndcg"):
+        if metric in ("recall",):
             assert ci.point == 1.0, f"{metric}@{k} should be 1.0 for a perfect retriever"
 
 
@@ -30,7 +30,7 @@ def test_worst_retriever_scores_zero(simple_queries, oracle):
     records = run_simple([worst], simple_queries, oracle, ks=(5, 10), levels=(STRICT,))
     agg = aggregate(records)
     for (arm, metric, k, level), ci in agg.items():
-        if metric in ("recall", "ndcg", "rr"):
+        if metric in ("recall", "rr"):
             assert ci.point == 0.0, f"{metric}@{k} should be 0.0 for a worst retriever"
 
 
@@ -42,24 +42,24 @@ def test_every_query_gets_the_same_global_metrics(simple_queries, oracle):
     for r in records:
         by_query.setdefault(r.query_id, set()).add(r.metric)
     metric_sets = {frozenset(m) for m in by_query.values()}
-    assert metric_sets == {frozenset({"recall", "ndcg", "rr"})}
+    assert metric_sets == {frozenset({"recall", "rr"})}
 
 
 def test_report_orders_arms_and_excludes_hit_rate(simple_queries, oracle):
     arms = [
         QualityRetriever(oracle, hits_in_top_k=2, name="dense"),
         QualityRetriever(oracle, hits_in_top_k=5, name="hybrid"),
-        QualityRetriever(oracle, hits_in_top_k=10, name="hybrid+rerank"),
+        QualityRetriever(oracle, hits_in_top_k=10, name="bm25"),
     ]
     records = run_simple(arms, simple_queries, oracle, ks=(10,), levels=(STRICT, LENIENT))
     agg = aggregate(records)
-    table = build_arm_table(agg, ["dense", "hybrid", "hybrid+rerank"], k=10)
+    table = build_arm_table(agg, ["dense", "hybrid", "bm25"], k=10)
 
-    assert [r.arm for r in table.rows] == ["hybrid+rerank", "hybrid", "dense"]
+    assert [r.arm for r in table.rows] == ["bm25", "hybrid", "dense"]
     primary = TABLE1_COLUMNS[0].label
     points = [r.cells[primary].point for r in table.rows]
     assert points[0] > points[1] > points[2]  # monotonic quality
-    assert table.columns == ("Recall@10 (strict)", "nDCG@10 (strict)", "Recall@10 (family)")
+    assert table.columns == ("Recall@10 (strict)", "Recall@10 (family)")
     assert not any("hit" in c.lower() for c in table.columns)
 
 

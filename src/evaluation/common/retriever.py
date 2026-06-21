@@ -1,8 +1,8 @@
 """
 Retriever Protocol + the result type the metrics consume.
 
-The Protocol is the seam between the evaluation method and the IR stack. The real arms —
-dense-only, BM25-only, hybrid (RRF); reranker deferred — will each implement `rank()`.
+The Protocol is the seam between the evaluation method and the retriever. Each arm,
+dense-only, BM25-only, and hybrid (RRF), implements `rank()`.
 
 `rank()` takes the whole `Query` (not just text) so a mock can look up the right answer by
 id; a real retriever simply ignores everything but `query.text`. Mock retrievers (for tests)
