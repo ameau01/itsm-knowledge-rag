@@ -78,7 +78,7 @@ flowchart LR
     L2 --> ANS
 ```
 
-**Retrieval is hybrid.** Dense vectors catch semantic matches. Sparse vectors catch exact identifiers and error codes that dense embeddings blur. Qdrant fuses the two natively in a single query with Reciprocal Rank Fusion, and a cross-encoder reranker re-scores the result. Whether the hybrid and the reranker each beat the simpler arms is measured, not assumed. See [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md).
+**Retrieval is hybrid.** Dense vectors catch semantic matches. Sparse vectors catch exact identifiers and error codes that dense embeddings blur. Qdrant fuses the two natively in a single query with Reciprocal Rank Fusion. Whether the hybrid beats the simpler arms is measured, not assumed. See [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md).
 
 **The overview is precomputed, not generated per query (L2).** A bounded corpus clusters into a finite set of issue families. The overview for each family is built once, during ingest, and cached. A search returns a prepared answer instead of paying for synthesis every time. This is the same experience as a Google "AI overview," but precomputed, which a live web search cannot do. The efficiency claim is measured head to head against per-query synthesis. See [docs/evaluation.md](docs/evaluation.md). The cached pages live in a relational store that is the source of truth, with the index built from it; how that store is read during ingest and query is in [docs/operational-store.md](docs/operational-store.md).
 
@@ -95,7 +95,7 @@ In the original pattern, lint is a health check on a growing wiki. It fixes cont
 flowchart LR
     W["Wiki + index"] --> LK["Leakage check<br/>deterministic"]
     W --> FT["Faithfulness + citation<br/>judge-based"]
-    W --> RT["recall@k, nDCG@k<br/>retrieval"]
+    W --> RT["recall@k<br/>retrieval"]
     LK --> GATE["Quality gate"]
     FT --> GATE
     RT --> GATE

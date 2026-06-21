@@ -1,3 +1,6 @@
+# Read when Streamlit is launched from the repo root (where the run scripts run).
+# A copy also lives in streamlit_app/.streamlit/ for running from that directory.
+
 [theme]
 base            = "light"
 primaryColor    = "#1a0dab"

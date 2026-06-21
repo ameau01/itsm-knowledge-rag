@@ -36,9 +36,9 @@ Per simple-query intent:
 
 | Intent | Primary metrics | Note |
 |---|---|---|
-| diagnosis | recall@k, nDCG@k (k = 5, 10) | capped recall: hits / min(k, n_relevant) |
+| diagnosis | recall@k (k = 5, 10) | capped recall: hits / min(k, n_relevant) |
 | synthesis | **set recall**: fraction of `expected_ticket_set` in top-k | the set is a required minimum, never a precision denominator |
-| exact_match | recall@k, nDCG@k; report sparse-vs-dense gap | the sparse-retrieval probe |
+| exact_match | recall@k; report sparse-vs-dense gap | the sparse-retrieval probe |
 | fix_lookup | **precision@k (strict)**: fraction of top-k in the labeled root-cause cluster | asker knows the cause; wrong-cause results are errors |
 
 Also: context precision (fraction of top-k in the correct family) for every simple

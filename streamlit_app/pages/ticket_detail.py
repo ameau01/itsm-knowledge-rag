@@ -14,6 +14,7 @@ import json
 import os
 import pathlib
 import sqlite3
+import urllib.parse
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -155,8 +156,13 @@ ticket_id = st.query_params.get("id") or st.session_state.get("ticket_id")
 
 # ── Back button ───────────────────────────────────────────────────────────────
 
-if st.button("← Back to search"):
-    st.switch_page("app.py")
+_back_q = st.query_params.get("q", "")
+_back_href = "/Search_results" + (f"?q={urllib.parse.quote(_back_q)}" if _back_q else "")
+st.markdown(
+    f"<a href='{_back_href}' target='_self' style='display:inline-block;font-size:14px;"
+    f"font-weight:600;color:#1a0dab;text-decoration:none;padding:4px 12px;"
+    f"border:1px solid #dadce0;border-radius:4px'>← Back to results</a>",
+    unsafe_allow_html=True)
 
 if not ticket_id:
     st.warning("No ticket selected. Return to search and click **View ticket →**.")

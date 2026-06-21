@@ -33,6 +33,12 @@ eval = [
     "deepeval>=1.0",
     "openai>=1.40",
 ]
+retrieval = [
+    # dense (Arctic via sentence-transformers) + sparse (BM25 via fastembed) + Qdrant.
+    "qdrant-client>=1.12",
+    "fastembed>=0.4",
+    "sentence-transformers>=3.0",
+]
 
 [tool.mypy]
 python_version = "3.11"

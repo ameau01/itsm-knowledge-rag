@@ -15,9 +15,9 @@ L1 is raw-ticket search. L2 is the curated overview built on top of it. They are
 L1 is the matching layer. It does the best it can with similarity. L2 is the knowledge layer. It is the answer to what similarity alone cannot do.
 
 
-## L1: hybrid retrieval and reranking
+## L1: hybrid retrieval
 
-L1 is a funnel. Two retrievers, fused, then reranked.
+L1 is a funnel. Two retrievers, fused into one ranked list.
 
 Dense retrieval embeds the tickets and the query, then matches by vector similarity. It catches semantic matches. A query about "cannot sign in after reset" finds tickets about account lockout even with different words.
 
@@ -25,18 +25,20 @@ Sparse retrieval scores exact terms with BM25. It catches identifiers, error cod
 
 The two are fused into one ranked list with Reciprocal Rank Fusion. RRF merges by rank, not by raw score, so the two retrievers' incompatible score scales never have to be reconciled. Dense alone misses exact codes. Sparse alone misses paraphrase. The fusion is meant to get both. Whether it beats either component alone is measured as an ablation, not assumed. See [retrieval-evaluation.md](retrieval-evaluation.md).
 
-A cross-encoder reranker then re-scores the fused candidates against the query. It reads query and ticket together, so it catches ordering a bi-encoder misses. Its lift may be modest on this corpus, where most families have one dominant cause and the fused list is often already in order. It is in the design because it is the right component as the corpus grows, and because its lift is measured rather than assumed.
-
 Qdrant is the vector store. It holds both the dense and sparse vectors and fuses them in a single query, so the fusion is not hand-rolled in application code. Tickets are indexed after redaction. No personal data enters the index.
 
-The funnel: fuse with RRF, then rerank, then return the top results. Abstention is decided before the reranker runs, on the fused score, covered below.
+The funnel: fuse with RRF, then return the top results. Abstention is decided on the dense similarity score, covered below.
+
+![Search results page: live hybrid retrieval for a plain-language query, with faceted filters that reflect the retrieved set](images/search-result.png)
 
 
 ## Knowing when to decline
 
 L1 always returns something. A semantic retriever ranks whatever is closest, even when nothing in the corpus fits. So the system needs a way to say the answer is not here.
 
-That decision is made on the fused RRF score, before the reranker runs. The reranker orders whatever it is handed and will rank its best candidate highly even when none fit, so its score is a poor signal for declining. The fused score reflects how well the query actually matched the corpus, so it is the signal that drops on an out-of-corpus query. Below a calibrated floor, the system abstains rather than return a confident wrong answer. How the floor is set and tested is in [retrieval-evaluation.md](retrieval-evaluation.md).
+That decision is made on the dense top-1 cosine similarity. An out-of-corpus query has no close match, so its best cosine is low. An in-corpus query has at least one close match, so its best cosine is high. Below a calibrated floor, the system abstains rather than return a confident wrong answer. How the floor is set and tested is in [retrieval-evaluation.md](retrieval-evaluation.md).
+
+The same cosine signal also filters the results that are returned. Retrieval ranks by fused RRF. Each candidate also carries its own dense cosine score. A candidate below a relevance floor is dropped, even when other candidates pass. So the result count is not fixed. A sharp query returns a long list. A vague query returns a short one. A query with nothing above the floor returns an empty list. That empty case is the abstention above. The list reflects real matches. It is not padded to a fixed size.
 
 
 ## L2: the curated overview

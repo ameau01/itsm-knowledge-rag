@@ -3,7 +3,7 @@
 [![Status](https://img.shields.io/badge/status-v0.0.2%20initial%20design-orange)](#project-status)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face%20Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
-[![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20hybrid%20%2B%20reranker-blueviolet)](https://qdrant.tech)
+[![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20hybrid-blueviolet)](https://qdrant.tech)
 [![PII](https://img.shields.io/badge/PII-AD%20directory%20%2B%20format%20rules%20%2B%20Presidio-orange)](https://microsoft.github.io/presidio/)
 [![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://deepeval.com/guides/guides-rag-evaluation)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
@@ -44,20 +44,21 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 **Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
 
-**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query with Reciprocal Rank Fusion, and a cross-encoder reranker re-scores the result. The overview body is precomputed per family. A search returns a prepared answer instead of synthesizing one on every query. The cached overview is the same idea as a Google "AI overview." Precomputing it maximizes response speed and eliminates redundant LLM inference costs. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
+**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query with Reciprocal Rank Fusion. The overview body is precomputed per family. A search returns a prepared answer instead of synthesizing one on every query. The cached overview is the same idea as a Google "AI overview." Precomputing it maximizes response speed and eliminates redundant LLM inference costs. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
 
 **Two surfaces share one pipeline.** Support agents get the full search: the overview plus ranked source tickets they are authorized to read. General employees get a redaction-safe, browse-only version of the same curated knowledge.
 
 
 ## Results
 
-Measured on a synthetic corpus of 745 tickets across 14 issue families. The evaluation ground truth is frozen and committed: a canonical catalog of 14 families and 76 root causes with all 745 tickets assigned, a query set of 63 single-answer, 34 ambiguous, and 15 abstention questions, and a per-family abstention certification (210/210 probes returned null). Result numbers are pending the harness run. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md).
+Measured on a synthetic corpus of 745 tickets across 14 issue families. The evaluation ground truth is frozen and committed: a canonical catalog of 14 families and 76 root causes with all 745 tickets assigned, a query set of 63 single-answer, 34 ambiguous, and 15 abstention questions, and a per-family abstention certification (210/210 probes returned null). Redaction and retrieval numbers are measured. The L2 curation and cache numbers are pending the harness run. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md), with retrieval detail in [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md).
 
 | Axis | Metric | Result |
 |---|---|---|
 | PII leakage (deterministic) | recall vs. authored sidecar | 98.9% |
 | Technical retention | RETAIN-class strings preserved | 97.6% |
-| Retrieval | recall@k, nDCG@k | TBD |
+| Retrieval (hybrid, shipped) | recall@10 (strict / family) | 0.649 / 0.970 |
+| Abstention | accuracy on out-of-corpus queries | 1.000 |
 | Curation quality (judge-based) | faithfulness, citation accuracy | TBD |
 | Cache vs. zero-shot | latency, cost per query | TBD |
 
@@ -112,7 +113,7 @@ examples/            real worked outputs: query, overview, source tickets, redac
 
 ## Stack
 
-Python, Qdrant (native dense + sparse fusion), cross-encoder reranker, AD directory match + format rules + Presidio, DeepEval / G-Eval, MkDocs-Material, Docker.
+Python, Qdrant (native dense + sparse fusion), AD directory match + format rules + Presidio, DeepEval / G-Eval, MkDocs-Material, Docker.
 
 
 ## Project status

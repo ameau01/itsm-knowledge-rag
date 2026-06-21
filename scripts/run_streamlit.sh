@@ -13,7 +13,7 @@
 #
 # Environment (read from the shell or a project-root .env, which is sourced here):
 #   OPERATIONAL_STORE   SQLite store directory (default: .operational_store)
-#   STREAMLIT_PORT      Default port when --port is not given (default: 8501)
+#   SUPPORT_VIEW_PORT   Default port when --port is not given (default: 8501)
 #
 # Runs from the repo root so .env and the OPERATIONAL_STORE path resolve correctly.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -30,7 +30,7 @@ USAGE
     uv run sh scripts/run_streamlit.sh [OPTIONS] [-- STREAMLIT_ARGS...]
 
 OPTIONS
-    --port N      Port to serve on (default: $STREAMLIT_PORT or 8501).
+    --port N      Port to serve on (default: $SUPPORT_VIEW_PORT or 8501).
     -h, --help    Show this message and exit.
 
 EXAMPLES
@@ -50,8 +50,17 @@ EOF
     ;;
 esac
 
-# ── Argument parsing ───────────────────────────────────────────────────────────
-PORT="${STREAMLIT_PORT:-8501}"
+# ── Load project-root .env FIRST (so SUPPORT_VIEW_PORT, OPERATIONAL_STORE, etc. are in
+#    scope before we read them below, and reach the app too) ──
+if [ -f .env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env
+  set +a
+fi
+
+# ── Argument parsing (a --port flag overrides the .env default) ──────────────────
+PORT="${SUPPORT_VIEW_PORT:-8501}"
 EXTRA=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -61,14 +70,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# ── Load project-root .env (so OPERATIONAL_STORE etc. reach this script + app) ──
-if [ -f .env ]; then
-  set -a
-  # shellcheck disable=SC1091
-  . ./.env
-  set +a
-fi
-
 # ── Dependency check ───────────────────────────────────────────────────────────
 uv run --group app python3 -c "import streamlit" 2>/dev/null || {
   echo "Streamlit is not installed."
@@ -77,7 +78,7 @@ uv run --group app python3 -c "import streamlit" 2>/dev/null || {
 }
 
 # ── Operational store check ────────────────────────────────────────────────────
-# app.py resolves the DB as $OPERATIONAL_STORE/itsm_rag.db, then the committed
+# the app resolves the DB as $OPERATIONAL_STORE/itsm_rag.db, then the committed
 # snapshot at streamlit_app/data/itsm_rag.db.
 STORE_DIR="${OPERATIONAL_STORE:-.operational_store}"
 if [ ! -f "$STORE_DIR/itsm_rag.db" ] && [ ! -f "streamlit_app/data/itsm_rag.db" ]; then
@@ -88,5 +89,5 @@ fi
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 echo "Starting Streamlit on http://localhost:$PORT  (store: $STORE_DIR)"
-# shellcheck disable=SC2086
-exec uv run --group app streamlit run streamlit_app/app.py --server.port "$PORT" $EXTRA
+exec uv run --group app --group retrieval streamlit run streamlit_app/Home.py \
+  --server.port "$PORT" --server.fileWatcherType none $EXTRA

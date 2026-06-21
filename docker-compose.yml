@@ -1,0 +1,21 @@
+# Local Qdrant for development.
+#
+#   docker compose up -d qdrant      # start
+#   open http://localhost:6333/dashboard
+#   docker compose down              # stop (data persists on disk)
+#   rm -rf "$LOCAL_VECTOR_DB_PATH"   # wipe the index (default: .vector_db)
+#
+# Data lives in $LOCAL_VECTOR_DB_PATH (default .vector_db, gitignored) — same convention as
+# .operational_store / .hf_cache. Set LOCAL_VECTOR_DB_PATH in .env to change it.
+# The retriever connects via QDRANT_URL from .env (default http://localhost:6333).
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.12.0     # any server >= 1.10 (hybrid Query API + sparse IDF); bump as desired
+    container_name: itsm_qdrant
+    ports:
+      - "6333:6333"                  # REST + dashboard
+      - "6334:6334"                  # gRPC
+    volumes:
+      - ${LOCAL_VECTOR_DB_PATH:-.vector_db}:/qdrant/storage
+    restart: unless-stopped

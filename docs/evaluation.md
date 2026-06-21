@@ -11,7 +11,7 @@ This page is the map. Each axis links to the doc that covers it in full.
 |---|---|---|---|
 | PII leakage | Redaction | Leak rate vs. authored key | Deterministic |
 | Technical retention | Redaction | RETAIN strings preserved | Deterministic |
-| Retrieval | L1 | recall@k, nDCG@k | Label-based |
+| Retrieval | L1 | recall@k | Label-based |
 | Curation quality | L2 | Faithfulness, citation accuracy | Judge-based |
 | Abstention | L1 | Accuracy on out-of-corpus queries | Label-based |
 | Efficiency | L2 | Latency, cost vs. zero-shot | Measured |
@@ -29,7 +29,7 @@ Failure localization. A wrong answer is one of two failures. The wrong tickets w
 ## The three docs
 
 - [redaction-evaluation.md](redaction-evaluation.md). Does the redactor remove every PII value and keep every technical term? Deterministic, scored against two authored keys. This is the one axis with measured results today: 98.9 percent of PII removed, 97.6 percent of technical content kept.
-- [retrieval-evaluation.md](retrieval-evaluation.md). Does L1 surface the right prior tickets, and does the hybrid plus reranker beat its parts? Label-based, scored against the frozen catalog. Covers the four-arm ablation, complex-query resilience, and abstention.
+- [retrieval-evaluation.md](retrieval-evaluation.md). Does L1 surface the right prior tickets, and does the hybrid beat its parts? Label-based, scored against the frozen catalog. Covers the arm ablation, complex-query resilience, and abstention.
 - [wiki-evaluation.md](wiki-evaluation.md). Is the L2 overview faithful to the tickets it draws on? Judge-based, with the cache-versus-zero-shot efficiency comparison alongside.
 
 
