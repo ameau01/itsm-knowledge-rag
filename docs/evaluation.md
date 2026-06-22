@@ -37,7 +37,19 @@ Failure localization. A wrong answer is one of two failures. The wrong tickets w
 
 The ground truth is built, frozen, and committed under `eval-set/`. The harness reads only those files. Upstream copies are documentation. These are the answer key.
 
-The labels were not hand-waved. The canonical catalog of 14 families and 76 root causes was built by one model and reviewed family by family by a second model under an adversarial protocol. The query set was blind-verified the same way. Each artifact records its provenance: the dataset revision it was built against, the producing and verifying models, and its review trail.
+The labels were not hand-waved. The canonical catalog of 14 families and 76 root causes was built by one model and reviewed family by family by a second model under an adversarial protocol. The query set was blind-verified the same way.
+
+What is frozen:
+
+- `catalog.json`: the canonical ontology. 14 families, 76 root causes, all 745 tickets assigned. It defines both the wiki page boundaries and every eval label. Built by one model and blind-reviewed family by family by a second model under an adversarial protocol. All 14 families converged. Convergence was contested and the full attempt history is recorded in the catalog, not hidden.
+- `retrieval/simple-queries.json`: 63 questions with exactly one correct root cause. Subtypes: 21 diagnosis, 19 synthesis, 10 exact-match, 13 fix-lookup. Each one blind-verified and baseline smoke-tested at generation.
+- `retrieval/complex-queries.json`: 34 questions with multiple plausible root causes. These are corpus-discovered sibling-cluster ambiguities, each anchored to a ticket-derived cause. This is the class where the system is meant to beat a general model.
+- `retrieval/abstention-queries.json`: 15 questions with no answer in the corpus. The correct behavior is to abstain.
+- `retrieval/abstention-certification.json`: every abstention question interrogated against all 14 families. 210 of 210 probes returned null.
+- `redaction/pii.json` and `redaction/retention.json`: the two redaction answer keys, frozen alongside the rest.
+- `wiki/wiki-currated-tickets.json`: eval ground truth for wiki-curation with one record per curated page (family + root_cause_id).
+
+Each artifact records its provenance: the dataset revision it was built against, the producing and verifying models, the generation date, and its review trail. The builders run separately from this repo, with blind label verification by an independent model and deterministic lint gates.
 
 
 ## What is not measured

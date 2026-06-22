@@ -19,16 +19,13 @@ When a new ticket arrives, the agent reads it, writes a query, and reviews what 
 This is deliberate. Deciding whether two tickets are the same problem has real consequences if it is wrong, so that judgment stays with the human. The system makes the prior knowledge fast to find and easy to verify. The agent makes the call. Keeping the human in the loop here is the right boundary for an action that touches a live system. See the query path in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 
-## At L2: the expensive work is precomputed, the relevance is added per query
+## At L2: the expensive work is precomputed
 
 The body of each overview is built once during ingest and cached. The expensive part, consolidating many ticket descriptions into one coherent issue statement, happens at build time, not on every search. This choice is local to L2. L1 retrieval still runs per query.
 
 The alternative is zero-shot synthesis: run an LLM over the retrieved tickets on every query. That pays the consolidation cost every time, adds latency to each search, and produces a rushed single-pass answer with no cross-ticket consolidation.
 
-Precompute is available here because the corpus is bounded. A finite set of issue families means each overview body can be built ahead of time and reused. A live web search cannot do this, because the web is unbounded. So the experience matches a Google AI overview, with the heavy consolidation paid once.
-
-This is not a static lookup. On top of the cached body, a planned serving step generates a short per-query line: why this page answers the question asked, and which diagnostic steps apply. That step is a small generation grounded in the already-curated page, not a fresh synthesis from raw tickets. The heavy work is reused; only the thin relevance framing is produced per query. The latency and cost gain over zero-shot is measured head to head in [wiki-evaluation.md](wiki-evaluation.md).
-
+Precompute is available here because the corpus is bounded. A finite set of issue families means each overview body can be built ahead of time and reused. A live web search cannot do this, because the web is unbounded. So the experience matches a Google AI Overview, with the heavy consolidation paid once. Faithfulness, relevancy, summarization and variation preservation are measured in [wiki-evaluation.md](wiki-evaluation.md).
 
 ## At ingest: redaction runs first, and it does more than protect
 

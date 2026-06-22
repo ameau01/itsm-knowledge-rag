@@ -2,7 +2,7 @@
 
 The system keeps two stores. One is the source of truth. The other is a search index
 built from it. This document explains the split, the shape of the data, and how the
-store is read when wiki pages are built and when an AI Overview is served.
+store is read when wiki pages are built and when an AI-generated overview is served.
 
 For the system as a whole, see [../ARCHITECTURE.md](../ARCHITECTURE.md). For
 retrieval, see [retrieval.md](retrieval.md).
@@ -66,9 +66,9 @@ Finally it writes the page back to the store as a wiki page record, with its lay
 confidence, and status. The store now holds a finished page ready to serve.
 
 
-## Use in AI Overview synthesis
+## Use in AI-generated overview synthesis
 
-The AI Overview is what an agent sees after a search. The expensive work already
+The AI-generated overview is what an agent sees after a search. The expensive work already
 happened when the page was built. At query time the store simply hands back the
 prepared page.
 
@@ -77,10 +77,9 @@ a root cause. For the matching root cause, the system reads the prepared page di
 from the store by its key. This is a fast lookup, not a fresh synthesis. It also reads
 the golden diagnostics and resolution for that cause.
 
-The only text generated at query time is a single short relevance line that explains
-why this page matches what the agent typed. Everything else is read from the store. The
-page body is served, not rebuilt, on every query. This is what makes the overview fast
-and cheap to serve.
+No text is generated at query time. The page body is read from the store, not rebuilt,
+on every query. The corpus is bounded, so the page never goes stale between queries and
+there is nothing to regenerate. This is what makes the overview fast and cheap to serve.
 
 
 ## What lives where
@@ -91,4 +90,4 @@ and cheap to serve.
 | Curated page body, layout, confidence | Relational store |
 | Most similar tickets for a query | Vector index |
 | Exact error-code match | Vector index |
-| Prepared page for an AI Overview | Relational store |
+| Prepared page for an AI-generated overview | Relational store |

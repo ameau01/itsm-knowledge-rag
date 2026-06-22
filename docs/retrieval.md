@@ -2,7 +2,7 @@
 
 Similarity is not relevance. Two tickets can read alike and be different problems. Two can read differently and be the same root cause. A retriever ranks by similarity, so even the best search returns a list that still needs judgment. That gap is the reason this system has a second layer.
 
-L1 is raw-ticket search. L2 is the curated overview built on top of it. They are weak alone and strong together. For where this sits in the system, see [ARCHITECTURE.md](../ARCHITECTURE.md). For how each is measured, see [retrieval-evaluation.md](retrieval-evaluation.md) and [wiki-evaluation.md](wiki-evaluation.md).
+L1 is raw-ticket search. L2 is the cached overview. They are weak alone and strong together. For where this sits in the system, see [ARCHITECTURE.md](../ARCHITECTURE.md). For how each is measured, see [retrieval-evaluation.md](retrieval-evaluation.md) and [wiki-evaluation.md](wiki-evaluation.md).
 
 
 ## The two layers
@@ -10,9 +10,9 @@ L1 is raw-ticket search. L2 is the curated overview built on top of it. They are
 | Layer | What it returns | Built |
 |---|---|---|
 | L1 | Ranked source tickets, with snippets | Per query, at search time |
-| L2 | A curated overview for the issue family | Once, during ingest, then cached |
+| L2 | A synthesized overview for the issue family | Once, during ingest, then cached |
 
-L1 is the matching layer. It does the best it can with similarity. L2 is the knowledge layer. It is the answer to what similarity alone cannot do.
+L1 is retrieval. L2 is the precomputed wiki page. A query hits both: L2 gives the prepared answer, L1 gives the evidence underneath it.
 
 
 ## L1: hybrid retrieval
@@ -45,11 +45,9 @@ The same cosine signal also filters the results that are returned. Retrieval ran
 
 L2 is the curated wiki page for an issue family, built once during ingest.
 
-This is the answer to the relevance gap. L1 can return tickets of the wrong family, or the same family with a different observed error. Even good hybrid search has that limit, because it matches on similarity. L2 addresses it by consolidating at build time. For each issue family, curation takes the many ways users described the same problem and combines them into one coherent issue statement, then attaches the golden root cause and resolution surfaced verbatim. The conflicting descriptions are resolved into knowledge, not left as a pile of similar-looking tickets.
+At query time the matched family's overview is read from cache, not generated. This is the key efficiency choice. The alternative, zero-shot synthesis, would run an LLM over retrieved tickets on every query: slow, costly, and lower quality because it synthesizes in one rushed pass with no cross-ticket consolidation. The cached overview pays that cost once, offline, and amortizes it across every future query. The cache is the relational store; how it is read at build and query time is in [operational-store.md](operational-store.md).
 
-The work happens once, offline, and is cached. The alternative is zero-shot synthesis: run a model over the retrieved tickets on every query. That is slow, costly, and lower quality, because it synthesizes in one rushed pass with no cross-ticket consolidation. The cached overview pays that cost once and serves it cheaply thereafter. The latency and cost difference is measured head to head. See [wiki-evaluation.md](wiki-evaluation.md). The cache is the relational store; how it is read at build and query time is in [operational-store.md](operational-store.md).
-
-The experience matches a Google AI overview: a prepared answer on top, the sources below. The difference is the mechanism. A web overview is generated live because the web is unbounded. This corpus is bounded, so the overview is precomputed.
+The experience matches a Google AI Overview: a prepared answer on top, the sources below. The difference is the mechanism. A web overview is generated live because the web is unbounded. This corpus is bounded, so the overview is precomputed.
 
 
 ## Generative versus extractive

@@ -28,6 +28,8 @@ Two kinds of truth, deliberately separated:
 | `retrieval/abstention-certification.json` | Per-family evidence matrix: every abstention question individually interrogated against all 14 families — 210/210 returned null. | **FROZEN** (2026-06-11) |
 | `retrieval/queries.schema.json` | JSON Schema shared by producer and eval harness | **FROZEN** (2026-06-11) |
 | `knowledge-gap-queries.json` | Knowledge-gap probes: strong questions whose family (DRF) is deliberately excluded from the wiki at eval time. Kept with the builders until the consumer wiki exists. | protocol artifact (not exported, by design) |
+| `wiki/wiki-currated-tickets.json` | Wiki-curation eval ground truth: one record per curated page (`family` + `root_cause_id`) with the curated content, source tickets, and per-field source sections. | added 2026-06-22 (pending merge with the curation table) |
+| `wiki/family_names.json` | Family code → readable label, for rendering the wiki UI. | added 2026-06-21 |
 | `redaction/retention.json` | Per-ticket RETAIN-class strings: 745/745 tickets, 8,581 entries, 0 flags, 0 unresolved suspects. Every disputed span owner-ruled with logged rationale. | **FROZEN** (2026-06-11) |
 | `redaction/pii.json` | Copy of the dataset sidecar (leakage ground truth), byte-identical in revisions `6e9ec80b` (build) and `db074a5` (current) | **FROZEN** (2026-06-11) |
 | `metrics.md` | The scoring contract: every metric defined per axis (deterministic gates, label-based, judge-based), failure localization, judge protocol | **FROZEN** (2026-06-11) |

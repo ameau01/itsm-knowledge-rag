@@ -1,21 +1,62 @@
-# Local Qdrant for development.
+# One-command stack for the ITSM Knowledge Search app.
 #
-#   docker compose up -d qdrant      # start
-#   open http://localhost:6333/dashboard
-#   docker compose down              # stop (data persists on disk)
-#   rm -rf "$LOCAL_VECTOR_DB_PATH"   # wipe the index (default: .vector_db)
+#   cp .env.example .env                 # required (add a key only for rag-live L2 overview)
+#   docker compose up --build rag-demo   # mock L2, no key — builds, ingests, embeds, serves
+#   docker compose up --build rag-live   # live L2 (key in .env)
+#   docker compose up -d qdrant          # just the vector store (for local `uv` runs)
+#   docker compose down                  # stop    |   docker compose down -v   # + wipe data
 #
-# Data lives in $LOCAL_VECTOR_DB_PATH (default .vector_db, gitignored) — same convention as
-# .operational_store / .hf_cache. Set LOCAL_VECTOR_DB_PATH in .env to change it.
-# The retriever connects via QDRANT_URL from .env (default http://localhost:6333).
+# Open http://localhost:8000  (override with SUPPORT_VIEW_PORT in .env).
+#
+# The app services talk to the qdrant service over the network (server mode), so there is no
+# embedded on-disk lock. Data persists in named volumes:
+#   qdrant_storage  the vector index      op_store  redacted tickets (SQLite)
+#   hf_cache        corpus + embedding model (~2 GB, downloaded on first run)
+
+x-app: &app
+  build: .
+  image: itsm-knowledge-rag:latest
+  env_file: .env
+  depends_on:
+    - qdrant
+  environment: &app-env
+    QDRANT_LOCAL: "false"
+    QDRANT_URL: "http://qdrant:6333"
+    OPERATIONAL_STORE: "/app/.operational_store"
+    HF_HOME: "/app/.hf_cache"
+    SUPPORT_VIEW_PORT: "${SUPPORT_VIEW_PORT:-8000}"
+  ports:
+    - "${SUPPORT_VIEW_PORT:-8000}:${SUPPORT_VIEW_PORT:-8000}"
+  volumes:
+    - hf_cache:/app/.hf_cache
+    - op_store:/app/.operational_store
 
 services:
   qdrant:
     image: qdrant/qdrant:v1.12.0     # any server >= 1.10 (hybrid Query API + sparse IDF); bump as desired
     container_name: itsm_qdrant
     ports:
-      - "6333:6333"                  # REST + dashboard
+      - "6333:6333"                  # REST + dashboard (http://localhost:6333/dashboard)
       - "6334:6334"                  # gRPC
     volumes:
-      - ${LOCAL_VECTOR_DB_PATH:-.vector_db}:/qdrant/storage
+      - qdrant_storage:/qdrant/storage
     restart: unless-stopped
+
+  rag-live:
+    <<: *app
+    container_name: rag-live
+    environment:
+      <<: *app-env
+      PIPELINE_MODE: "live"
+
+  rag-demo:
+    <<: *app
+    container_name: rag-demo
+    environment:
+      <<: *app-env
+      PIPELINE_MODE: "mock"
+
+volumes:
+  qdrant_storage:
+  hf_cache:
+  op_store:

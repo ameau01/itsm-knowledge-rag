@@ -1,0 +1,25 @@
+# Keep the build context small and the image clean. Source, scripts, eval-set and
+# streamlit_app are NOT ignored — they are needed in the image.
+.git
+.gitignore
+.venv
+.env
+.env.*
+!.env.example
+
+# Local caches and build artifacts (rebuilt inside the container / mounted as volumes).
+.hf_cache
+.vector_db
+.operational_store
+.uv-cache
+**/.uv-cache
+
+# Python bytecode and tooling caches.
+**/__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Large doc assets not needed at runtime.
+docs/images

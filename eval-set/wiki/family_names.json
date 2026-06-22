@@ -1,0 +1,17 @@
+{
+  "_comment": "Family code -> readable label for the UI. Derived from the catalog family names.",
+  "AIT": "Integration Gateway API Timeouts",
+  "ALP": "AD Lockout from Stale Cached Mobile Credentials",
+  "CES": "Internal Web Service Load-Balancer TLS Certificate Expiry",
+  "DCP": "Intune Device Non-Compliant Encryption (Conditional Access Block)",
+  "DRF": "Internal DNS Resolution Failures",
+  "EDE": "BitLocker Not Enabled / Recovery Key Not Escrowed",
+  "LPD": "Laptop Slow Post-Login (CPU / Disk Contention)",
+  "OES": "Outlook / Exchange Online Mailbox Sync Failures",
+  "PDQ": "Print Server Stuck Jobs / Driver Failure",
+  "SDA": "Shared Drive Access Denied",
+  "SIB": "Software Center Install Blocked (Endpoint Protection)",
+  "SML": "SSO / MFA Prompt Loop (Okta / Azure AD)",
+  "VDA": "GlobalProtect VPN Immediate Post-MFA Disconnect",
+  "WCI": "Corporate Wi-Fi 802.1X Authentication Failures"
+}

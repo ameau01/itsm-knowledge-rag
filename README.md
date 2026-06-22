@@ -44,14 +44,14 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 **Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
 
-**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query with Reciprocal Rank Fusion. The overview body is precomputed per family. A search returns a prepared answer instead of synthesizing one on every query. The cached overview is the same idea as a Google "AI overview." Precomputing it maximizes response speed and eliminates redundant LLM inference costs. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
+**Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query with Reciprocal Rank Fusion. The overview body is precomputed per family. A search returns a prepared answer instead of synthesizing one on every query. The cached overview is the same idea as a Google "AI Overview." Precomputing it maximizes response speed and eliminates redundant LLM inference costs. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
 
 **Two surfaces share one pipeline.** Support agents get the full search: the overview plus ranked source tickets they are authorized to read. General employees get a redaction-safe, browse-only version of the same curated knowledge.
 
 
 ## Results
 
-Measured on a synthetic corpus of 745 tickets across 14 issue families. The evaluation ground truth is frozen and committed: a canonical catalog of 14 families and 76 root causes with all 745 tickets assigned, a query set of 63 single-answer, 34 ambiguous, and 15 abstention questions, and a per-family abstention certification (210/210 probes returned null). Redaction and retrieval numbers are measured. The L2 curation and cache numbers are pending the harness run. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md), with retrieval detail in [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md).
+Measured on a synthetic corpus of 745 tickets across 14 issue families. The evaluation ground truth is frozen and committed: a canonical catalog of 14 families and 76 root causes with all 745 tickets assigned, a query set of 63 single-answer, 34 ambiguous, and 15 abstention questions, and a per-family abstention certification (210/210 probes returned null).  Redaction and retrieval numbers are measured. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md), with retrieval detail in [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md). The L2 curation detail in [docs/wiki-evaluation.md](docs/wiki-evaluation.md).
 
 | Axis | Metric | Result |
 |---|---|---|
@@ -59,8 +59,7 @@ Measured on a synthetic corpus of 745 tickets across 14 issue families. The eval
 | Technical retention | RETAIN-class strings preserved | 97.6% |
 | Retrieval (hybrid, shipped) | recall@10 (strict / family) | 0.649 / 0.970 |
 | Abstention | accuracy on out-of-corpus queries | 1.000 |
-| Curation quality (judge-based) | faithfulness, citation accuracy | TBD |
-| Cache vs. zero-shot | latency, cost per query | TBD |
+| Curation quality (judge-based) | faithfulness, variation-preservation | TBD |
 
 The PII-leakage check is the one hard, non-circular number. Its ground truth is authored upstream, independently of the redaction system being tested, so the redactor cannot grade itself. The curation metrics are judge-based and reported as such. The project is explicit about which guarantees are deterministic and which are interpretive.
 
@@ -71,22 +70,34 @@ Three paths. Full detail in [docs/running.md](docs/running.md).
 
 **Path A. Docker, mock mode (no LLM, no key, no network).**
 ```
-docker compose up --build demo
+docker compose up --build rag-demo
 ```
 Replays recorded fixtures through the real pipeline. The output carries a MOCK MODE banner.
 
 **Path B. Docker, live LLM.**
 ```
-cp .env.example .env && $EDITOR .env   # add the API key
-docker compose up --build live
+cp .env.example .env   # add OPENAI_API_KEY and/or ANTHROPIC_API_KEY
+docker compose up --build rag-live
 ```
+Builds the image, starts Qdrant, then ingests, embeds, and serves the search app at http://localhost:8000. The first run downloads the corpus and the dense model (about 2 GB, cached in a volume). Retrieval is dense + sparse + RRF; the key is only used for the curated L2 overview.
 
-**Path C. Local, developer.**
+**Path C. Local, no Docker (developer).**
 ```
-uv sync
-cp .env.example .env && $EDITOR .env
-make demo
+uv sync --group retrieval --group app
+cp .env.example .env
+uv run sh scripts/run_demo.sh
 ```
+The same build-and-serve without containers. Full detail in [docs/running.md](docs/running.md).
+
+**Stopping, re-running, and cleanup (Docker).**
+```
+docker compose up -d rag-live      # run detached (frees your terminal)
+docker compose down                # stop + remove containers; image and data volumes kept
+docker compose up rag-live         # re-run: reuses the image and the built index, serves at once
+docker compose down -v             # also remove the data volumes (index, store, model cache)
+docker compose down --rmi all -v   # full wipe: containers, both images, and volumes
+```
+Plain `down` keeps the volumes, so the next `up` skips ingest and embedding and serves in seconds. `down -v` deletes them, so the next `up` re-ingests, re-embeds, and re-downloads the corpus and the embedding model (~2 GB) — a full first run again. Use `-v` only when you want a clean slate. `--build` rebuilds the image; add it only after changing the code or the Dockerfile (the first `up` builds automatically if the image is missing). To remove only the app image while keeping the Qdrant one: `docker image rm itsm-knowledge-rag:latest` after `docker compose down`.
 
 
 ## Scope
