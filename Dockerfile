@@ -20,13 +20,15 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-# 1) Dependencies first, for layer caching. Only the lockfiles invalidate this layer.
+ARG SYNC_GROUPS="retrieval app wiki"
+
+# 1) Dependencies first, for layer caching. Only the lockfiles (+ SYNC_GROUPS) invalidate this.
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-install-project --group retrieval --group app
+RUN uv sync --no-install-project $(for g in $SYNC_GROUPS; do printf -- '--group %s ' "$g"; done)
 
 # 2) Project source, then install the project itself into the synced environment.
 COPY . .
-RUN uv sync --group retrieval --group app
+RUN uv sync $(for g in $SYNC_GROUPS; do printf -- '--group %s ' "$g"; done)
 
 # 3) Bake presidio's spaCy model into the image. Otherwise redaction downloads it (~382 MB)
 #    at first ingest into the container layer, where it is lost on every recreate and re-fetched.

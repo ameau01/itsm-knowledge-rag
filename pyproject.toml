@@ -39,6 +39,10 @@ retrieval = [
     "fastembed>=0.4",
     "sentence-transformers>=3.0",
 ]
+wiki = [
+    # mkdocs compilation: render wiki_pages -> Markdown -> static site.
+    "mkdocs-material>=9.5",
+]
 
 [tool.mypy]
 python_version = "3.11"

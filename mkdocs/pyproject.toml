@@ -1,0 +1,14 @@
+[project]
+name = "itsm-wiki"
+version = "0.0.2"
+description = "Lean wiki image: serve the committed MkDocs site. No ML/ingest deps."
+requires-python = ">=3.11"
+dependencies = []
+
+# Only mkdocs-material — kept in a `wiki` group so the scripts' `uv run --group wiki`
+# works the same here as in the beefy project. No presidio/pandas/qdrant/streamlit.
+[dependency-groups]
+wiki = ["mkdocs-material>=9.5"]
+
+[tool.uv]
+package = false

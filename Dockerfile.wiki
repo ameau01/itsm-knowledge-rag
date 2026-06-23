@@ -1,0 +1,29 @@
+# syntax=docker/dockerfile:1
+# Lean image for the WIKI DEMO — serves the committed MkDocs site only.
+#
+# Deliberately tiny: only mkdocs-material (no presidio / pandas / qdrant / spaCy / streamlit),
+# so it builds fast and hosts cheap for a reviewer. The beefy Dockerfile powers rag-live and
+# wiki-live (ingest + render + serve); this image only serves the committed mkdocs/ pages.
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+WORKDIR /app
+
+# Lean deps only (the wiki group of a minimal pyproject = mkdocs-material).
+COPY mkdocs/pyproject.toml ./pyproject.toml
+RUN uv sync --group wiki --no-install-project
+
+# The committed site + the serve entrypoint. No src/, no operational store, no model.
+COPY mkdocs ./mkdocs
+COPY scripts/run_wiki.sh ./scripts/run_wiki.sh
+
+ENV UV_NO_SYNC=1 \
+    WIKI_VIEW_PORT=8001 \
+    PIPELINE_MODE=mock
+EXPOSE 8001
+
+ENTRYPOINT ["sh", "scripts/run_wiki.sh"]

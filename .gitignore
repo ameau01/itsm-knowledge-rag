@@ -13,6 +13,12 @@ INTERNAL_*
 # --- Vector DB (Qdrant storage, built at runtime, not source) ---
 # Path set by LOCAL_VECTOR_DB_PATH in .env (default .vector_db). Reset with `rm -rf .vector_db`.
 .vector_db/
+
+# --- MkDocs wiki build (ephemeral; pruned + rebuilt from scratch by build_wiki / wiki-live) ---
+# .mkdocs/ is the live build dir (never committed). The committed template + snapshot live in
+# mkdocs/ (the Pages/demo source); only its compiled site/ is ignored.
+.mkdocs/
+mkdocs/site/
 .vector-db/
 
 # --- Secrets and environment ---

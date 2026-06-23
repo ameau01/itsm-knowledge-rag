@@ -11,7 +11,7 @@ L2 generates text, so this is the judge-based half. A score here is a model's ju
 
 Two things in L2 are generated. Both are checked.
 
-- The wiki understanding: a title, a plain-language symptom summary, a cause statement, and a list of variations. One model call per issue consolidates many tickets into this.
+- The wiki curation: a title, a plain-language symptom summary, a cause statement, and a list of variations. One model call per issue consolidates many tickets into this.
 - The AI-generated overview: a short, static summary compiled from the wiki page. It keeps the description and the diagnostic steps and drops the variations.
 
 What is not generated, and not checked:
@@ -24,7 +24,7 @@ Each generated field is checked against the source it was built from:
 - Cause: against the engineer notes and the diagnostics summaries.
 
 
-## Wiki understanding metrics
+## Wiki curation metrics
 
 All produced by DeepEval or G-Eval.
 

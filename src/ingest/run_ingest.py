@@ -8,7 +8,7 @@ For each ticket in the corpus:
        L1: AD identity exact match   (users_directory.json from HF snapshot)
        L2: Format-based regex rules  (redaction_policy.yaml)
        L3: Presidio NER              (residual names, international phones)
-  4. Write to SQLite operational store (ingest.store)
+  4. Write to SQLite operational store (operational_store.store); seed wiki_pages
 
 The full reimport is atomic: the tickets table is truncated and all inserts
 happen inside a single SQLite transaction.  A failure mid-run rolls back,
@@ -43,11 +43,13 @@ from corpus.extractor import (
     extract_text_fields,
 )
 from ingest.redactor import PolicyRedactor
-from ingest.store import (
+from operational_store.store import (
     count_tickets,
     get_connection,
     insert_redacted_tickets,
     reset_tickets_table,
+    reset_wiki_pages,
+    seed_wiki_pages,
 )
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -217,6 +219,13 @@ def main(argv: list[str] | None = None) -> int:
 
             if processed % 50 == 0:
                 print(f"  {processed}/{total} …")
+
+    # ── Seed wiki_pages deterministic columns (membership + canonical diagnostics) ──
+    if not args.dry_run and conn is not None:
+        reset_wiki_pages(conn)
+        n_pages = seed_wiki_pages(conn)
+        print(f"Seeded {n_pages} wiki_pages rows (membership + canonical diagnostics; "
+              f"curated_description left NULL for the curation load).")
 
     elapsed = time.monotonic() - t0
 

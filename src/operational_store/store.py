@@ -4,12 +4,13 @@ Operational data store — SQLite-backed persistence for the ingest pipeline.
 Two tables:
   tickets    Redacted ticket text + structured metadata, one row per source ticket.
              Source of truth for the vector index and serving layer.
-  wiki_pages Curated AI-overview per root cause (one row per root_cause_id).
-             Populated by the curation step (future); empty after ingest.
+  wiki_pages One row per (family, root_cause_id). The deterministic columns
+             (curated_tickets, diagnostic_steps) are seeded by ingest; the generated
+             curated_description is filled later by the curation load step.
 
 Usage
 -----
-    from ingest.store import get_connection, init_db, insert_redacted_tickets
+    from operational_store.store import get_connection, init_db, insert_redacted_tickets
 
     conn = get_connection()          # opens / creates the DB
     init_db(conn)                    # creates tables if they don't exist
@@ -24,6 +25,7 @@ Transactions are the caller's responsibility too — wrap bulk inserts in
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -62,28 +64,23 @@ CREATE TABLE IF NOT EXISTS tickets (
     resolution_steps       TEXT,   -- JSON array of resolution step strings
     root_cause_narrative   TEXT,   -- engineer's causal summary (root_cause column)
     -- Pipeline bookkeeping
-    redacted_at            TEXT    NOT NULL,
+    upserted_at            TEXT    NOT NULL,   -- when this row was last written
     pipeline_version       TEXT    NOT NULL
 );
 """
 
-# wiki_pages is populated by the curation step; empty after ingest.
-# PK is root_cause_id (not family_id) because each family has multiple root causes.
+# wiki_pages: one row per (family, root_cause_id). Ingest seeds the deterministic columns
+# (curated_tickets, diagnostic_steps); the curation load fills curated_description later.
 _DDL_WIKI_PAGES = """
 CREATE TABLE IF NOT EXISTS wiki_pages (
-    root_cause_id       TEXT    PRIMARY KEY,  -- "AIT/expired-api-token-auth-failures"
-    family_id           TEXT    NOT NULL,     -- "AIT"
-    family_name         TEXT    NOT NULL,     -- "integration-gateway-api-timeouts"
-    issue_statement     TEXT,
-    common_symptoms     TEXT,
-    root_cause_summary  TEXT,
-    resolution_summary  TEXT,
-    caveats             TEXT,
-    source_ticket_ids   TEXT,                 -- JSON array: ["INC-AIT-0001", ...]
-    ticket_count        INTEGER NOT NULL DEFAULT 0,
-    curated_at          TEXT,                 -- NULL until curation step runs
-    pipeline_version    TEXT,
-    curation_model      TEXT                  -- e.g. "claude-haiku-4-5-20251001"
+    family              TEXT    NOT NULL,
+    root_cause_id       TEXT    NOT NULL,
+    curated_description TEXT,                 -- JSON {title,symptoms,cause,variations,reporting}; NULL until curated
+    diagnostic_steps    TEXT,                 -- JSON [{step,action,expected_result}]; canonical playbook (ingest)
+    curated_tickets     TEXT,                 -- comma-joined member ticket_ids (ingest)
+    curation_details    TEXT,                 -- JSON {model,pipeline_version,curated_at}; NULL until curated
+    upserted_at         TEXT    NOT NULL,     -- seeded by ingest, bumped by curation load
+    PRIMARY KEY (family, root_cause_id)
 );
 """
 
@@ -130,8 +127,8 @@ def reset_tickets_table(conn: sqlite3.Connection) -> None:
     guarantees the live schema always matches the current DDL, preventing silent
     schema-mismatch bugs during refactoring.
 
-    wiki_pages is intentionally NOT touched: it is populated by the separate
-    curation step and must survive an ingest re-run.
+    wiki_pages is reset + seeded separately by the ingest run (reset_wiki_pages +
+    seed_wiki_pages), because its deterministic columns derive from the rebuilt tickets.
     """
     conn.execute("DROP TABLE IF EXISTS tickets")
     conn.execute(_DDL_TICKETS)
@@ -162,6 +159,74 @@ def truncate_wiki_table(conn: sqlite3.Connection) -> int:
         Number of rows deleted.
     """
     cur = conn.execute("DELETE FROM wiki_pages")
+    return cur.rowcount
+
+
+def reset_wiki_pages(conn: sqlite3.Connection) -> None:
+    """Drop and recreate wiki_pages with the current schema (called by ingest before seeding)."""
+    conn.execute("DROP TABLE IF EXISTS wiki_pages")
+    conn.execute(_DDL_WIKI_PAGES)
+    conn.commit()
+
+
+def seed_wiki_pages(conn: sqlite3.Connection) -> int:
+    """
+    Seed one wiki_pages row per (family, root_cause_id) with the DETERMINISTIC columns —
+    membership (`curated_tickets`) and the canonical diagnostic playbook (`diagnostic_steps`).
+    `curated_description` / `curation_details` stay NULL until the curation load runs.
+
+    Derivation logic for `diagnostic_steps` lives in operational_store.diagnostics so the
+    stored column and any renderer call the same function.
+
+    Returns:
+        Number of wiki_pages rows seeded.
+    """
+    from operational_store.diagnostics import canonical_diagnostic_steps
+
+    now = datetime.now(timezone.utc).isoformat()
+    groups = conn.execute(
+        "SELECT DISTINCT family, root_cause_id FROM tickets "
+        "WHERE root_cause_id IS NOT NULL ORDER BY family, root_cause_id"
+    ).fetchall()
+    for g in groups:
+        members = [
+            r[0] for r in conn.execute(
+                "SELECT ticket_id FROM tickets WHERE root_cause_id = ? ORDER BY ticket_id",
+                (g["root_cause_id"],),
+            )
+        ]
+        steps = canonical_diagnostic_steps(conn, g["root_cause_id"])
+        conn.execute(
+            "INSERT OR REPLACE INTO wiki_pages "
+            "(family, root_cause_id, curated_tickets, diagnostic_steps, upserted_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (g["family"], g["root_cause_id"], ",".join(members),
+             json.dumps(steps, ensure_ascii=False), now),
+        )
+    conn.commit()
+    return len(groups)
+
+
+def update_wiki_curation(
+    conn: sqlite3.Connection,
+    family: str,
+    root_cause_id: str,
+    curated_description: str,
+    curation_details: str,
+) -> int:
+    """
+    Curation load writes ONLY the generated columns (curated_description, curation_details)
+    and bumps upserted_at. It never touches the ingest-owned deterministic columns.
+
+    Returns:
+        Number of rows updated (1 if the page exists, 0 otherwise).
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    cur = conn.execute(
+        "UPDATE wiki_pages SET curated_description = ?, curation_details = ?, upserted_at = ? "
+        "WHERE family = ? AND root_cause_id = ?",
+        (curated_description, curation_details, now, family, root_cause_id),
+    )
     return cur.rowcount
 
 
@@ -208,7 +273,7 @@ def insert_redacted_tickets(
             diagnostics_coverage, diagnostics_summary,
             diagnostics_steps, diagnostics_steps_raw, diagnostics_procedure,
             observed_errors, resolution_steps, root_cause_narrative,
-            redacted_at, pipeline_version
+            upserted_at, pipeline_version
         ) VALUES (
             :ticket_id, :family, :root_cause_id,
             :submitted_at, :priority, :sla_plan, :environment, :applications,
@@ -216,7 +281,7 @@ def insert_redacted_tickets(
             :diagnostics_coverage, :diagnostics_summary,
             :diagnostics_steps, :diagnostics_steps_raw, :diagnostics_procedure,
             :observed_errors, :resolution_steps, :root_cause_narrative,
-            :redacted_at, :pipeline_version
+            :upserted_at, :pipeline_version
         )
         """,
         {
@@ -238,7 +303,7 @@ def insert_redacted_tickets(
             "observed_errors":        redacted_fields.get("observed_errors"),
             "resolution_steps":       redacted_fields.get("resolution_steps"),
             "root_cause_narrative":   redacted_fields.get("root_cause_narrative"),
-            "redacted_at":            now,
+            "upserted_at":            now,
             "pipeline_version":       pipeline_version,
         },
     )

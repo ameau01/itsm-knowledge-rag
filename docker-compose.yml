@@ -31,6 +31,9 @@ x-app: &app
     - hf_cache:/app/.hf_cache
     - op_store:/app/.operational_store
 
+# The wiki reads the operational store, not Qdrant — so no qdrant dependency, no index.
+# wiki-demo is a LEAN image (mkdocs only) that serves the committed pages; wiki-live shares the
+# BEEFY rag image so it can ingest + render from the store before serving.
 services:
   qdrant:
     image: qdrant/qdrant:v1.12.0     # any server >= 1.10 (hybrid Query API + sparse IDF); bump as desired
@@ -49,12 +52,46 @@ services:
       <<: *app-env
       PIPELINE_MODE: "live"
 
-  rag-demo:
+  rag-demo:                        # LEAN-ER rag image: vector-DB search UI, but no wiki/mkdocs group.
     <<: *app
     container_name: rag-demo
+    build:
+      context: .
+      args:
+        SYNC_GROUPS: "retrieval app"
+    image: itsm-knowledge-rag-demo:latest
     environment:
       <<: *app-env
       PIPELINE_MODE: "mock"
+
+  wiki-demo:                       # LEAN image (mkdocs only) — serve committed mkdocs/. Fast build, no ML deps, no DB.
+    build:
+      context: .
+      dockerfile: Dockerfile.wiki
+    image: itsm-knowledge-wiki:latest
+    container_name: wiki-demo
+    env_file: .env
+    environment:
+      WIKI_VIEW_PORT: "${WIKI_VIEW_PORT:-8001}"
+      PIPELINE_MODE: "mock"
+    ports:
+      - "${WIKI_VIEW_PORT:-8001}:${WIKI_VIEW_PORT:-8001}"
+
+  wiki-live:                       # BEEFY shared image — ingest + render from the store, then serve .mkdocs
+    build: .
+    image: itsm-knowledge-rag:latest
+    container_name: wiki-live
+    env_file: .env
+    entrypoint: ["sh", "scripts/run_wiki.sh"]
+    environment:
+      OPERATIONAL_STORE: "/app/.operational_store"
+      WIKI_VIEW_PORT: "${WIKI_VIEW_PORT:-8001}"
+      PIPELINE_MODE: "live"
+    ports:
+      - "${WIKI_VIEW_PORT:-8001}:${WIKI_VIEW_PORT:-8001}"
+    volumes:
+      - hf_cache:/app/.hf_cache
+      - op_store:/app/.operational_store
 
 volumes:
   qdrant_storage:

@@ -1,0 +1,38 @@
+/* Artsy, heavy-stroke hero title for the home page H1 (class added via attr_list). */
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+
+.hero-title {
+  font-family: "Archivo Black", system-ui, sans-serif !important;
+  font-size: 3.1rem;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--md-primary-fg-color);
+  -webkit-text-stroke: 0.6px var(--md-primary-fg-color);
+  text-stroke: 0.6px var(--md-primary-fg-color);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.08);
+  margin: 0.3rem 0 1.2rem;
+}
+
+/* Colored pane that sets the "Categories" quick-list apart from the listing below. */
+.md-typeset .category-pane {
+  background: #eaf3ec;
+  border: 1px solid #c3ddc9;
+  border-left: 4px solid #5aa06e;
+  border-radius: 0.3rem;
+  padding: 0.9rem 1.1rem 0.4rem;
+  margin: 0 0 1.8rem;
+}
+[data-md-color-scheme="slate"] .md-typeset .category-pane {
+  background: rgba(120, 190, 145, 0.08);
+  border-color: rgba(120, 190, 145, 0.25);
+  border-left-color: #5aa06e;
+}
+.md-typeset .category-pane > p:first-child {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  color: var(--md-default-fg-color--light);
+}
