@@ -20,19 +20,26 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-ARG SYNC_GROUPS="retrieval app wiki"
+# Pre-baked --group flags (not a bare list): beefy default = everything (rag-live + wiki-live);
+# rag-demo overrides to "--group retrieval --group app" (no wiki). Direct ${SYNC_GROUPS}
+# expansion — no subshell — so the flags can never silently resolve to empty.
+ARG SYNC_GROUPS="--group retrieval --group app --group wiki"
 
 # 1) Dependencies first, for layer caching. Only the lockfiles (+ SYNC_GROUPS) invalidate this.
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-install-project $(for g in $SYNC_GROUPS; do printf -- '--group %s ' "$g"; done)
+RUN uv sync --no-install-project ${SYNC_GROUPS}
 
 # 2) Project source, then install the project itself into the synced environment.
 COPY . .
-RUN uv sync $(for g in $SYNC_GROUPS; do printf -- '--group %s ' "$g"; done)
+RUN uv sync ${SYNC_GROUPS}
 
-# 3) Bake presidio's spaCy model into the image. Otherwise redaction downloads it (~382 MB)
-#    at first ingest into the container layer, where it is lost on every recreate and re-fetched.
-RUN uv run python -m spacy download en_core_web_lg
+# 3) Bake presidio's spaCy model into the image. --no-sync: a bare `uv run` would re-sync to the
+#    DEFAULT groups and STRIP the optional groups (retrieval/app/wiki) just installed above.
+RUN uv run --no-sync python -m spacy download en_core_web_lg
+
+# 4) Fail the BUILD (not production) if the groups didn't actually land. retrieval -> qdrant_client,
+#    app -> streamlit; both are present in every image built from this file (beefy and rag-demo).
+RUN uv run --no-sync python -c "import qdrant_client, streamlit; print('deps OK:', qdrant_client.__name__, streamlit.__name__)"
 
 # Use the environment built above as-is at runtime: every `uv run` in the entrypoint and the
 # scripts should skip re-syncing (no project rebuild, no bytecode recompile on each call).

@@ -58,7 +58,7 @@ services:
     build:
       context: .
       args:
-        SYNC_GROUPS: "retrieval app"
+        SYNC_GROUPS: "--group retrieval --group app"
     image: itsm-knowledge-rag-demo:latest
     environment:
       <<: *app-env
