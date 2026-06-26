@@ -7,7 +7,7 @@ ingest's and are left untouched.
 
 Handoff contract (the only shape this depends on):
     { "root_cause_id", "family", "source_ticket_ids": [...],
-      "curation": { "title","symptoms","cause","variations","reporting" } }
+      "curation": { "title","symptoms","cause","variations","diagnostic_summary","reporting" } }
 
 Run:
     python -m wiki.load --curation-dir <dir> [--db <path>]
@@ -23,7 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # put src/ on the path
 from operational_store.store import get_connection, update_wiki_curation  # noqa: E402
 
-_CURATED_KEYS = ["title", "symptoms", "cause", "variations", "reporting"]
+_CURATED_KEYS = ["title", "symptoms", "cause", "variations", "diagnostic_summary", "reporting"]
 
 
 def load(conn, curation_dir: Path) -> tuple[int, int]:

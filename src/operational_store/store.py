@@ -213,6 +213,27 @@ def update_wiki_curation(
     return cur.rowcount
 
 
+def update_wiki_overview(
+    conn: sqlite3.Connection,
+    family: str,
+    root_cause_id: str,
+    ai_overview: str,
+    ai_overview_details: str,
+) -> int:
+    """The overview step writes ONLY the AI-overview columns (ai_overview, ai_overview_details).
+
+    Returns:
+        Number of rows updated (1 if the page exists, 0 otherwise).
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    cur = conn.execute(
+        "UPDATE wiki_pages SET ai_overview = ?, ai_overview_details = ?, upserted_at = ? "
+        "WHERE family = ? AND root_cause_id = ?",
+        (ai_overview, ai_overview_details, now, family, root_cause_id),
+    )
+    return cur.rowcount
+
+
 # ── Insert ─────────────────────────────────────────────────────────────────────
 
 def insert_redacted_tickets(
