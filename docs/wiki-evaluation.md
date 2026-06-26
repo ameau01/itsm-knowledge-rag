@@ -50,12 +50,22 @@ Scope notes:
 
 ## AI-generated overview metric
 
-The overview is checked lightly.
+The overview is the short answer shown at the top of agent search. It is generated from the wiki page, not the raw tickets. So its reference is the wiki page. Its diagnostic steps are rendered verbatim from the golden field. They are not generated, so they are not checked.
 
-- It is generated from the wiki page, not from the tickets. So its reference is the wiki page.
-- The single check is faithfulness: does the overview add anything the wiki page does not already support.
-- Its diagnostic steps are rendered verbatim from the golden field, not generated, so they are not faithfulness-checked.
+It is scored on overview quality. Two things are checked. Does every claim hold against the source page. Is the wording calibrated to the confidence shown. The judge is an independent OpenAI model (gpt-4o), different from the Anthropic model that wrote it. It runs three times per page, across all 76 pages.
 
 | Metric | Result |
 |---|---|
-| Overview faithfulness | TBD |
+| Overview quality (mean) | 0.938 |
+| Range | 0.84 to 0.997 |
+| Spread (stdev) | 0.033 |
+
+Quality holds across the confidence tiers, and is highest where the system is most sure:
+
+| Confidence | Pages | Overview quality |
+|---|---|---|
+| High | 22 | 0.972 |
+| Medium | 26 | 0.935 |
+| Low | 28 | 0.913 |
+
+A separate guard checks the wording of low-confidence overviews. They must be worded cautiously, not stated as fact. Across all 76 pages it recorded zero hard failures and zero soft warnings. The system does not just score well on average. It hedges when it is unsure.

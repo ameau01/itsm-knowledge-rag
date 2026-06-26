@@ -1,16 +1,4 @@
-"""Resolver: turn the eval mapping's logical ids into reference text from the store.
-
-The eval file (eval-set/wiki/wiki-currated-tickets.json) names ticket_ids and column names
-only — never table internals. This module is the one place that reads the operational store,
-so the eval file stays storage-agnostic. All reads are in-project (the operational store +
-the in-project eval mapping); nothing here references the parent or experiment folders.
-
-Two reference views (the "split" decision):
-  - gold_context(): per generated field, EXACTLY what the gold generation saw — honoring
-    `deduplicated` (root_cause_narrative) and `capped_at` (diagnostics_summary). This becomes
-    the gold arm's per-arm faithfulness context.
-  - evidence_pool(): per field, ALL member tickets' source columns, uncapped and undeduped —
-    the completeness reference for summarization / variation.
+"""Resolver: read the curation UNDER TEST from wiki_pages, and the SOURCE text from tickets, using the eval recipe only as a formula.
 """
 
 from __future__ import annotations
@@ -26,17 +14,15 @@ from operational_store.store import get_connection  # noqa: E402
 from .contracts import GENERATED_FIELDS, Candidate, PageMeta  # noqa: E402
 
 _PROJECT = Path(__file__).resolve().parents[3]
-GOLD = _PROJECT / "eval-set" / "wiki" / "wiki-currated-tickets.json"
+RECIPE = _PROJECT / "eval-set" / "wiki" / "wiki-currated-tickets.json"
 
-# Only these ticket columns may feed curation; an allowlist keeps the SELECT injection-safe
-# (column names arrive from the eval file's source_sections).
 _ALLOWED_COLUMNS = frozenset(
     {"submitted_description", "correspondence", "root_cause_narrative", "diagnostics_summary"}
 )
 
 
-# ── eval-file access ───────────────────────────────────────────────────────────────
-def load_gold(path: Path = GOLD) -> list[dict]:
+# ── recipe access (content-free) ─────────────────────────────────────────────────
+def load_recipe(path: Path = RECIPE) -> list[dict]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
@@ -51,7 +37,7 @@ def members(record: dict) -> list[str]:
     return [t for t in (ct or "").split(",") if t]
 
 
-# ── store reads ────────────────────────────────────────────────────────────────────
+# ── store reads: tickets (the SOURCE / ground truth) ─────────────────────────────
 def _column_texts(
     conn,
     ticket_ids: Sequence[str],
@@ -77,9 +63,7 @@ def _column_texts(
     return out
 
 
-def gold_context(conn, record: dict) -> dict[str, list[str]]:
-    """Per generated field: exactly what the gold generation saw (source_sections columns
-    resolved over input_scope ids, honoring deduplicated / capped_at)."""
+def recipe_context(conn, record: dict) -> dict[str, list[str]]:
     src = record.get("source_sections", {})
     scope = record.get("input_scope", {})
     ctx: dict[str, list[str]] = {}
@@ -99,7 +83,6 @@ def gold_context(conn, record: dict) -> dict[str, list[str]]:
 
 
 def evidence_pool(conn, record: dict) -> dict[str, list[str]]:
-    """Per generated field: ALL member tickets' source columns, uncapped and undeduped."""
     src = record.get("source_sections", {})
     ids = members(record)
     pool: dict[str, list[str]] = {}
@@ -111,15 +94,40 @@ def evidence_pool(conn, record: dict) -> dict[str, list[str]]:
     return pool
 
 
-def synthesize_gold_candidate(conn, record: dict) -> Candidate:
-    """The human-curated gold as the first arm: its output is curated_description, its
-    per-field context is exactly the gold input_scope."""
+# ── store reads: wiki_pages (the curation UNDER TEST) ────────────────────────────
+def store_curation(conn, family: str, root_cause_id: str) -> dict:
+    row = conn.execute(
+        "SELECT curated_description FROM wiki_pages WHERE family = ? AND root_cause_id = ?",
+        (family, root_cause_id),
+    ).fetchone()
+    if row is None or not row[0]:
+        return {}
+    try:
+        data = json.loads(row[0])
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def has_curation(curation: dict) -> bool:
+    return any((curation.get(f) or "").strip() for f in GENERATED_FIELDS)
+
+
+def missing_curation(conn, records: Sequence[dict]) -> list[str]:
+    return [
+        r["root_cause_id"]
+        for r in records
+        if not has_curation(store_curation(conn, r["family"], r["root_cause_id"]))
+    ]
+
+
+def curation_candidate(conn, record: dict) -> Candidate:
     return Candidate(
-        arm="gold",
+        arm="curated",
         root_cause_id=record["root_cause_id"],
         family=record["family"],
-        curation=record["curated_description"],
-        context=gold_context(conn, record),
+        curation=store_curation(conn, record["family"], record["root_cause_id"]),
+        context=recipe_context(conn, record),
     )
 
 
@@ -132,13 +140,11 @@ def page_meta(conn, record: dict) -> PageMeta:
     )
 
 
-def build_gold_arm(conn, records: Sequence[dict]) -> tuple[list[Candidate], dict[str, PageMeta]]:
-    """Convenience: the gold arm's candidates + per-page meta for a set of records."""
-    cands = [synthesize_gold_candidate(conn, r) for r in records]
+def build_subject(conn, records: Sequence[dict]) -> tuple[list[Candidate], dict[str, PageMeta]]:
+    cands = [curation_candidate(conn, r) for r in records]
     meta = {r["root_cause_id"]: page_meta(conn, r) for r in records}
     return cands, meta
 
 
 def open_store(db: Path | None = None):
-    """Open the in-project operational store (default path from settings)."""
     return get_connection(db)

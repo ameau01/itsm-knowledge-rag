@@ -65,3 +65,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 - `docs/evaluation.md`, `docs/redaction-evaluation.md`, `docs/retrieval-evaluation.md`
+
+## [Curation Evaluation implementation]
+
+### Added
+- Using DeepEval test case to evaluate quality of wiki pages.
+- Using G-Eval custom query to evaluate quality of AI overview
+- Added ai-overview component to streamlit search page.
+
+### Documentation
+- `docs/running.md`, `docs/wiki-evaluation.md`
+

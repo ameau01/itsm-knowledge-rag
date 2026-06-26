@@ -2,25 +2,22 @@
 Operational data store — SQLite-backed persistence for the ingest pipeline.
 
 Two tables:
-  tickets    Redacted ticket text + structured metadata, one row per source ticket.
-             Source of truth for the vector index and serving layer.
-  wiki_pages One row per (family, root_cause_id). The deterministic columns
-             (curated_tickets, diagnostic_steps) are seeded by ingest; the generated
-             curated_description is filled later by the curation load step.
+  tickets     Redacted ticket text + structured metadata, one row per source ticket. Source of truth for the vector index and serving layer.
+  wiki_pages  One row per (family, root_cause_id). The columns (curated_tickets, diagnostic_steps) are filled later by the curation step
+  ai_overview A short Google-style summary of the page). Value stay NULL until their generation step runs.
 
 Usage
 -----
     from operational_store.store import get_connection, init_db, insert_redacted_tickets
 
-    conn = get_connection()          # opens / creates the DB
-    init_db(conn)                    # creates tables if they don't exist
-    truncate_tks_table(conn)         # clear before a full reimport
+    conn = get_connection() 
+    init_db(conn)
+    truncate_tks_table(conn)
     insert_redacted_tickets(conn, ticket_id, metadata, redacted_fields, version)
     conn.close()
 
-The caller is responsible for opening and closing the connection.
-Transactions are the caller's responsibility too — wrap bulk inserts in
-`with conn:` to get atomic commit-or-rollback semantics.
+The caller is responsible for opening and closing the connection. 
+DB Transactions are the caller's responsibility to wrap bulk inserts in `with conn:` to get atomic commit-or-rollback semantics.
 """
 
 from __future__ import annotations
@@ -69,8 +66,7 @@ CREATE TABLE IF NOT EXISTS tickets (
 );
 """
 
-# wiki_pages: one row per (family, root_cause_id). Ingest seeds the deterministic columns
-# (curated_tickets, diagnostic_steps); the curation load fills curated_description later.
+# wiki_pages: one row per (family, root_cause_id). 
 _DDL_WIKI_PAGES = """
 CREATE TABLE IF NOT EXISTS wiki_pages (
     family              TEXT    NOT NULL,
@@ -79,6 +75,8 @@ CREATE TABLE IF NOT EXISTS wiki_pages (
     diagnostic_steps    TEXT,                 -- JSON [{step,action,expected_result}]; canonical playbook (ingest)
     curated_tickets     TEXT,                 -- comma-joined member ticket_ids (ingest)
     curation_details    TEXT,                 -- JSON {model,pipeline_version,curated_at}; NULL until curated
+    ai_overview         TEXT,                 -- JSON {lead,key_points,confidence,evidence}; NULL until overview generated
+    ai_overview_details TEXT,                 -- JSON {model,pipeline_version,generated_at}; NULL until overview generated
     upserted_at         TEXT    NOT NULL,     -- seeded by ingest, bumped by curation load
     PRIMARY KEY (family, root_cause_id)
 );
@@ -123,12 +121,6 @@ def reset_tickets_table(conn: sqlite3.Connection) -> None:
     """
     Drop and recreate the tickets table.
 
-    Use this at the start of every ingest run instead of truncate — dropping
-    guarantees the live schema always matches the current DDL, preventing silent
-    schema-mismatch bugs during refactoring.
-
-    wiki_pages is reset + seeded separately by the ingest run (reset_wiki_pages +
-    seed_wiki_pages), because its deterministic columns derive from the rebuilt tickets.
     """
     conn.execute("DROP TABLE IF EXISTS tickets")
     conn.execute(_DDL_TICKETS)
@@ -140,9 +132,6 @@ def reset_tickets_table(conn: sqlite3.Connection) -> None:
 def truncate_tks_table(conn: sqlite3.Connection) -> int:
     """
     Delete all rows from the tickets table (rows only, schema preserved).
-
-    Prefer reset_tickets_table() for full ingest runs — it also refreshes the
-    schema.  This helper remains available for targeted row-level resets.
 
     Returns:
         Number of rows deleted.
@@ -171,12 +160,7 @@ def reset_wiki_pages(conn: sqlite3.Connection) -> None:
 
 def seed_wiki_pages(conn: sqlite3.Connection) -> int:
     """
-    Seed one wiki_pages row per (family, root_cause_id) with the DETERMINISTIC columns —
-    membership (`curated_tickets`) and the canonical diagnostic playbook (`diagnostic_steps`).
-    `curated_description` / `curation_details` stay NULL until the curation load runs.
-
-    Derivation logic for `diagnostic_steps` lives in operational_store.diagnostics so the
-    stored column and any renderer call the same function.
+    Seed one wiki_pages row per (family, root_cause_id).
 
     Returns:
         Number of wiki_pages rows seeded.
@@ -215,8 +199,7 @@ def update_wiki_curation(
     curation_details: str,
 ) -> int:
     """
-    Curation load writes ONLY the generated columns (curated_description, curation_details)
-    and bumps upserted_at. It never touches the ingest-owned deterministic columns.
+    Curation load writes ONLY the generated columns (curated_description, curation_details).
 
     Returns:
         Number of rows updated (1 if the page exists, 0 otherwise).
@@ -239,29 +222,6 @@ def insert_redacted_tickets(
     redacted_fields: dict[str, str],
     pipeline_version: str,
 ) -> None:
-    """
-    Insert one redacted ticket row into the tickets table.
-
-    Designed to be called inside a `with conn:` transaction block so that a
-    failed batch rolls back atomically rather than leaving the table
-    half-populated.
-
-    Args:
-        conn:             Open SQLite connection (caller manages lifecycle).
-        ticket_id:        e.g. "INC-AIT-0001".
-        metadata:         Dict from corpus.extractor.extract_metadata(). Keys:
-                            family, root_cause_id, submitted_at, priority,
-                            sla_plan, environment, applications,
-                            diagnostics_coverage
-        redacted_fields:  Output of redact_ticket() + observed_errors (not
-                          redacted). Expected keys:
-                            submitted_description, correspondence,
-                            diagnostics_summary, diagnostics_steps,
-                            diagnostics_steps_raw, diagnostics_procedure,
-                            observed_errors, resolution_steps,
-                            root_cause_narrative
-        pipeline_version: Semver string, e.g. "0.0.2".
-    """
     now = datetime.now(timezone.utc).isoformat()
 
     conn.execute(
@@ -349,3 +309,60 @@ def get_wiki_page(conn: sqlite3.Connection, root_cause_id: str) -> sqlite3.Row |
         "SELECT * FROM wiki_pages WHERE root_cause_id = ?", (root_cause_id,)
     )
     return cur.fetchone()
+
+
+# ── AI overview (query-time L2 selection support) ───────────────────────────────
+
+_OVERVIEW_SECTIONS = ("description", "correspondence", "diagnostics", "resolution")
+
+
+def _wiki_has_column(conn: sqlite3.Connection, col: str) -> bool:
+    return any(r[1] == col for r in conn.execute("PRAGMA table_info(wiki_pages)"))
+
+
+def _overview_loads(value):
+    if not value:
+        return None
+    try:
+        return json.loads(value)
+    except (json.JSONDecodeError, TypeError):
+        return value
+
+
+def get_ai_overview(conn: sqlite3.Connection, root_cause_id: str) -> dict | None:
+    """The chosen page's AI overview + curated/diagnostic payload for the serving layer, or None.
+    """
+    if not _wiki_has_column(conn, "ai_overview"):
+        return None
+    row = conn.execute(
+        "SELECT family, root_cause_id, ai_overview, ai_overview_details, "
+        "curated_description, diagnostic_steps, curated_tickets "
+        "FROM wiki_pages WHERE root_cause_id = ?",
+        (root_cause_id,),
+    ).fetchone()
+    if row is None or not (row["ai_overview"] or "").strip():
+        return None
+    overview = _overview_loads(row["ai_overview"])
+    if not isinstance(overview, dict):
+        return None
+    return {
+        "family": row["family"], "root_cause_id": row["root_cause_id"],
+        "ai_overview": overview,
+        "ai_overview_details": _overview_loads(row["ai_overview_details"]),
+        "curated_description": _overview_loads(row["curated_description"]),
+        "diagnostic_steps": _overview_loads(row["diagnostic_steps"]),
+        "curated_tickets": row["curated_tickets"],
+    }
+
+
+def build_card_lookup(conn: sqlite3.Connection) -> dict:
+    """(ticket_id, section_name) -> {'family', 'root_cause'(slug)} for every ticket × section.
+    """
+    rows = conn.execute("SELECT ticket_id, family, root_cause_id FROM tickets").fetchall()
+    lookup = {}
+    for r in rows:
+        rc = r["root_cause_id"]
+        card = {"family": r["family"], "root_cause": rc.split("/", 1)[-1] if rc else None}
+        for sec in _OVERVIEW_SECTIONS:
+            lookup[(r["ticket_id"], sec)] = card
+    return lookup

@@ -25,6 +25,9 @@ load_dotenv()
 # src/ on path so the app can import the retriever package.
 _REPO = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO / "src"))
+sys.path.insert(0, str(_REPO / "streamlit_app"))   # sibling component modules (overview_block)
+
+import overview_block   # noqa: E402  (after sys.path setup)
 
 # ── section contract (mirrors corpus/sections.py) ──────────────────────────────
 SECTION_COLUMNS = {
@@ -158,6 +161,15 @@ CARDS = load_section_cards()
 LOOKUP = {(c["tid"], c["section"]): c for c in CARDS}
 
 
+@st.cache_resource
+def _overview_conn():
+    """A long-lived read connection to the operational store for get_ai_overview."""
+    import sqlite3
+    c = sqlite3.connect(str(_db_path()), check_same_thread=False)
+    c.row_factory = sqlite3.Row
+    return c
+
+
 @st.cache_resource(show_spinner="Loading the retriever (first run downloads the embedding model)…")
 def get_retriever():
     """Build the arms once per app process. Returns the {name: arm} dict, or an error string."""
@@ -223,6 +235,7 @@ if query and st.query_params.get("q") != query:
 
 # ── retrieve a candidate pool (the universe for both facets and results) ─────────
 candidates: list[dict] = []
+overview_sel = None
 retriever_error = None
 if query:
     arms = get_retriever()
@@ -230,10 +243,15 @@ if query:
         retriever_error = arms
     else:
         from retrieval.relevance import relevant_keys   # app-level gate (hybrid rank + cosine floor)
+        from retrieval.overview_select import select_overview
         q = _Query(query)
-        for key in relevant_keys(arms, q, POOL):
+        ranked_keys = list(relevant_keys(arms, q, POOL))
+        for key in ranked_keys:
             if key in LOOKUP:
                 candidates.append(LOOKUP[key])
+        # AI Overview: tied to the query via the UNFILTERED candidates (filter-agnostic). None when
+        # there is no answer or the overview column is NULL/missing — render_overview then shows nothing.
+        overview_sel = select_overview(ranked_keys, LOOKUP, _overview_conn())
 
 # ── sidebar facets, built from the retrieved candidates ───────────────────────────
 with st.sidebar:
@@ -262,6 +280,9 @@ if retriever_error is not None:
         "(`uv run sh scripts/build_retrieval_index.sh`). See docs/running.md."
         f"\n\nDetail: {retriever_error}")
     st.stop()
+
+# AI Overview — above the source tickets (Google layout). Renders nothing when overview_sel is None.
+overview_block.render_overview(overview_sel)
 
 shown: list[dict] = []
 n_pages, page = 1, 0

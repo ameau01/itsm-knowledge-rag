@@ -1,6 +1,6 @@
 [project]
 name = "itsm-knowledge-rag"
-version = "0.0.2"
+version = "0.1.0"
 description = "Turns closed IT tickets into searchable, verifiable answers. RAG pipeline with PII redaction at ingest (Presidio + custom recognizers), hybrid retrieval (Qdrant, dense + sparse vectors), and LLM curation — with a deterministic PII-leakage benchmark separate from judge-based curation quality."
 readme = "README.md"
 license = { file = "LICENSE" }

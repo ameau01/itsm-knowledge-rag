@@ -1,6 +1,6 @@
 [project]
 name = "itsm-wiki"
-version = "0.0.2"
+version = "0.1.0"
 description = "Lean wiki image: serve the committed MkDocs site. No ML/ingest deps."
 requires-python = ">=3.11"
 dependencies = []

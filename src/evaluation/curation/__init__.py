@@ -1,18 +1,17 @@
 """Curation (L2) evaluation harness.
 
-Scores a curation *strategy* (single-shot, ReAct, IR pipeline, ...) the same way the L1
-harness scores a retrieval arm: arm x case x metric x runs -> (mean, stdev). An "arm" here
-is a curation strategy; the unit under test is the generated `curation` per root cause.
+Evaluates the live curation in the operational store's wiki_pages table against the source tickets.
+From L1 harness scores retrieval: case x metric x runs -> (mean, stdev).
 
-Strategy code never lives here. A strategy emits frozen candidate files
-(eval-set/wiki/candidates/<arm>/<root_cause>.json); this package only *scores* candidates,
-so runs are reproducible and the measuring stick is fixed before any strategy is written.
-The human-curated gold is just the first arm (synthesized from the eval mapping), doubling
-as the harness self-test.
+Three roles, kept strictly separate:
+  - RECIPE  eval-set/wiki/wiki-currated-tickets.json — Receipe for evaluation.
+  - SUBJECT wiki_pages.curated_description — the generated curation under test, read live.
+  - SOURCE  the tickets table free-text columns — the ground truth the subject is judged on.
+
+Reading the store is the only supported path: there is no gold answer and no candidate arms.
+If any in-scope page has no curation, the run hard-exits — you cannot score what isn't there.
 
 Reference wiring (the "split" decision):
-  - Faithfulness  -> each arm's OWN logged context (per-field). A strategy that under-
-    retrieves and then invents detail correctly fails.
-  - Summarization / Variation -> the FULL evidence pool (all member tickets, uncapped), so
-    under-retrieval shows up as dropped content.
+  - Faithfulness  -> Did the curation invent anything not in the tickets it was meant to summarize?
+  - Summarization / Variation -> the FULL evidence pool, so dropped content shows up as low coverage.
 """

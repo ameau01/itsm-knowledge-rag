@@ -2,6 +2,7 @@
 
 Deterministic, no LLM. For each wiki_pages row it renders a Material-for-MkDocs page:
   - curated prose (Description / Root cause / Recommendation) from curated_description
+  - a curated plain-language diagnostic_summary atop the canonical Diagnostics steps
   - the canonical Diagnostics from wiki_pages.diagnostic_steps (already deterministic)
   - Affected-environment stats and 1-2 Resolution examples from the member tickets
 Then it writes the home page (index.md) and the explicit nav into mkdocs.yml.
@@ -221,9 +222,13 @@ def render_page(conn, row) -> tuple[str, int, str]:
     if curated and (u.get("cause") or "").strip():
         p += ["## Root cause", "", u["cause"].strip(), ""]
 
-    if diag:
-        p += ["## Diagnostics", "", "Steps used to confirm this root cause:", "",
-              _steps_md(diag), ""]
+    diag_summary = (u.get("diagnostic_summary") or "").strip() if curated else ""
+    if diag_summary or diag:
+        p += ["## Diagnostics", ""]
+        if diag_summary:
+            p += [diag_summary, ""]   # curated plain-language summary, above the verbatim steps
+        if diag:
+            p += ["Steps used to confirm this root cause:", "", _steps_md(diag), ""]
 
     if examples:
         p += ["## Resolution", ""]

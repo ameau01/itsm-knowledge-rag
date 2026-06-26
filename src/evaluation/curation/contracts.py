@@ -16,9 +16,7 @@ ANSWER_RELEVANCY = "answer_relevancy"
 SUMMARIZATION = "summarization"
 VARIATION = "variation"
 
-# Generated, faithfulness-checked fields (reporting is a template -> excluded).
-GENERATED_FIELDS: tuple[str, ...] = ("title", "symptoms", "cause", "variations")
-# Fields that make up the "body" judged for completeness (title is a label, not body).
+GENERATED_FIELDS: tuple[str, ...] = ("title", "symptoms", "cause", "variations", "diagnostic_summary")
 BODY_FIELDS: tuple[str, ...] = ("symptoms", "cause", "variations")
 
 
@@ -144,8 +142,7 @@ def build_curation_cases(
         # SummarizationMetric reads input as the source doc, actual_output as the summary.
         add(SUMMARIZATION, body, [], inp="\n\n".join(source))
 
-    # 4) Variation preservation — multi-ticket pages only (a singleton has no cross-ticket
-    #    variation). Judged against the variations' evidence pool.
+    # 4) Variation preservation — multi-ticket pages only (a singleton has no cross-ticket variation). Judged against the variations' evidence pool.
     if multi_ticket:
         variation_text = "\n".join(
             t for t in (_clean(u.get("variations")), symptoms) if t

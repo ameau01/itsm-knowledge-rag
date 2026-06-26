@@ -1,6 +1,6 @@
 # ITSM Knowledge RAG
 
-[![Status](https://img.shields.io/badge/status-v0.0.2%20initial%20design-orange)](#project-status)
+[![Status](https://img.shields.io/badge/status-v0.1.0%20in%20progress-yellow)](#project-status)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face%20Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
 [![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20hybrid-blueviolet)](https://qdrant.tech)
@@ -33,6 +33,7 @@ This project makes an organization's own resolution history usable again. It is 
 When a new support ticket arrives, the human support agent can search this system for similar issues. The system returns a quick overview of past resolutions. This summary highlights common symptoms, root causes, and successful fixes. Links to the original source tickets are also provided. The agent decides whether the new ticket is genuinely the same problem and reuses the proven resolution if it fits.
 
 This system never sees the new ticket. The judgment stays with the agent. The system surfaces prior knowledge and ranks the evidence. It does not classify the new ticket, declare a match, or apply a fix. That separation is deliberate. Deciding whether two tickets are the same problem is exactly the call a human should make before applying a fix.
+
 
 A general-purpose model only knows generic troubleshooting. It does not hold an organization's specific, proven resolutions. This project establishes a knowledge pipeline to turn corporate records into useful, actionable information.
 
@@ -100,6 +101,18 @@ docker compose down --rmi all -v   # full wipe: containers, both images, and vol
 Plain `down` keeps the volumes, so the next `up` skips ingest and embedding and serves in seconds. `down -v` deletes them, so the next `up` re-ingests, re-embeds, and re-downloads the corpus and the embedding model (~2 GB) — a full first run again. Use `-v` only when you want a clean slate. `--build` rebuilds the image; add it only after changing the code or the Dockerfile (the first `up` builds automatically if the image is missing). To remove only the app image while keeping the Qdrant one: `docker image rm itsm-knowledge-rag:latest` after `docker compose down`.
 
 
+## The wiki (employee-facing knowledge pages)
+
+The curated knowledge is also published as a static **MkDocs** site (one page per root cause), served separately from the search app and on its own port (`WIKI_VIEW_PORT`, default 8001). It reads the operational store, not the vector index, so it has no Qdrant dependency.
+
+```
+docker compose up wiki-demo    # serve the committed mkdocs/ pages — no key, no DB, instant
+docker compose up wiki-live    # ingest + build a fresh site into .mkdocs/, then serve that
+```
+
+**The pages are generated, not hand-authored.** Each page is rendered deterministically from the `wiki_pages` table. The plain-language summary comes from LLM curation. Diagnostics, environment stats, and resolution examples are surfaced verbatim from the tickets. The rendered pages are committed, so GitHub Pages deploys them with a key-free `mkdocs build`. No LLM step runs in CI. `wiki-demo` serves the committed snapshot. `wiki-live` rebuilds a fresh site from the store. The generation is fully reproducible. Committing the output is a deploy convenience.
+
+
 ## Scope
 
 This is a focused system, not a platform. It runs on a single ITSM ticket corpus. It uses one inexpensive model throughout. It is not agentic. There is no tool use and no autonomous orchestration. Curation organizes problem descriptions. It preserves the root causes and resolutions human engineers determined rather than arbitrating them. The architecture is deliberately simple. The evaluation is where the rigor goes. The reasoning behind these and other choices is in [docs/decisions.md](docs/decisions.md).
@@ -129,14 +142,16 @@ Python, Qdrant (native dense + sparse fusion), AD directory match + format rules
 
 ## Project status
 
-[![Version](https://img.shields.io/badge/version-0.0.2-blue)](https://github.com/ameau01/itsm-knowledge-rag/releases)
-[![Status: Design](https://img.shields.io/badge/status-initial%20design-orange)](https://github.com/ameau01/itsm-knowledge-rag)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/ameau01/itsm-knowledge-rag/releases)
+[![Status: In Progress](https://img.shields.io/badge/status-in%20progress-blue)](https://github.com/ameau01/itsm-knowledge-rag)
 
-Early stage: The dataset is published and the design is documented. Implementation is in progress.
 
+In progress: 
+- The dataset is published and the design is documented. Implementation is in progress.
 - Published dataset with an authored PII sidecar: [`ameau01/synthetic-it-support-tickets`](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets).
 - Initial design documentation on docs/ folder.
 - Add Presidio redaction code to ingestion process, and deepeval for curation evaluation.
+- Add DeepEval and G-Eval to measure quality of Wiki pages and AI overview.
 
 ## License
 
@@ -150,6 +165,6 @@ MIT.
   title   = {ITSM Knowledge RAG},
   author  = {Alexander Meau},
   year    = {2026},
-  version = {0.0.2}
+  version = {0.1.0}
 }
 ```

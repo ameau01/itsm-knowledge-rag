@@ -51,9 +51,13 @@ The live app is a search box over the ticket corpus. Type a problem in plain lan
 
 ![Home page: a plain search box with a few example queries from the eval-set](images/home.png)
 
-Results come back ranked by live hybrid retrieval. The filters on the left reflect the retrieved set, not the whole corpus. Each hit shows the matched section and links to the full ticket.
+Results come back with an AI overview at the top. It is a short answer naming the most likely cause, with a confidence label. The ranked source tickets sit underneath to verify it. The filters on the left reflect the retrieved set, not the whole corpus.
 
-![Search results: ranked tickets for the query, with family, priority, and other facets](images/search-result.png)
+![Search results: the AI overview on top, with ranked source tickets and facets below](images/search-result.png)
+
+Expanding the overview reveals the diagnostic steps. They are surfaced verbatim from how the issue was resolved in past tickets.
+
+![The expanded AI overview with verbatim diagnostic steps](images/ai-overview.png)
 
 A ticket opens to the full record: description, environment, correspondence, root cause, diagnostics, and resolution.
 
