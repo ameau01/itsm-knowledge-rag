@@ -16,6 +16,8 @@
 
 Similarity is not relevance. A search engine ranks tickets that look alike, but two tickets can read the same and be different problems. So this system does not stop at search. It curates an organization's own resolution history into verified answers, then surfaces the source tickets underneath so an agent can confirm before acting. A general model can describe standard VPN troubleshooting. It cannot know that in this company the disconnect was an expired device certificate fixed through the internal enrollment service. That fact lives only in the company's tickets.
 
+![Agent search showing an AI Overview marked high confidence and synthesized from 11 consolidated tickets, with a common pattern, scope and variation, how the issue is identified, and verbatim diagnostic steps from the playbook below](docs/images/ai-overview.png)
+
 
 ## The problem
 
@@ -43,7 +45,7 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 **Redaction runs first, over the whole ticket.** No personal data reaches the searchable layer or any published surface. A declarative policy drives three layers: exact match against the corporate user directory shipped with the dataset, format rules for structured identifiers, and Presidio NER as a catch-all. The directory is the primary control on identity recall, the same pattern as a periodic AD pull in production. Redacting first also removes the person-specific tokens that would otherwise stop curation from generalizing. See [docs/redaction-policy.md](docs/redaction-policy.md).
 
-**Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/retrieval.md](docs/retrieval.md).
+**Curation consolidates the messy fields.** Users describe the same problem many ways. Curation turns those descriptions into one common, searchable issue statement. The human-determined root cause and resolution are surfaced verbatim, not regenerated. The system organizes the questions. It does not rewrite the answers. See [docs/wiki-curation.md](docs/wiki-curation.md).
 
 **Retrieval is hybrid, and the overview is cached.** Hybrid search matches a query to the right issue family. Qdrant fuses dense and sparse vectors in one query with Reciprocal Rank Fusion. The overview body is precomputed per family. A search returns a prepared answer instead of synthesizing one on every query. The cached overview is the same idea as a Google "AI Overview." Precomputing it maximizes response speed and eliminates redundant LLM inference costs. See [docs/retrieval.md](docs/retrieval.md). The curated pages are held in a relational store that is the source of truth, with the vector index built from it; see [docs/operational-store.md](docs/operational-store.md).
 
@@ -60,7 +62,7 @@ Measured on a synthetic corpus of 745 tickets across 14 issue families. The eval
 | Technical retention | RETAIN-class strings preserved | 97.6% |
 | Retrieval (hybrid, shipped) | recall@10 (strict / family) | 0.649 / 0.970 |
 | Abstention | accuracy on out-of-corpus queries | 1.000 |
-| Curation quality (judge-based) | faithfulness, variation-preservation | TBD |
+| Curation quality (judge-based) | faithfulness / variation-preservation | 0.95–0.99 / 0.927 |
 
 The PII-leakage check is the one hard, non-circular number. Its ground truth is authored upstream, independently of the redaction system being tested, so the redactor cannot grade itself. The curation metrics are judge-based and reported as such. The project is explicit about which guarantees are deterministic and which are interpretive.
 
@@ -96,9 +98,8 @@ docker compose up -d rag-live      # run detached (frees your terminal)
 docker compose down                # stop + remove containers; image and data volumes kept
 docker compose up rag-live         # re-run: reuses the image and the built index, serves at once
 docker compose down -v             # also remove the data volumes (index, store, model cache)
-docker compose down --rmi all -v   # full wipe: containers, both images, and volumes
 ```
-Plain `down` keeps the volumes, so the next `up` skips ingest and embedding and serves in seconds. `down -v` deletes them, so the next `up` re-ingests, re-embeds, and re-downloads the corpus and the embedding model (~2 GB) — a full first run again. Use `-v` only when you want a clean slate. `--build` rebuilds the image; add it only after changing the code or the Dockerfile (the first `up` builds automatically if the image is missing). To remove only the app image while keeping the Qdrant one: `docker image rm itsm-knowledge-rag:latest` after `docker compose down`.
+Plain `down` keeps the volumes, so the next `up` serves in seconds. `down -v` deletes them, so the next `up` re-ingests and re-downloads about 2 GB. Use `-v` only for a clean slate. Full cleanup options and the rebuild flags are in [docs/running.md](docs/running.md).
 
 
 ## The wiki (employee-facing knowledge pages)
@@ -106,7 +107,7 @@ Plain `down` keeps the volumes, so the next `up` skips ingest and embedding and 
 The curated knowledge is also published as a static **MkDocs** site (one page per root cause), served separately from the search app and on its own port (`WIKI_VIEW_PORT`, default 8001). It reads the operational store, not the vector index, so it has no Qdrant dependency.
 
 ```
-docker compose up wiki-demo    # serve the committed mkdocs/ pages — no key, no DB, instant
+docker compose up wiki-demo    # serve the committed mkdocs/ pages, no key, no DB, instant
 docker compose up wiki-live    # ingest + build a fresh site into .mkdocs/, then serve that
 ```
 

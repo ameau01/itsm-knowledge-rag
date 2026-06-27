@@ -25,7 +25,15 @@ The body of each overview is built once during ingest and cached. The expensive 
 
 The alternative is zero-shot synthesis: run an LLM over the retrieved tickets on every query. That pays the consolidation cost every time, adds latency to each search, and produces a rushed single-pass answer with no cross-ticket consolidation.
 
-Precompute is available here because the corpus is bounded. A finite set of issue families means each overview body can be built ahead of time and reused. A live web search cannot do this, because the web is unbounded. So the experience matches a Google AI Overview, with the heavy consolidation paid once. Faithfulness, relevancy, summarization and variation preservation are measured in [wiki-evaluation.md](wiki-evaluation.md).
+Precompute is available here because the corpus is bounded. A finite set of issue families means each overview body can be built ahead of time and reused. A live web search cannot do this, because the web is unbounded. So the experience matches a Google AI Overview, with the heavy consolidation paid once. Faithfulness, relevancy, and variation preservation are measured in [wiki-evaluation.md](wiki-evaluation.md).
+
+## The AI overview is decoupled from curation
+
+The AI overview is the short answer at the top of agent search. It could have been the last node in the curation loop. It is deliberately not.
+
+Instead it is a separate stage that runs after curation. It reads the finished page and writes one more field. The reason is cost and tuning. Curation is slow and occasionally fails mid-run. The overview is fast, and its prompt is the most-tuned part of the design, since it carries the confidence tiers and the hedging. Decoupled, the overview can be re-run over the existing pages without re-curating anything. Coupled, every prompt tweak would re-enter the expensive curation path.
+
+The seam is clean because each curation arm ends the same way, with a finished page in the store. One overview stage serves all of them, single-shot or multi-agent, unchanged. The overview is a pure update of one field, safe to re-run. A failure on one page leaves that page without an overview, and does not block the rest. How the overview is scored is in [wiki-evaluation.md](wiki-evaluation.md).
 
 ## At ingest: redaction runs first, and it does more than protect
 
@@ -33,4 +41,4 @@ Redaction is the first step of ingest, over the whole ticket. The obvious reason
 
 The less obvious reason is that redaction is also an enabling precondition for curation. Person-specific tokens, a name, a username, a device hostname, are what make one ticket look different from another describing the same problem. Removing them is what lets curation consolidate many descriptions into one common pattern.
 
-So the ordering is deliberate. Redaction does not normalize; curation does. But curation cannot generalize cleanly over text still full of unique identifiers. Redaction clears that noise first, then curation consolidates. The policy and the leakage contract are in [redaction-policy.md](redaction-policy.md). The consolidation step is in [retrieval.md](retrieval.md).
+So the ordering is deliberate. Redaction does not normalize; curation does. But curation cannot generalize cleanly over text still full of unique identifiers. Redaction clears that noise first, then curation consolidates. The policy and the leakage contract are in [redaction-policy.md](redaction-policy.md). How the consolidation is designed is in [wiki-curation.md](wiki-curation.md).

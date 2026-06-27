@@ -59,7 +59,7 @@ flowchart LR
 
 **Redaction runs first, over the whole ticket.** It is a safety gate. No personal data reaches the index or the published wiki. It is also an enabling precondition. Removing person-specific tokens is what lets curation consolidate many descriptions into one common pattern. Redaction does not normalize. It clears the way so curation can. The policy and the leakage contract are in [docs/redaction-policy.md](docs/redaction-policy.md).
 
-**Curation consolidates descriptions. Golden fields pass through.** The messy content is how users describe a problem, not the answer. Curation turns those varied descriptions into one searchable issue statement, and keeps the distinct variations alongside it. The diagnostic steps and resolution were determined by a human engineer. They are surfaced verbatim, never regenerated. The system organizes the questions; it does not rewrite the answers. Detail in [docs/retrieval.md](docs/retrieval.md).
+**Curation consolidates descriptions. Golden fields pass through.** The messy content is how users describe a problem, not the answer. Curation turns those varied descriptions into one searchable issue statement, and keeps the distinct variations alongside it. The diagnostic steps and resolution were determined by a human engineer. They are surfaced verbatim, never regenerated. The system organizes the questions; it does not rewrite the answers. How curation is designed is in [docs/wiki-curation.md](docs/wiki-curation.md).
 
 Unlike the original pattern, ingest here is batch, not compounding. The corpus is bounded and frozen, so a source does not trigger cascading page updates. This is a deliberate scope choice. It is what makes the ground truth stable enough for a deterministic eval.
 
@@ -131,11 +131,12 @@ Wiki pages are grouped by seed category. Each page covers one root cause. The sc
 | Section | Content | Source |
 |---|---|---|
 | Category, root cause | The grouping and the cause | From the tickets |
-| Aggregated description | One readable problem statement, consolidated from many tickets | Synthesized |
+| Title | A short, distinct name for the issue | Synthesized |
+| Symptoms | One readable problem statement, consolidated from many tickets | Synthesized |
 | Variations | Distinct ways the problem was described, kept alongside | Preserved, not merged |
-| Diagnostic steps | What was checked, and what was observed | Golden, verbatim |
-| Resolution | The steps that worked | Golden, verbatim |
+| Cause | The plain-language root cause | Synthesized from engineer notes |
+| Diagnostic steps, resolution | The exact steps that were run and that worked | Golden, verbatim |
 
-Two principles shape this. First, the description and correspondence are synthesized into one readable statement, because that is what makes the AI-generated overview fast to read. The overview does not show variations. Second, the variations are still preserved on the page, because a closed ticket is treated as source of truth until a human redacts or removes it. A description that differs is not a conflict to drop. It is a legitimate variation to surface. The diagnostic steps and resolution are golden and are never synthesized. They are the content the employee actually needs, so they are shown as the engineer recorded them.
+Two principles shape this. First, the descriptions and correspondence are synthesized into one readable symptom statement, because that is what makes the AI-generated overview fast to read. The overview does not show variations. Second, the variations are still preserved on the page, because a closed ticket is treated as source of truth until a human redacts or removes it. A description that differs is not a conflict to drop. It is a legitimate variation to surface. The diagnostic steps and resolution are golden and are never synthesized. They are the content the employee actually needs, so they are shown as the engineer recorded them.
 
 Sample pages, in markdown, are in [sample-wiki-pages/](../sample-wiki-pages/), so the structure is visible before the pipeline is complete.
