@@ -246,6 +246,7 @@ def update_wiki_overview(
         "WHERE family = ? AND root_cause_id = ?",
         (ai_overview, ai_overview_details, now, family, root_cause_id),
     )
+    conn.commit()
     return cur.rowcount
 
 
