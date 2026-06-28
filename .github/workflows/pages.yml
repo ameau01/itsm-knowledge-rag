@@ -1,0 +1,41 @@
+name: Deploy wiki to GitHub Pages
+
+# Builds the COMMITTED wiki Markdown (mkdocs/) into a static site and deploys it.
+# It does NOT run ingest, curation, or any LLM — it only compiles md -> html, so CI is
+# bulletproof and key-free. The committed md is regenerated from the operational store by
+# the mkdocs compilation (scripts/build_wiki.sh) and `docker compose up wiki-live`.
+
+on:
+  push:
+    branches: [main]
+    paths: ["mkdocs/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; cancel in-progress.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install mkdocs-material
+      - run: mkdocs build -f mkdocs/mkdocs.yml
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: mkdocs/site
+      - id: deployment
+        uses: actions/deploy-pages@v4
