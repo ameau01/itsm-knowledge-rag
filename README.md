@@ -106,6 +106,10 @@ Plain `down` keeps the volumes, so the next `up` serves in seconds. `down -v` de
 
 The curated knowledge is also published as a static **MkDocs** site (one page per root cause), served separately from the search app and on its own port (`WIKI_VIEW_PORT`, default 8001). It reads the operational store, not the vector index, so it has no Qdrant dependency.
 
+It is deployed live on GitHub Pages: **[ameau01.github.io/itsm-knowledge-rag](https://ameau01.github.io/itsm-knowledge-rag/)** — built from the committed `mkdocs/` by a key-free `mkdocs build` (no LLM runs in CI).
+
+![The employee-facing wiki published on GitHub Pages: one root-cause page with the plain-language summary, affected-environment stats, diagnostics, and resolution examples](docs/images/wiki-github-page.png)
+
 ```
 docker compose up wiki-demo    # serve the committed mkdocs/ pages, no key, no DB, instant
 docker compose up wiki-live    # ingest + build a fresh site into .mkdocs/, then serve that
