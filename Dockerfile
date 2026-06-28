@@ -20,9 +20,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
+# FASTEMBED_CACHE_PATH is NOT a volume, so the baked BM25 model lives in the image layer.
+ENV HF_HOME=/app/.hf_cache \
+    FASTEMBED_CACHE_PATH=/app/.fastembed_cache
+
 # Pre-baked --group flags (not a bare list): beefy default = everything (rag-live + wiki-live);
-# rag-demo overrides to "--group retrieval --group app" (no wiki). Direct ${SYNC_GROUPS}
-# expansion — no subshell — so the flags can never silently resolve to empty.
 ARG SYNC_GROUPS="--group retrieval --group app --group wiki"
 
 # 1) Dependencies first, for layer caching. Only the lockfiles (+ SYNC_GROUPS) invalidate this.
@@ -37,12 +39,16 @@ RUN uv sync ${SYNC_GROUPS}
 #    DEFAULT groups and STRIP the optional groups (retrieval/app/wiki) just installed above.
 RUN uv run --no-sync python -m spacy download en_core_web_lg
 
+# 3b) Bake the dense + sparse embedding models into the image (into $HF_HOME) 
+RUN uv run --no-sync python -c "import sys; sys.path.insert(0, 'src'); \
+from retrieval.embeddings import DenseEmbedder, SparseEmbedder; \
+DenseEmbedder(); SparseEmbedder(); print('embedders baked into', __import__('os').environ.get('HF_HOME'))"
+
 # 4) Fail the BUILD (not production) if the groups didn't actually land. retrieval -> qdrant_client,
 #    app -> streamlit; both are present in every image built from this file (beefy and rag-demo).
 RUN uv run --no-sync python -c "import qdrant_client, streamlit; print('deps OK:', qdrant_client.__name__, streamlit.__name__)"
 
-# Use the environment built above as-is at runtime: every `uv run` in the entrypoint and the
-# scripts should skip re-syncing (no project rebuild, no bytecode recompile on each call).
+# Use the environment built above as-is at runtime: every `uv run` in the entrypoint.
 ENV UV_NO_SYNC=1
 
 # The app serves on SUPPORT_VIEW_PORT (default 8000).

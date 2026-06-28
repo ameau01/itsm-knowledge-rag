@@ -1,16 +1,16 @@
 # Running the system
 
-Two modes. Mock mode replays recorded fixtures and needs no API key. Live mode runs the real models and the live retriever. For what the system does, see the [README](../README.md). For how it works, see [ARCHITECTURE.md](../ARCHITECTURE.md).
+Two modes. Mock mode loads the store from committed SQL seeds and needs no API key or network. Live mode runs a real Hugging Face ingest with Presidio redaction, then applies the same curated seeds. Neither serving mode calls an LLM — curation and overviews are precomputed and shipped as seeds. For what the system does, see the [README](../README.md). For how it works, see [ARCHITECTURE.md](../ARCHITECTURE.md).
 
-Everything upstream and downstream of the model call is identical across modes. Only the LLM client swaps. The same pipeline, index, redaction, and eval run in every mode.
+Everything downstream of ingest is identical across modes. The only difference is where tickets come from: committed seeds (mock) or a live HF download + redaction (live). The same index, retrieval, and eval run in every mode.
 
 
 ## Mock mode (no key)
 
-No LLM, no API key, no network. The fastest way to see the system run. It replays recorded fixtures through the real pipeline, including the L2 curated overviews, and serves the views with a MOCK MODE banner so it is never mistaken for live generation.
+No LLM, no API key, no network. The fastest way to see the system run. It loads the operational store from committed SQL seeds (tickets + curated overviews), builds the embedding index locally, and serves the views.
 
 ```
-docker compose up --build demo
+docker compose up rag-demo
 ```
 
 Use this to see the search interface, the overview-plus-sources layout, and the two views, without any setup.
@@ -18,7 +18,7 @@ Use this to see the search interface, the overview-plus-sources layout, and the 
 
 ## Live mode, from scratch
 
-For a reviewer who wants real retrieval. The setup below builds the index and serves a live search. None of these steps call an LLM. Retrieval is dense + sparse + RRF, all local. An API key is only needed to also run the curated overview (L2) and the judge eval; it is not needed for live retrieval.
+For a reviewer who wants real ingest. The setup below redacts the corpus, loads the curated content, builds the index, and serves a live search. None of these steps call an LLM. Retrieval is dense + sparse + RRF, all local. No API key is needed to serve — curation and overviews ship as committed seeds; a key is only for the judge eval or regenerating the seeds.
 
 1. Install dependencies.
 
@@ -32,7 +32,7 @@ uv sync --group retrieval --group app
 cp .env.example .env
 ```
 
-3. Build and serve in one command. This redacts the corpus into the operational store and builds the embedding index if they are missing, then starts the app. The first run downloads the corpus and the dense model (about 2 GB, cached in `.hf_cache`) and embeds the corpus; later runs skip the builds and just launch.
+3. Build and serve in one command. This redacts the corpus into the operational store, loads the curated content + AI overview from the committed seeds, and builds the embedding index if missing, then starts the app. The first run downloads the corpus and the dense model (about 2 GB, cached in `.hf_cache`) and embeds the corpus; later runs skip the builds and just launch.
 
 ```
 uv run sh scripts/run_demo.sh --port 8000
@@ -40,7 +40,7 @@ uv run sh scripts/run_demo.sh --port 8000
 
 Open the app, type a problem in plain language, and get the closest ticket sections back by live hybrid retrieval. A few example queries from the eval-set sit under the search box.
 
-For manual control, run the three steps yourself instead: `scripts/run_ingest.sh` (redact to SQLite), `scripts/build_retrieval_index.sh` (embed to Qdrant), `scripts/run_streamlit.sh` (serve).
+For manual control, run the steps yourself instead: `scripts/run_ingest.sh` (redact to SQLite — it also loads the curated seeds at the end), `scripts/build_retrieval_index.sh` (embed to Qdrant), `scripts/run_streamlit.sh` (serve). To (re)load curation on its own — e.g. after an ingest that left it NULL — run `scripts/load_seeds.sh --l2-only`.
 
 To use a Qdrant server instead of the embedded store, set `QDRANT_LOCAL=false` in `.env` and point `QDRANT_URL` at it: a local container (`docker compose up -d qdrant`) or a Qdrant Cloud cluster (add `QDRANT_API_KEY`). With a server, run the three steps manually so you control when it is up. Build the index and serve in the same mode; the embedded and server storage formats are not interchangeable.
 
@@ -103,7 +103,7 @@ The three build artifacts are gitignored and safe to delete. The recent refactor
 | Path | Holds | Rebuild with |
 |---|---|---|
 | `.hf_cache` | corpus + embedding models | re-downloads on next ingest and index, about 2 GB |
-| `.operational_store` | redacted tickets (SQLite) | `scripts/run_ingest.sh` |
+| `.operational_store` | redacted tickets + curated content (SQLite) | `scripts/run_ingest.sh` (ingests, then loads the curated seeds) |
 | `.vector_db` | Qdrant index | `scripts/build_retrieval_index.sh` |
 
 To rebuild the data and index without re-downloading the models, delete `.operational_store` and `.vector_db` only, then re-run steps 4 and 5. Delete `.hf_cache` as well only to test the cold-download path.

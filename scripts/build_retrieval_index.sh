@@ -16,4 +16,5 @@
 
 set -e
 
-PYTHONPATH=src uv run --group retrieval python3 -m retrieval.ingest "$@"
+# --no-sync (not --group): the env is already synced (locally via `uv sync --group retrieval`,
+PYTHONPATH=src uv run --no-sync python3 -m retrieval.ingest "$@"

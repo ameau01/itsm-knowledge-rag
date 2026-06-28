@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
 done
 
 # ── Dependency check ───────────────────────────────────────────────────────────
-uv run --group app python3 -c "import streamlit" 2>/dev/null || {
+uv run --no-sync python3 -c "import streamlit" 2>/dev/null || {
   echo "Streamlit is not installed."
   echo "Install it with: uv sync --group app"
   exit 1
@@ -89,5 +89,5 @@ fi
 
 # ── Run ────────────────────────────────────────────────────────────────────────
 echo "Starting Streamlit on http://localhost:$PORT  (store: $STORE_DIR)"
-exec uv run --group app --group retrieval streamlit run streamlit_app/Home.py \
+exec uv run --no-sync streamlit run streamlit_app/Home.py \
   --server.port "$PORT" --server.fileWatcherType none $EXTRA

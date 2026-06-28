@@ -1,17 +1,19 @@
 # One-command stack for the ITSM Knowledge Search app.
 #
-#   cp .env.example .env                 # required (add a key only for rag-live L2 overview)
-#   docker compose up --build rag-demo   # mock L2, no key — builds, ingests, embeds, serves
-#   docker compose up --build rag-live   # live L2 (key in .env)
+#   cp .env.example .env                 # required for config (ports etc.); NO LLM key needed
+#   docker compose up rag-demo           # mock: store from SQL seeds — no HF, no redaction, no key
+#   docker compose up rag-live           # live: tickets from HF + redaction; L2 from SQL seeds, no key
+#     (first run auto-builds the image and starts qdrant; add --build only to force a rebuild)
 #   docker compose up -d qdrant          # just the vector store (for local `uv` runs)
 #   docker compose down                  # stop    |   docker compose down -v   # + wipe data
 #
 # Open http://localhost:8000  (override with SUPPORT_VIEW_PORT in .env).
 #
-# The app services talk to the qdrant service over the network (server mode), so there is no
-# embedded on-disk lock. Data persists in named volumes:
+# Neither app image needs an LLM key: L2 curation + overview ship as committed SQL seeds (db_seeds/),
+# and the embedding model is baked into the image at build time. The app services talk to the qdrant
+# service over the network (server mode), so there is no embedded on-disk lock. Named volumes:
 #   qdrant_storage  the vector index      op_store  redacted tickets (SQLite)
-#   hf_cache        corpus + embedding model (~2 GB, downloaded on first run)
+#   hf_cache        embedding model (baked into the image; live also caches the HF corpus here)
 
 x-app: &app
   build: .

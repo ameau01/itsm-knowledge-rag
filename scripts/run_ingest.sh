@@ -57,7 +57,7 @@ EOF
 esac
 
 # ── Dependency check ───────────────────────────────────────────────────────────
-uv run python3 -c "import pandas" 2>/dev/null || {
+uv run --no-sync python3 -c "import pandas" 2>/dev/null || {
   echo "Missing Python package: pandas"
   echo "Install with: uv sync"
   exit 1
@@ -70,7 +70,7 @@ HF_SNAPSHOTS="$HF_CACHE/datasets--ameau01--synthetic-it-support-tickets/snapshot
 if [ ! -d "$HF_SNAPSHOTS" ] || [ -z "$(ls -A "$HF_SNAPSHOTS" 2>/dev/null)" ]; then
   echo "HF dataset not found at $HF_SNAPSHOTS"
   echo "Downloading now..."
-  uv run sh scripts/test_hf_download.sh || {
+  uv run --no-sync sh scripts/test_hf_download.sh || {
     echo "Download failed. Run manually: uv run sh scripts/test_hf_download.sh"
     exit 1
   }
@@ -83,4 +83,14 @@ STORE_DIR="${OPERATIONAL_STORE:-.operational_store}"
 mkdir -p "$STORE_DIR"
 
 # ── Run ────────────────────────────────────────────────────────────────────────
-uv run python3 src/ingest/run_ingest.py "$@"
+uv run --no-sync python3 src/ingest/run_ingest.py "$@"
+
+# ── Load L2 curation + AI overview ─────────────────────────────────────────────
+# Ingest writes tickets and seeds wiki_pages with curated_description / ai_overview.
+case " $* " in
+  *" --dry-run "*)
+    echo "Dry run — skipping L2 curation/overview seed load." ;;
+  *)
+    echo "Loading curation + AI overview from db_seeds…"
+    uv run --no-sync sh scripts/load_seeds.sh --l2-only ;;
+esac

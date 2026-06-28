@@ -24,16 +24,31 @@ until curl -sf "$QURL/readyz" >/dev/null 2>&1; do
 done
 echo "[entrypoint] Qdrant is ready."
 
-# 2) Operational store (redacted tickets). PIPELINE_MODE controls L2 curation (mock|live).
-if [ -f "$STORE/itsm_rag.db" ]; then
-  echo "[entrypoint] operational store present — skipping ingest"
+# 2) Operational store. PIPELINE_MODE selects how TICKETS are sourced; the L2 content
+#    (curation + overview) ALWAYS comes from the committed SQL seeds (db_seeds/), so neither
+#    image ever needs an LLM key.
+#      mock  → tickets + L2 entirely from SQL seeds (no HF, no redaction, no key)
+#      live  → tickets from HF + redaction, then L2 applied from the SQL seeds
+MODE="${PIPELINE_MODE:-mock}"
+if [ "$MODE" = "live" ]; then
+  # live: HF ingest is expensive, so keep it idempotent (skip if the store already exists).
+  if [ -f "$STORE/itsm_rag.db" ]; then
+    echo "[entrypoint] LIVE: operational store present — skipping HF ingest"
+  else
+    echo "[entrypoint] LIVE: ingesting tickets from HF (redact) …"
+    uv run --no-sync sh scripts/run_ingest.sh
+    echo "[entrypoint] LIVE: applying L2 curation + overview from SQL seeds …"
+    uv run --no-sync sh scripts/load_seeds.sh --l2-only
+  fi
 else
-  echo "[entrypoint] ingesting corpus (redact, mode=${PIPELINE_MODE:-mock}) …"
-  uv run sh scripts/run_ingest.sh
+  # mock: loading from SQL seeds is cheap, so ALWAYS (re)load. This guarantees curation + overview
+  # are present even when the op_store volume is reused from an earlier run (the stale-volume trap).
+  echo "[entrypoint] MOCK: (re)loading store from SQL seeds (no HF, no redaction, no key) …"
+  uv run --no-sync sh scripts/load_seeds.sh
 fi
 
 # 3) Embedding index — build only if the collection is absent in Qdrant.
-if uv run --group retrieval python3 - <<'PY'
+if uv run --no-sync python3 - <<'PY'
 import sys
 sys.path.insert(0, "src")
 from retrieval.qdrant_ops import QdrantOps
@@ -43,11 +58,11 @@ PY
 then
   echo "[entrypoint] vector collection present — skipping index build"
 else
-  echo "[entrypoint] building embedding index (downloads the model once, ~2 GB) …"
-  uv run sh scripts/build_retrieval_index.sh
+  echo "[entrypoint] building embedding index (model baked into the image; this embeds the corpus) …"
+  uv run --no-sync sh scripts/build_retrieval_index.sh
 fi
 
 # 4) Serve. Bind 0.0.0.0 so the port is reachable from the host.
 echo "[entrypoint] serving on 0.0.0.0:$PORT"
-exec uv run --group app --group retrieval streamlit run streamlit_app/Home.py \
+exec uv run --no-sync streamlit run streamlit_app/Home.py \
   --server.address 0.0.0.0 --server.port "$PORT" --server.fileWatcherType none

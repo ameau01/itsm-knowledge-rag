@@ -33,5 +33,5 @@ EOF
 esac
 
 cd "$(dirname "$0")/.."
-uv sync -q
-uv run python src/test/test_hf_download.py
+# NOTE: no `uv sync` here — it would re-sync to the DEFAULT groups and strip the optional
+uv run --no-sync python src/test/test_hf_download.py

@@ -73,16 +73,16 @@ Three paths. Full detail in [docs/running.md](docs/running.md).
 
 **Path A. Docker, mock mode (no LLM, no key, no network).**
 ```
-docker compose up --build rag-demo
+docker compose up rag-demo
 ```
-Replays recorded fixtures through the real pipeline. The output carries a MOCK MODE banner.
+Loads the operational store from committed SQL seeds (tickets + curated overviews) and serves live local retrieval — no Hugging Face download, no redaction, no LLM key. (First run auto-builds the image; add `--build` to force a rebuild.)
 
-**Path B. Docker, live LLM.**
+**Path B. Docker, live ingest (real HF download + Presidio redaction).**
 ```
-cp .env.example .env   # add OPENAI_API_KEY and/or ANTHROPIC_API_KEY
-docker compose up --build rag-live
+cp .env.example .env   # config only — no LLM key needed
+docker compose up rag-live
 ```
-Builds the image, starts Qdrant, then ingests, embeds, and serves the search app at http://localhost:8000. The first run downloads the corpus and the dense model (about 2 GB, cached in a volume). Retrieval is dense + sparse + RRF; the key is only used for the curated L2 overview.
+Builds the image, starts Qdrant, ingests the corpus with live redaction, applies the curated L2 content from the committed seeds, embeds, and serves the search app at http://localhost:8000. The first run downloads the corpus and the dense model (about 2 GB, cached in a volume). Retrieval is dense + sparse + RRF, all local. No LLM key is needed — curation and overviews ship as SQL seeds; a key is only for regenerating the seeds or running the judge eval.
 
 **Path C. Local, no Docker (developer).**
 ```
