@@ -8,21 +8,20 @@ curated: true
 self_serviceable: true
 ---
 
-# Post-login laptop slowdown caused by temporary file buildup and low disk space
+# Post-Login Laptop Sluggishness Due to Temp File Disk Exhaustion
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience persistent sluggishness on their managed Windows 10 laptop beginning immediately after sign-in. Core applications — including Outlook, Chrome, and File Explorer — take noticeably longer than normal to open during the first several minutes of use, and general desktop responsiveness is degraded throughout that period. Task Manager may show CPU usage exceeding 90% while these applications are loading.
+Affected users experience consistent sluggishness on their managed Windows 10 laptop during the post-login period. Core applications such as Outlook, Chrome, and File Explorer take noticeably longer than normal to open in the first several minutes after sign-in, and general desktop responsiveness is degraded. No single application failure is identified; rather, the slowdown is broad and affects routine work across multiple programs.
 
-Unlike issues that resolve once the initial post-login burst of activity subsides, the slowdown in this case continues to affect application launches and overall system performance beyond the sign-in window. The affected device's system drive may show very little free space remaining (for example, under 2 GB on a 256 GB drive), though users may not be aware of the disk-space condition and may attribute the problem to a recent software update or other change.
-
-No specific application errors or crashes are reported; the issue presents as a broad performance degradation rather than a failure of any single program or service.
+The underlying issue is an accumulation of temporary files consuming a significant portion of the system drive's available space. In reported cases, tens of gigabytes of temp files had built up in user-profile and system temp directories, leaving the drive critically low on free space. This disk-space exhaustion produces elevated CPU and disk utilization immediately after login, which subsides only partially and continues to impair application launch times until the temp-file buildup is addressed.
 
 !!! note "Reported variations"
 
-    - The affected user may initially associate the onset of slowness with a recent company laptop update, though diagnostics confirm the root cause is disk-space exhaustion rather than a policy or update-related issue.
+    - Affected users may initially correlate the onset of sluggishness with a recent company update push, though diagnostics confirm the root cause is disk-space exhaustion from temp-file accumulation rather than an update- or policy-related issue.
+    - The slowdown presents as a general performance degradation with no single failing application, making it difficult for the affected user to pinpoint the source of the problem.
 
 ## Affected environment
 
@@ -35,7 +34,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The system drive has reached critically low free space due to a large accumulation of temporary files in user and system temp directories. In observed cases, temporary file buildup exceeded 38 GB, leaving less than 2 GB of usable space on the drive. This shortage creates ongoing disk contention that degrades application launch times and general system responsiveness well beyond the normal post-login period.
+Critically low available disk space combined with excessive temporary file accumulation caused ongoing disk contention and degraded laptop performance after login.
 
 ## Diagnostics
 
@@ -58,7 +57,7 @@ Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "temporary file buildup and low disk space slowdown" when reporting it.
+Resolved by IT after identifying and clearing accumulated temporary files that had exhausted available disk space on the affected laptop.
 
 ---
 

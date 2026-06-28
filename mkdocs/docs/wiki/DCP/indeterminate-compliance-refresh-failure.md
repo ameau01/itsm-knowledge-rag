@@ -8,25 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Conditional Access block due to indeterminate compliance refresh failure
+# Stale Compliance Refresh Leaves Devices Noncompliant Despite Sync Attempts
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their managed devices are marked as "NonCompliant" in Company Portal, and Conditional Access subsequently blocks access to Microsoft 365 applications such as Outlook and OneDrive. The block may appear suddenly on a device that was previously functioning normally, with no obvious change on the user's end. Email and cloud file access are unavailable until the compliance state is corrected.
+Affected users report that their managed devices are marked as noncompliant in Company Portal, triggering Conditional Access blocks that prevent access to corporate resources such as Outlook email and OneDrive. The noncompliant status persists even after manual sync attempts through Company Portal, which complete without error but do not update the compliance state.
 
-When users attempt to resolve the issue by running a manual sync from Company Portal, the sync may appear to complete without returning an error, yet the device's compliance status does not update. The last successful check-in timestamp displayed in Company Portal remains stale — in some cases by 48 hours or more — suggesting the device is not successfully refreshing its compliance evaluation with the management service.
+On Windows devices, the last device check-in remained stale at approximately 48 hours. A backend sync triggered by support staff registered a check-in attempt but did not cause the compliance record to refresh, indicating the device was not successfully processing compliance signals. No specific policy condition was surfaced in this scenario.
 
-Company Portal may display a specific noncompliant condition, such as an encryption-related policy failure, but the information shown can be misleading. In the reported cases, first-line diagnostics were unable to confirm that the flagged condition (for example, disk encryption status or operating system version) was genuinely out of compliance. The noncompliant state persisted even after remote sync attempts initiated from the administration console, further indicating that the compliance evaluation itself was failing to complete rather than reflecting a true policy violation.
+On Android devices, the noncompliance appeared following a compliance policy update and presented as an encryption-related condition tied to a specific device compliance policy. Diagnostics produced mixed findings, including inconsistent encryption reporting from the Android attestation layer and a stale policy assignment following a group membership change. These observations complicated the resolution path and required additional platform-side review by the Intune administration team before a definitive fix could be applied.
 
-The issue has been observed on both Windows and Android devices and has affected multiple users within the same organizational group simultaneously, particularly following a compliance policy update or group membership change.
+Across both platforms, the core behavior was consistent: compliance evaluation failed to complete or refresh properly, leaving devices in an indeterminate noncompliant state that blocked access to business applications through Conditional Access.
 
 !!! note "Reported variations"
 
-    - On Android devices, Company Portal may display an encryption-related compliance failure referencing a specific policy name, even though the actual encryption status of the device cannot be confirmed as noncompliant from available evidence.
-    - Following a compliance policy update or Azure AD group membership change, multiple devices in the same user group may be affected simultaneously; some devices may self-resolve after a manual sync while most remain stuck in a noncompliant state.
-    - A remote sync triggered from the Intune administration console may register a check-in attempt on the backend without actually updating the device's compliance record.
+    - On Android devices, some units in the affected group cleared their noncompliant status after a manual Company Portal sync, while the majority remained noncompliant and did not update promptly — indicating inconsistent compliance refresh behavior across the same device population.
+    - The Android noncompliance specifically referenced an encryption-related policy condition, whereas the Windows case did not surface an encryption indicator and instead presented primarily as a stale check-in with no policy condition called out.
+    - The issue affected multiple users within a single group, suggesting group-level policy targeting or group membership changes as a contributing scope factor.
 
 ## Affected environment
 
@@ -39,7 +39,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The device's regular check-in with the Intune mobile device management service stalled or failed to complete, preventing the compliance evaluation from refreshing. Because the compliance state was not updated, Conditional Access continued to enforce an outdated "NonCompliant" determination and blocked access to protected applications. In some cases, the available compliance, encryption, and policy-assignment signals were inconsistent, making it impossible to confirm a single root cause from standard first-line diagnostics alone; platform-side review by the Intune administration team was required to clear the stale state.
+A stale Intune MDM check-in prevented the affected devices from refreshing their compliance evaluation, leaving Conditional Access to enforce an outdated noncompliant state. Available evidence pointed to failed or incomplete compliance state refresh rather than a confirmed BitLocker or OS-version policy violation. A single root cause could not be confirmed from first-line diagnostics because the available compliance, encryption, and assignment signals were inconsistent.
 
 ## Diagnostics
 
@@ -72,7 +72,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "indeterminate compliance refresh failure" when reporting it.
+Resolved by IT after escalation for platform-side review; reference as stale compliance refresh causing persistent noncompliant state and Conditional Access blocks.
 
 ---
 

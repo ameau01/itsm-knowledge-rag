@@ -8,22 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Outlook sync failure due to expired Microsoft 365 authentication tokens
+# Corrupted Microsoft 365 Authentication Tokens Blocking Outlook Sync
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience inconsistent or failed email synchronization in Outlook Desktop on Windows. Outlook may display a "Disconnected" status or cycle between connected and disconnected states, and new messages stop arriving. Repeated sign-in prompts may appear, but completing them does not restore stable mailbox access.
+Affected users experience inconsistent email synchronization in Outlook Desktop on Windows 10, where the mailbox does not fully disconnect but messages fail to update reliably. The issue typically follows repeated sign-in prompts and recent account changes. Outlook may display a "Disconnected" status intermittently, and messages stop arriving despite the client maintaining partial connectivity to Exchange Online.
 
-The issue can also affect mobile email on managed devices. In reported cases, iPhone mail stopped updating around the same time as the desktop disruption, displaying a "sync failed" message. Despite the apparent similarity to a profile or device compliance problem, rebuilding the Outlook profile does not resolve the issue, and mobile device partnership health checks return normal results.
+The sync failure extends beyond the desktop client, also affecting mobile mail access on managed iOS devices. The mobile application reports a "sync failed" error message. In some cases, affected users are initially uncertain whether mobile mail is impacted until both platforms are individually confirmed as failing. Messages may stop arriving approximately two days before the issue is reported.
 
-Because email access is disrupted on multiple platforms simultaneously, affected users may initially be uncertain which device or application is at fault. The interruption persists until the underlying authentication problem is addressed by IT support.
+Diagnostic investigation reveals that the mailbox can reach Exchange Online and that mobile device partnership health appears normal. Rebuilding the Outlook profile does not resolve the issue, distinguishing it from a stale-profile scenario. The persistence of authentication prompts and sync failures across multiple platforms indicates an underlying account authentication token problem preventing Outlook from maintaining a valid mailbox session.
 
 !!! note "Reported variations"
 
-    - Mobile email on a managed iPhone may stop syncing with a "sync failed" message at the same time as the desktop disruption, even though mobile device partnership health appears normal.
-    - Outlook Desktop may not fully disconnect but instead alternate between connected and disconnected states, making the issue appear intermittent rather than a complete outage.
+    - Outlook Desktop displayed a "Disconnected" status with intermittent connectivity rather than a complete and sustained connection loss.
+    - The mobile mail client presented an explicit "sync failed" error message rather than silently failing to update.
+    - Repeated authentication prompts preceded the sustained sync failure on the desktop client.
+    - Profile rebuild on the desktop did not resolve the issue, distinguishing the behavior from a stale-profile scenario.
 
 ## Affected environment
 
@@ -36,7 +38,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-Stored Microsoft 365 authentication tokens on the affected device become corrupted or expire in a way that prevents Outlook from successfully reauthenticating. This causes the application to fail repeatedly when trying to establish a valid mailbox session with Exchange Online, even though network connectivity and the user's mailbox are otherwise healthy. Because the token issue affects the account's authentication state rather than a single app profile, it can disrupt email access on both desktop and mobile platforms at the same time.
+Corrupted or invalid stored Microsoft 365 authentication tokens caused Outlook to repeatedly fail reauthentication. This prevented stable mailbox synchronization despite a healthy profile and compliant mobile partnership. The issue affected both desktop and mobile platforms simultaneously.
 
 ## Diagnostics
 
@@ -59,7 +61,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'expired M365 authentication tokens' when reporting it.
+Resolved by IT by clearing cached credentials from Windows Credential Manager and forcing a fresh Modern Authentication sign-in, restoring service on both desktop and mobile.
 
 ---
 

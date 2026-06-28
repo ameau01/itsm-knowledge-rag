@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale A record in authoritative internal DNS zone causing intermittent resolution failures
+# Stale A Record in Authoritative Internal DNS Zone
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience intermittent failures when attempting to reach internal services by hostname. DNS lookups return either NXDOMAIN responses or resolve to an outdated IP address belonging to a decommissioned or migrated host, preventing applications and users from reliably connecting to internal endpoints. The issue typically manifests across multiple office locations and subnets simultaneously, with different resolver paths sometimes returning different incorrect answers — one site may receive NXDOMAIN while another receives the stale address.
+Affected users and internal services experience intermittent failures resolving internal hostnames — such as application endpoints, database services, and portal resources — across multiple subnets, VLANs, and office locations. DNS queries return inconsistent results: some yield an outdated IP address belonging to a decommissioned or migrated host, while others return NXDOMAIN. The mixed responses disrupt application-layer connectivity, causing health-check failures, connection timeouts, broken deployment pipelines, and degraded user-facing dashboards.
 
-The failures are visible on user workstations, application servers, and automated monitoring systems alike. Internal services that depend on hostname-based connectivity — such as database connections, API endpoints, deployment pipelines, and health-check systems — may lose connectivity or behave erratically. Users commonly notice the problem when internal dashboards, portals, or application workflows become unreachable by name, even though the underlying service is running normally at its current address.
+The issue traces to stale or incorrect A record data persisting in the authoritative internal DNS zone after a planned infrastructure change such as a service migration or host decommissioning. In some cases the authoritative zone itself retains the outdated or duplicate record; in others the zone is correctly updated but recursive resolvers continue serving cached stale data due to high TTL values or negative cache entries. Both scenarios produce the same observable pattern of alternating stale-address and NXDOMAIN responses across the resolver tier.
 
-Monitoring dashboards and alerting systems typically show elevated DNS error rates and NXDOMAIN spikes correlating with the onset of the issue. The inconsistency between resolver responses can make the problem appear intermittent from any single vantage point, as some queries succeed while others fail depending on which resolver handles the request and whether its cache contains the stale or negative entry. The issue persists until the authoritative DNS zone record is corrected and resolver caches are cleared.
+The problem typically surfaces shortly after a planned DNS or infrastructure change and is reported concurrently by engineering, operations, and application teams. Internal monitoring dashboards corroborate the issue with elevated DNS error rates and NXDOMAIN spikes. Contributing factors include deprecated DNS management or change-control policy references in zone or resolver configurations, zone serial numbers not incremented after record changes, and resolver caches not flushed following authoritative updates.
 
 !!! note "Reported variations"
 
-    - In some cases the authoritative zone record itself is correct but the resolver continues serving stale cached data due to an outdated resolver configuration or policy reference that prevents proper cache invalidation.
-    - A duplicate stale A record may coexist alongside the correct record in the zone, causing resolvers to intermittently return either the current or retired address.
-    - Multiple hostnames in the same authoritative zone may be affected simultaneously when several records are missed during an infrastructure migration.
-    - Deprecated DNS change-control or zone management policy references in runbooks or resolver configurations may delay validation and correction of the stale record.
-    - Negative cache entries on resolvers may produce NXDOMAIN responses even after the authoritative zone record has been corrected, until resolver caches are explicitly flushed.
+    - In some cases the authoritative zone already contained the correct record, but resolvers continued serving stale cached data due to an outdated policy reference in the resolver configuration, requiring a configuration update and service restart rather than a zone record correction.
+    - Deprecated DNS change-control or zone management policy references delayed remediation or contributed to resolver misconfiguration.
+    - Some affected environments returned purely NXDOMAIN from one resolver while a secondary resolver returned the correct address, rather than alternating between a stale IP and NXDOMAIN.
+    - Some clients experienced DNS query timeouts or SERVFAIL responses rather than explicit NXDOMAIN, particularly when multiple resolver nodes held conflicting cache states.
+    - In certain cases only application server hosts were affected, surfacing the issue through health-check failures and broken database connectivity rather than user-reported browsing problems.
+    - Duplicate stale A records were left behind in the authoritative zone after a migration rather than the existing record being updated, causing the resolver to serve the retired address.
+    - The issue affected multiple distinct hostnames within the same internal zone simultaneously rather than a single record.
+    - High TTL values on the affected zone records prolonged the period during which stale data was served, extending the window of user impact beyond typical cache refresh cycles.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 14 reported cases:
 
 ## Root cause
 
-An outdated or duplicate A record remains in the internal authoritative DNS zone after a service migration, host decommissioning, or IP address change, continuing to point to a retired address. Internal recursive resolvers then serve the stale record or cache negative (NXDOMAIN) responses from brief zone-reload gaps, producing inconsistent and incorrect answers across the network. In some cases, a long time-to-live value on the record extends the duration of the problem, and outdated DNS management policy references in zone configurations or operational runbooks delay detection and correction of the stale data.
+A stale A record remained in the internal authoritative DNS zone after a service IP change or host decommissioning, and recursive resolvers continued serving outdated cached data due to high TTL values or unflushed caches. In some cases, deprecated DNS management policy references in resolver or zone configurations further delayed detection and correction of the outdated zone data.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'stale authoritative DNS zone record' when reporting it.
+Resolved by IT after correcting the stale authoritative zone A record, flushing resolver caches, and updating deprecated DNS policy references.
 
 ---
 

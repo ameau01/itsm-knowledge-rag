@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Software installation blocked by endpoint protection with stale device inventory
+# Endpoint Protection Installer Block Combined With Stale Intune Inventory
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to install approved applications from Software Center on managed Windows 10 or Windows 11 devices find that the installation is blocked by an endpoint protection or application control policy. The error messages vary but commonly include "Installation blocked by Endpoint Protection," "Installer fails policy check," "Installation blocked by security policy," or "blocked by policy," sometimes accompanied by error codes such as 0x80070005, 0x800704EC, 0x87D13B3, 0x87D1FDE8, or 0xD0000247. In some cases, the endpoint protection engine quarantines the installer outright, preventing any execution attempt.
+Affected users on corporate-managed Windows endpoints report that approved applications are either missing from the Software Center catalog or fail immediately upon installation with a security policy block. Error messages consistently reference Endpoint Protection or application control denial, with common indicators including "Installation blocked by Endpoint Protection," "blocked by security policy," or specific coded failures such as "PolicyCheckFailed:EP-403," accompanied by error codes including 0x80070005, 0x80070490, 0x800704EC, 0x87D13B3, 0x87D00607, 0x87D1FDE8, or 0xD0000247. In some cases the application is visible but fails instantly upon launch; in others it is entirely absent from the catalog or appears intermittently across sessions.
 
-In addition to the security block, the application may not appear in the Software Center catalog at all, or it may appear intermittently — visible in one view or session and missing after a refresh. This catalog visibility issue stems from the affected device having a stale inventory or policy state in Intune, with devices sometimes not having synchronized for days or even weeks. Because the device record is outdated, Software Center cannot correctly resolve the application's entitlement or deployment targeting for the user, so the app either does not display or is treated as unavailable.
+Investigation consistently reveals two co-occurring conditions. First, Endpoint Protection or Defender Application Control policy is actively blocking the installer due to a hash mismatch, missing publisher signature approval, heuristic detection, or the installer not appearing on the security allowlist. Second, the device's Intune inventory is stale—with last-sync timestamps ranging from 36 hours to approximately 30 days behind—preventing updated allowlist approvals, entitlement targeting, and application assignments from propagating to the endpoint. Neither condition alone fully accounts for the reported behavior.
 
-The combination of these two conditions — an active endpoint protection block on the installer and stale device inventory preventing proper policy evaluation — means that neither a manual install attempt nor a catalog refresh alone resolves the problem. Users across various departments and office locations have reported this issue on corporate-managed endpoints, often in connection with time-sensitive work such as quarter-end reporting or project deadlines. In several cases, a prior partial fix (such as an inventory refresh or entitlement group correction alone) temporarily restored access, but the issue recurred because the endpoint protection approval had not fully propagated to the device or the inventory fell stale again before the updated allow-policy could take effect.
+The issue affects multiple departments, offices, and application titles rather than a single software package. In recurring instances, a prior inventory refresh temporarily restores visibility, but the issue returns because the Endpoint Protection effective policy on the device still lacks the necessary approval. In some cases, the application is visible under an administrative account but absent under the affected user's standard account due to stale entitlement state. Multiple users within the same teams are typically affected concurrently.
 
 !!! note "Reported variations"
 
-    - On recently re-enrolled devices, the re-enrollment process may not trigger a full inventory sync, causing the application to be visible under an administrator account but missing for the standard user account.
-    - In some cases, the application appears in Software Center and is selectable but fails immediately upon clicking Install, rather than being absent from the catalog entirely.
-    - The issue has recurred after a previous ticket closure when the earlier remediation (such as an inventory refresh alone) did not fully propagate the endpoint protection approval to the device, causing both the security block and intermittent catalog visibility to return within days.
-    - Multiple users on the same team or in the same office may be affected simultaneously when the same installer is flagged by endpoint protection across several devices with stale inventory.
+    - The application is completely absent from the Software Center catalog, with no error shown until the user attempts to run the installer manually.
+    - The application is visible in Software Center but fails immediately upon clicking Install, without ever beginning the installation process.
+    - The Endpoint Protection block references a specific policy name or coded failure rather than a generic "blocked by policy" message.
+    - The block is triggered by a publisher signature or certificate mismatch, or by heuristic behavioral detection, rather than an unapproved installer hash.
+    - The issue recurs after a previous resolution due to a new installer version introducing an updated hash not yet added to the allowlist.
+    - The application appears intermittently or is visible under an administrative account but absent under the affected user's standard account.
+    - Multiple users within the same office or device group experience the issue simultaneously, indicating a broader policy or sync gap affecting a collection of devices.
+    - A recently re-enrolled or hardware-replaced device did not trigger a full Intune inventory sync, resulting in stale inventory despite the recent enrollment date.
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 21 reported cases:
 
 ## Root cause
 
-The approved application installer is being blocked by the endpoint protection or application control policy on the device because the installer's signature, hash, or publisher information is not present in the effective allowlist on that endpoint. At the same time, the device's Intune inventory and policy state are stale — often due to a missed or delayed check-in — so Software Center cannot evaluate the correct application targeting or entitlement for the user. Both conditions must be addressed together: the security allowlist must be updated to permit the installer, and the device must complete an inventory and policy synchronization so that the updated approval state and application assignment are reflected on the endpoint.
+Endpoint Protection or Defender Application Control policy was blocking the approved application installer because the required publisher signature, hash, or allowlist approval had not propagated to the endpoint. Concurrently, the device's Intune inventory and policy state were stale, preventing current entitlement targeting, application assignments, and updated security approvals from reaching the device. The combination of the active security block and outdated device policy caused both catalog visibility failures and installation denials in Software Center.
 
 ## Diagnostics
 
@@ -74,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'endpoint protection block with stale device inventory' when reporting it.
+Resolved by IT by updating the Endpoint Protection allowlist to approve the installer and forcing an Intune device inventory sync and policy refresh on the affected endpoint.
 
 ---
 

@@ -8,24 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Intermittent corporate Wi-Fi authentication failures with unclear combined root cause
+# Intermittent 802.1X Wi-Fi Rejection After Certificate Rotation and Profile Mismatch
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experienced intermittent failures when connecting to the corporate Wi-Fi network on managed Windows laptops. In some cases, devices were able to join the wireless network but were then rejected during authentication or received no IP address, leaving users without usable network access. In other cases, laptops connected briefly and then dropped, cycling between a connected state and a "no internet" or "no network access" status. Some users saw an explicit authentication failure message immediately after joining, while others maintained a nominal connection that provided no actual connectivity.
+Affected users on managed Windows laptops reported intermittent failures connecting to or remaining on the corporate Wi-Fi SSID using 802.1X authentication. Devices could typically join the SSID but were then rejected by the Network Access Control system or failed to obtain an IP address, resulting in a loss of network connectivity. In some cases, connection prompts failed immediately with an authentication error, while in others devices connected briefly before dropping. The issue often required multiple reconnection attempts and was not consistently resolved by retrying alone.
 
-The issue was reported across small groups of users — primarily on Sales floor devices in one location and among a handful of employees on a single floor in another. Affected users often resorted to mobile hotspots or repeated connection attempts to maintain productivity. Some devices recovered after an infrastructure-side certificate renewal without any further action, while others continued to fail until their endpoint Wi-Fi profiles and certificate bindings were individually remediated.
-
-The pattern of failures was inconsistent across users and devices. Within the same affected group, one user's device might show an expired wireless certificate and an outdated Wi-Fi profile, while another user's device had a current profile and valid certificate yet still experienced drops. Authentication logs similarly showed rejections for some users but clean sessions for others reporting the same symptoms. This mixed evidence made it difficult to attribute the issue to any single layer — endpoint configuration, network access control policy, or wireless infrastructure stability.
+Across both incidents, the scope was limited — one affected roughly seven users in a Sales group following a wireless controller certificate rotation, and the other affected approximately four to five users on a single office floor. Diagnostic evidence was mixed: some endpoints exhibited expired EAP certificates or outdated Wi-Fi profile revisions, while others with current profiles and certificates still experienced post-association drops. RADIUS and NAC logs showed sporadic 802.1X timeouts and endpoint rejections for some users but clean sessions for others on the same network, making it difficult to isolate a single failing layer.
 
 !!! note "Reported variations"
 
-    - Some devices failed authentication immediately upon joining the wireless network, while others connected successfully but lost connectivity or IP assignment shortly afterward.
-    - A subset of users recovered automatically after an infrastructure-side certificate renewal, with no endpoint-level remediation needed.
-    - At least one affected device had a valid and current Wi-Fi profile and certificate yet still experienced post-association drops, suggesting a factor beyond endpoint profile drift.
-    - In one instance, wireless controller logs showed a cluster of disconnect events during a narrow time window on specific access points, but the volume was too low to confirm sustained infrastructure instability.
+    - Some devices received an immediate "Authentication Failed" message upon joining the SSID, rather than connecting and then losing access
+    - In one incident, a wireless controller certificate rotation preceded the onset of failures; renewing the controller certificate restored service for a subset of devices but not all
+    - Certain endpoints required both certificate renewal and Wi-Fi profile re-push via MDM to restore connectivity
+    - RADIUS logs showed sporadic 802.1X timeouts for specific users while sessions for other users on the same SSID completed cleanly
+    - One endpoint had an outdated Wi-Fi profile revision while a neighboring device with the current profile still experienced drops
 
 ## Affected environment
 
@@ -38,7 +37,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The root cause could not be conclusively isolated to a single failing component. Evidence pointed to a combination of factors that may have contributed in varying degrees: a wireless controller certificate rotation that left parts of the authentication trust chain incomplete, endpoint Wi-Fi profiles or certificate bindings that were stale or misaligned with the updated infrastructure, network access control policies that continued rejecting certain devices, and possible transient instability on local wireless access points. Because the diagnostic data was mixed and did not consistently implicate one layer across all affected users, the precise primary cause remains unconfirmed.
+Wireless controller certificate rotation restored only part of the 802.1X trust chain. Several endpoints still carried stale corporate Wi-Fi profiles or certificate bindings, and NAC policy evaluation continued rejecting some Sales devices until profiles were re-enrolled and policy alignment was corrected. Insufficient evidence existed to confirm whether the primary cause was endpoint Wi-Fi profile inconsistency, intermittent NAC rejection, or short-lived wireless infrastructure instability.
 
 ## Diagnostics
 
@@ -71,7 +70,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "corporate Wi-Fi authentication failure – unconfirmed root cause" when reporting it.
+Resolved by IT through a combination of wireless controller certificate renewal, endpoint Wi-Fi profile re-enrollment via MDM, and NAC policy realignment.
 
 ---
 

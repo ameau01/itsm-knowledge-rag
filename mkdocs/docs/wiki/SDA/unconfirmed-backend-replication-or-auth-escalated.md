@@ -8,22 +8,15 @@ curated: true
 self_serviceable: false
 ---
 
-# Shared drive access denied due to unresolved backend replication or authentication issue
+# Kerberos Token Not Reflecting AD Group Despite Confirmed Membership
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience persistent "Access is denied" errors when attempting to open a department shared drive, whether through a mapped drive letter or by entering the UNC path directly in File Explorer. Windows repeatedly prompts for credentials after each failed attempt, but re-entering the correct password does not grant access. The issue is specific to the affected user's account; colleagues on the same team with equivalent access may be able to open the same folder without difficulty.
+Affected users experience "Access is denied" errors and repeated credential prompts when attempting to open a departmental shared drive. The issue occurs both through a mapped drive letter and via direct UNC path access to the same file server share. Entering credentials multiple times does not resolve the prompts, and the folder remains inaccessible. The issue is account-specific; colleagues on the same team with equivalent share access are able to open the folder without difficulty.
 
-The problem typically appears suddenly during a normal work session and blocks access to department files needed for ongoing work. Standard self-service steps such as re-entering credentials or navigating to the share via the full network path do not resolve the issue. Signing out and back in, or clearing cached authentication tickets on the workstation, may also fail to restore access.
-
-Initial investigation by IT may confirm that the user's account appears to hold the correct group membership for the share, and that the network path to the file server is valid. Despite these findings, the user's workstation session does not consistently reflect the expected permissions, resulting in a mismatch between what the directory shows and how the file server responds. Because the root cause cannot be isolated to a single workstation-level factor, the issue requires further backend review and is escalated to a higher-tier support team.
-
-!!! note "Reported variations"
-
-    - Intermittent credential prompts may persist even after a full sign-out/sign-in cycle and manual clearing of cached Kerberos tickets on the workstation.
-    - The issue may affect only one user on a shared team while others with the same group membership access the folder normally.
+Diagnostic review of the affected user's Active Directory account confirms that the correct security group membership is present. However, the Kerberos token on the affected workstation does not consistently reflect that group membership. The UNC path and drive mapping were verified as correct, ruling out a stale or misconfigured shortcut. The inconsistency between confirmed AD group membership and the token presented during authentication points to a backend replication or authentication-layer issue that could not be isolated to a single cause during initial investigation.
 
 ## Affected environment
 
@@ -36,7 +29,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-There is a conflict between the user's directory group membership (which appears correct) and the authentication credentials actually presented to the file server during access attempts. The Kerberos security token on the workstation does not consistently include the expected group membership information, even after credential cache clearing and session refresh. The underlying cause is suspected to involve backend directory replication delays or a file service authentication issue that requires deeper investigation by a specialized identity services team.
+There is conflicting evidence between directory entitlement state and actual SMB authentication behavior. The affected user's Active Directory group membership is confirmed as correct, but the Kerberos token presented during file share authentication does not consistently reflect that membership. The root cause is attributed to a backend permission replication or file service authentication issue requiring higher-tier review.
 
 ## Diagnostics
 
@@ -59,7 +52,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support and typically requires escalation to a higher-tier identity services team; reference "shared drive access denied – backend replication or auth escalation" when reporting it.
+Resolved by IT through escalation for higher-tier review of a backend replication or authentication-layer inconsistency affecting SMB share access.
 
 ---
 

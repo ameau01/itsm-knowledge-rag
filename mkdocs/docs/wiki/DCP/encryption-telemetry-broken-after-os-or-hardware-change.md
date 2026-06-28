@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Encryption compliance signal lost after OS update or policy change
+# Intermittent Encryption Signal Loss After OS Update Causes False Noncompliance
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their corporate-managed devices — both Windows laptops and Android phones — are marked as Noncompliant in Intune and blocked from Microsoft 365 services such as Outlook, Teams, SharePoint Online, and Exchange Online webmail. The block is enforced by Conditional Access immediately after a recent operating system update or a newly tightened compliance policy requiring encryption. Users confirm that encryption (BitLocker on Windows or device encryption on Android) appears enabled locally or in Company Portal, yet the Intune compliance portal continues to report the encryption signal as missing or not detected.
+Affected users report that their corporate-managed devices are marked Noncompliant in Intune immediately following an OS update, OS upgrade, or a compliance policy change that introduces an encryption requirement. Although encryption (BitLocker on Windows, device encryption on Android) appears enabled when verified locally via Control Panel or Company Portal, the Intune compliance service does not reliably receive or retain the encryption signal. Conditional Access consequently blocks access to Microsoft 365 resources including Outlook, Teams, SharePoint Online, Exchange Online, and other Office 365 services.
 
-The noncompliant state may appear intermittently: a forced device sync can briefly return the device to a compliant status before it reverts to noncompliant within minutes. In some cases the device's last Intune check-in timestamp is visibly stale — up to nine or more days old — indicating that the management connection did not refresh after the OS change. The issue has been observed across multiple offices and device platforms, and can affect several users simultaneously when a compliance policy change is rolled out to a group of devices at once.
+Forced device syncs and compliance reevaluations initiated from the Intune admin console may briefly return the device to a Compliant state, but the status reverts to Noncompliant within minutes. In some cases the device's last check-in timestamp in Intune is significantly stale—up to nine days old—meaning the compliance state never refreshes after the OS change. The intermittent or absent encryption telemetry persists across reboots and repeated Company Portal syncs performed by the affected users.
 
-Affected users are unable to sign in to any Conditional Access–protected resource from the impacted device, regardless of whether they use a desktop client or a web browser. Rebooting the device alone does not resolve the problem.
+The issue has been observed on Windows 10, Windows 11, and Android 11 corporate-managed devices across multiple office locations. In all reported cases, policy scope reviews confirm that the affected devices are correctly targeted by the relevant encryption compliance policy with no duplicate or stale assignments present.
 
 !!! note "Reported variations"
 
-    - On Android devices, the issue can surface immediately after a tightened encryption compliance policy is pushed, even without an OS update, because the server-side evaluation intermittently loses the encryption signal that Company Portal reports locally.
-    - Some Windows devices show a check-in timestamp that is many days old (nine or more days stale), meaning the compliance state never refreshed after the OS upgrade completed.
-    - In certain cases the compliance status briefly flips to Compliant after a manual sync but reverts to Noncompliant within minutes, rather than remaining persistently noncompliant.
+    - Multiple Android devices simultaneously affected after an admin-pushed compliance policy change adding an encryption requirement, rather than after an OS update
+    - Device check-in timestamp in Intune stale by over a week following an OS upgrade, preventing any compliance refresh until a manual sync is forced
+    - Encryption signal briefly restored after a forced compliance reevaluation from the admin console, then reverted to missing within minutes
+    - Windows 10 to 21H2 feature upgrade triggering the issue, as distinct from a routine overnight patch
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 4 reported cases:
 
 ## Root cause
 
-An operating system update or a newly applied encryption compliance policy causes the device's encryption status to stop reporting reliably to the Intune compliance service. Although encryption is active on the device itself, the backend telemetry that Intune uses to evaluate compliance either goes stale (because the device has not fully checked in since the update) or fluctuates intermittently. Because Conditional Access relies on that compliance evaluation, it treats the device as noncompliant and blocks access to protected resources until the encryption signal is stabilized through device remediation and a fresh compliance evaluation.
+A recent OS update or a newly tightened compliance policy left the device's Intune management check-in state stale, preventing the BitLocker or device-encryption status from being reported back to the compliance service. Because the encryption-required compliance policy depended on that signal, back-end evaluations intermittently or persistently missed the encryption state, and Conditional Access consumed a false Noncompliant result until device telemetry and policy evaluation were refreshed and stabilized.
 
 ## Diagnostics
 
@@ -64,15 +65,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Validated that affected Android devices for <USER> (<HOSTNAME>), <USER> (<HOSTNAME>), and <USER> (<HOSTNAME>) had encryption enabled locally in Company Portal and confirmed the issue was specific to the Intune compliance encryption signal rather than user enrollment state.
-2. Forced fresh device check-ins and Intune policy synchronizations for all three impacted devices from the <LOCATION> office to clear stale compliance evaluations and trigger new backend compliance calculations. Sync commands issued by <USER> via the Intune admin console.
-3. Reviewed the encryption requirement assignment against the impacted Sales device scope (<EMP_ID>, <EMP_ID>, <EMP_ID>) to confirm the devices were targeted by the intended policy pushed by <USER> and not by a stale or duplicate assignment.
-4. Remediated affected endpoints by having users update the Android OS and refresh the management client state, including Company Portal re-registration where needed on <HOSTNAME> and <HOSTNAME>, to restore consistent encryption telemetry reporting. Coordinated by <PERSON> (<USER>) with on-site support in <LOCATION>.
-5. Re-ran compliance evaluation after remediation and confirmed the devices for <USER>, <USER>, and <USER> returned to Compliant status in Intune, which allowed Conditional Access to permit normal user sign-in again. Final verification completed by <USER> at 16:40 UTC.
+1. Triggered a remote Intune sync and forced a fresh device compliance evaluation for the affected laptop <HOSTNAME> (registered to <USER>, <EMP_ID>) from the Intune admin console.
+2. Reviewed the failing compliance signal for <USER>'s device and confirmed the missing attribute was the BitLocker encryption reporting state rather than OS version or policy assignment.
+3. Re-applied the BitLocker reporting/compliance policy to the device <HOSTNAME> (IP <IP>) and initiated encryption state re-reporting via the Intune management extension.
+4. Instructed the user to reboot the laptop, install pending Windows updates, and run a Company Portal sync to complete local policy refresh. Contacted <PERSON> at <PHONE> to walk through the reboot and sync steps at her <LOCATION> office workstation.
+5. Monitored Intune until the device reported its encryption state correctly, changed back to Compliant, and Conditional Access allowed Outlook and SharePoint access again. Confirmed with <EMAIL> that email and SharePoint were accessible, and notified <USER> on the endpoint team that the issue was resolved.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'encryption compliance signal lost after OS or policy change' when reporting it.
+Resolved by IT after device telemetry and compliance policy evaluation were refreshed and stabilized to restore accurate encryption signal reporting.
 
 ---
 

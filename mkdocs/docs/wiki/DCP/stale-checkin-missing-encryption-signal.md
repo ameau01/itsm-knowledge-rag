@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale Intune check-in prevents encryption signal from reaching compliance evaluation
+# Stale Intune Check-In Causes Missing Encryption Signal and Noncompliance
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their managed devices — including Windows, macOS, iOS, and Android endpoints — are marked as Noncompliant in Intune Company Portal, and Conditional Access blocks access to corporate resources such as Exchange Online, SharePoint, Teams, Outlook, VPN, Dynamics 365, and other protected applications. The block page typically states that the device does not meet organizational compliance requirements or is not compliant, and the Company Portal compliance details show the encryption status as "Not reported," "Unknown," "Not Encrypted," or blank.
+Affected users on corporate-managed devices — including Windows 10/11 laptops, macOS endpoints, iOS/iPadOS devices, and Android mobile devices — are blocked from accessing Microsoft 365 resources (Exchange Online, SharePoint, Teams, Outlook) and other Conditional Access–protected services such as corporate VPN. Azure AD Conditional Access evaluates the device as noncompliant, and users receive errors such as "Your device is not compliant" or "You can't get there from here." Company Portal reflects a noncompliant status with a stale last-sync timestamp.
 
-The common thread across affected devices is a stale Intune check-in — the device has not successfully communicated its status to Intune for a period ranging from roughly 36 hours to 14 or more days. Because the check-in is outdated, the required encryption compliance signal (BitLocker on Windows, FileVault on macOS, or device encryption on iOS and Android) is never delivered to the compliance service, and the device remains in a noncompliant state. Conditional Access then enforces the "require compliant device" policy and denies access.
+The underlying compliance failure is a missing or unreported encryption signal in Intune. Device records show the encryption attribute as blank, unknown, "Not Encrypted," "EncryptionNotReported," or "EncryptionRequired," even when local encryption (BitLocker, FileVault, or native device encryption) is confirmed enabled on the endpoint. The affected devices have not completed a successful Intune check-in for periods ranging from approximately 36 hours to more than 14 days, preventing the Device Compliance Service from receiving a current encryption status.
 
-In some cases, a manual sync from Company Portal updates the check-in timestamp but does not immediately restore the encryption signal, leaving the device noncompliant even after the sync appears to complete. In other cases, Intune may briefly show the device as compliant while Conditional Access continues to use an older noncompliant evaluation, creating a temporary mismatch between what Company Portal displays and what Conditional Access enforces. The issue has been observed on individual devices as well as in larger groups of endpoints — sometimes affecting a dozen or more devices simultaneously — particularly after a compliance policy update or scheduled policy re-evaluation.
+Manual or remote sync attempts do not always resolve the issue on the first try. In several cases, the device briefly shows as compliant in the portal after a forced sync, but Conditional Access continues to block access based on older noncompliant evaluations until a full compliance re-evaluation incorporating a fresh encryption signal completes. The issue has been observed on individual devices and in bulk — in one case affecting approximately 12–14 devices simultaneously after a compliance policy update — disrupting access during time-sensitive work. Temporary Conditional Access exemptions were applied in some instances to restore productivity while compliance state caught up.
 
 !!! note "Reported variations"
 
-    - After a hardware component replacement (such as a motherboard swap), the device's encryption attestation data may be invalidated, causing the encryption signal to remain missing even though BitLocker appears enabled locally.
-    - On newly enrolled devices, the post-enrollment check-in may fail to deliver the encryption signal, leaving the device in a noncompliant state immediately after enrollment rather than after a period of inactivity.
-    - Conditional Access may continue to enforce a noncompliant evaluation for a period even after Intune Company Portal shows the device as compliant, due to a propagation delay between the compliance service and Conditional Access.
-    - A manual Company Portal sync may complete successfully and update the check-in timestamp without refreshing the encryption compliance signal, requiring additional steps such as a reboot or a server-side re-evaluation to restore reporting.
-    - Some devices require local encryption to be enabled or re-enabled (for example, BitLocker was paused or never fully activated) before the compliance signal can be reported, rather than the issue being purely a check-in delay.
+    - On macOS devices, the missing signal corresponds to FileVault; in at least one case FileVault was not yet fully enabled, requiring user-side enablement before compliance could be restored.
+    - On Android devices, the stale check-in window reached up to 14 days, with encryption reported as "Not reported" despite all other policy conditions passing.
+    - On iOS/iPadOS devices, encryption status appeared as "unknown" or "not reported" rather than explicitly failing, and in one case a scheduled compliance policy update immediately triggered the stale state.
+    - Following a hardware change such as a motherboard replacement, TPM attestation data was invalidated, causing Intune to report encryption as noncompliant despite BitLocker being enabled locally.
+    - BitLocker encryption was found paused after a BIOS update, preventing the encryption signal from being reported even though the device was online and connected.
+    - In some cases a forced sync briefly flipped the device to compliant in Intune, but Conditional Access continued to deny access based on an older evaluation until a full re-evaluation completed.
+    - After a compliance policy update, multiple devices within the same policy group became noncompliant simultaneously, with a subset requiring individual remediation because BitLocker was not enabled or had not reported status.
+    - The issue affected access to non-Microsoft gated resources such as corporate VPN, depending on the organization's Conditional Access policy scope.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 27 reported cases:
 
 ## Root cause
 
-Devices that have not checked in to Intune for an extended period retain stale compliance data, which prevents the required encryption status (such as BitLocker, FileVault, or mobile device encryption) from being reported to the compliance service. Without a current encryption signal, the compliance policy evaluates the device as noncompliant, and Conditional Access enforces that result by blocking access to protected corporate resources. In some instances, a subset of devices also required local encryption enablement, operating system updates, or re-enrollment before consistent encryption reporting could be permanently restored.
+Affected devices had not checked in to Intune within the expected sync window, leaving the required encryption compliance signal (BitLocker, FileVault, or native device encryption) absent or stale in the device inventory. Because the compliance policy required device encryption and no current signal was available, the Device Compliance Service evaluated the devices as noncompliant. Conditional Access then enforced the noncompliant result and blocked access to protected corporate resources.
 
 ## Diagnostics
 
@@ -75,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'stale check-in missing encryption signal' when reporting it.
+Resolved by IT by forcing a device sync, confirming encryption enablement, and allowing a full compliance re-evaluation to restore compliant status and lift Conditional Access blocks.
 
 ---
 

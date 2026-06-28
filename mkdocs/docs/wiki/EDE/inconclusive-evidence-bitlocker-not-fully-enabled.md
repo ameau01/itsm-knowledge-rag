@@ -8,23 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Disk encryption noncompliance due to incomplete BitLocker initialization on endpoint
+# BitLocker Not Initialized on Endpoint Preventing Recovery Key Escrow
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users' corporate Windows 10 laptops appear as noncompliant for disk encryption in Intune. The device's encryption status is reported as "Not encrypted," and no BitLocker recovery key is visible in Azure AD or Intune escrow for the device. This compliance failure prevents the laptop from meeting endpoint security requirements for normal corporate use.
+Affected users operate corporate-managed Windows 10 laptops that are flagged as noncompliant for disk encryption in Intune. In each case, the management console reports encryption as not enabled on the device, and no BitLocker recovery key is visible in Azure AD or tenant escrow for the associated user account. This noncompliant status prevents the devices from meeting organizational endpoint encryption requirements for normal corporate use.
 
-In some cases, the user may recall having accepted a BitLocker enablement prompt days or weeks earlier, yet encryption never completed — the drive icon never displayed a lock symbol, and no completion notification was received. Forcing a sync through Company Portal or rebooting the laptop does not resolve the noncompliant status, and the device continues to report as unencrypted after these attempts.
+For two of the three reported cases, the initial intake established only that encryption was not enabled and no recovery key was present, without confirming whether the BitLocker enablement prompt had ever been presented to or acted upon by the user; the underlying cause of the missing encryption remained undetermined at triage. In the remaining case, the affected user specifically reported having accepted the BitLocker enablement prompt approximately two weeks prior, but encryption never progressed — the drive icon never displayed a lock symbol, no completion notification appeared, and the device continued to report as unencrypted in Intune.
 
-Because device-specific details such as TPM readiness, protector state, and recent sync timestamps are often unavailable at the time of the initial report, IT support may not be able to immediately confirm whether the root cause lies with the device hardware, policy delivery, or the encryption process itself. The compliance alert, however, is genuine and reflects a truly unencrypted endpoint rather than a false reading.
+Across all three tickets, initial reports lacked sufficient device-level detail to confirm the underlying cause of the encryption failure. This limited the ability to validate policy delivery, TPM readiness, or key escrow status at the time of intake.
 
 !!! note "Reported variations"
 
-    - The user accepted the BitLocker enablement prompt but encryption silently failed to start or stalled before completion, with no error message or follow-up notification displayed on the device.
-    - A manual Company Portal sync and device reboot did not change the encryption status or trigger BitLocker to resume initialization.
-    - Initial ticket submissions lacked device hostname, TPM state, or last sync details, delaying diagnosis until the user could provide endpoint-level information.
+    - In one case, the affected user confirmed having accepted the BitLocker enablement prompt approximately two weeks before filing the ticket, with no subsequent encryption progress observed on the device during that interval.
+    - One ticket was submitted on behalf of the affected user by a third party via email rather than by the user directly.
+    - In one instance, the affected device was associated with a specific business group (Finance), and the noncompliance was identified under that group's enrollment context.
 
 ## Affected environment
 
@@ -37,7 +37,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-BitLocker encryption was never fully initialized on the affected device, leaving the disk unencrypted and preventing a recovery key from being generated or escrowed to Azure AD or Intune. The exact blocking factor — whether TPM or protector readiness, incomplete policy application, or a stalled encryption process — could not be conclusively isolated from the available evidence, but the combined indicators point to an endpoint-side failure to complete the BitLocker startup sequence.
+BitLocker was not fully initialized on the affected endpoints, so no valid recovery key had been escrowed to Azure AD or Intune. The most likely contributing conditions were missing or unapplied Intune BitLocker policy and unverified TPM/protector readiness, which left devices reporting encryption as disabled and therefore noncompliant, though TPM initialization, policy application, and escrow sync state could not be fully confirmed from the available evidence.
 
 ## Diagnostics
 
@@ -74,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "incomplete BitLocker initialization – disk encryption noncompliance" when reporting it.
+Escalated to IT for investigation into incomplete BitLocker enablement conditions including policy application and TPM/protector readiness; resolution outcome was not documented in the available ticket evidence.
 
 ---
 

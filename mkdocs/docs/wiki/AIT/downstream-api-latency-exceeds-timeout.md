@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Integration Gateway 504 timeouts caused by downstream API latency spikes
+# Downstream API Latency Exceeds Integration Gateway Timeout Causing 504 Errors
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Scheduled and batch data synchronization jobs processed through the Integration Gateway fail or are significantly delayed, with the gateway returning repeated HTTP 504 Gateway Timeout responses. The failures typically occur during overnight or peak-traffic sync windows — commonly between 02:00 and 07:30 UTC — and affect integration workflows such as customer data sync, billing feeds, order fulfillment, inventory reconciliation, and analytics pipelines. Affected users observe stalled or incomplete jobs on monitoring dashboards, growing queue backlogs (in some cases exceeding thousands of pending messages), and delayed data availability for downstream consumers across Finance, Operations, Analytics, and other teams.
+Affected users experience intermittent or sustained failures of scheduled data synchronization jobs routed through the Integration Gateway to downstream API endpoints — including internal services, billing APIs, CRM endpoints, and third-party vendor APIs. The primary symptom is repeated HTTP 504 Gateway Timeout responses when downstream API response times spike well beyond the gateway's configured timeout threshold (typically 15–30 seconds, though in some cases as low as 2–5 seconds). Failures cluster during overnight or early-morning batch processing windows, often spanning 20 minutes to over two hours, and affect multiple gateway nodes and pods across Kubernetes clusters rather than isolated instances.
 
-Gateway logs and monitoring dashboards show that outbound request durations spike well beyond the configured timeout threshold — response times that normally range from roughly one to three seconds can climb to anywhere from seven seconds to over a minute during the affected window. The Integration Gateway returns 504 or ETIMEDOUT errors once requests exceed the timeout, and the default retry cycle is quickly exhausted, compounding the backlog. Restarting gateway pods or nodes does not resolve the issue, confirming the problem is not local to the gateway infrastructure.
+Gateway monitoring dashboards and distributed traces consistently show downstream p95/p99 response latency climbing dramatically — from baselines of approximately 200 milliseconds to 1–3 seconds up to peaks of 7–72 seconds — directly causing the gateway to terminate requests before responses are received. The resulting 504 errors cascade into retry exhaustion, message queue backlogs (in some cases exceeding 4,200 pending messages), and delayed or blocked data availability for dependent workflows such as finance reporting, analytics pipelines, and billing integrations. In some incidents, over 340 consecutive timeout errors were logged within a 90-minute span.
 
-In some incidents, authentication-related errors such as HTTP 401 responses or token refresh failures appear alongside the timeouts, but these are typically a secondary or coincidental factor. Token rotation may briefly reduce authentication noise without eliminating the underlying timeout pattern, and log review generally shows no sustained token expiry, rejection, or rate-limiting (HTTP 429) evidence. The dominant failure signal remains elevated downstream API response latency exceeding the gateway's configured timeout window.
+Authentication failures, rate-limiting responses, and credential expiry are consistently ruled out during investigation; gateway logs show no HTTP 401/403 or 429 responses, and token validation confirms valid credentials. Where token rotation was performed as an early troubleshooting step, it did not resolve the core 504 timeout pattern. Gateway-side actions such as pod restarts and cache clears similarly fail to eliminate the issue. Resolution occurs only after downstream API teams address service-side performance conditions such as resource exhaustion, misconfigured connection pools, or missing database indexes.
 
 !!! note "Reported variations"
 
-    - In some cases, intermittent HTTP 401 Unauthorized errors appear on a minority of requests (approximately 15% or fewer), indicating a secondary or aging token condition that adds diagnostic noise but is not the primary driver of job failures.
-    - A failed token refresh event may coincide with the onset of timeouts, initially suggesting a credential issue, but diagnostic review confirms the service account credentials remain valid and the timeout pattern persists after token rotation.
-    - The latency spike may follow a recent application deployment, complicating initial triage by suggesting a release-related regression, though the root cause traces back to downstream service performance.
-    - Downstream API response times may only intermittently exceed the timeout threshold, causing some jobs to succeed while others in the same batch window fail, producing a partial-failure pattern rather than a complete outage.
-    - The downstream latency source has varied across incidents, including third-party partner APIs, internal billing and fulfillment services, and external vendor endpoints, each requiring separate escalation to the responsible service team.
+    - In one instance, a recent gateway deployment introduced intermittent HTTP 401 Unauthorized responses alongside the dominant 504 pattern; approximately 15% of requests returned authorization errors resolved by token rotation, but 504 timeouts persisted independently.
+    - Gateway timeout configurations varied across incidents, ranging from as low as 2–5 seconds to the more common 30-second threshold, causing failures at correspondingly different downstream latency levels.
+    - Some incidents involved external third-party partner APIs with no prior maintenance notice, while others involved internal downstream services; the timeout behavior was identical in both cases.
+    - Incomplete telemetry was reported in at least one incident, where request correlation IDs were not propagated from the gateway to the monitoring system, requiring manual timestamp-based correlation.
+    - Queue backlog severity varied significantly; one instance recorded over 4,200 pending messages while others reported sync lag exceeding 45 minutes without specific queue depth metrics.
+    - One downstream root cause was traced to a misconfigured connection pool on the API ingest tier; another was traced to a full table scan caused by a missing database index after a schema migration.
+    - In one case, the morning data availability report — rather than real-time alerting — was the first indicator of failure, as sync jobs had run overnight unattended.
+    - Rate limiting (HTTP 429) was considered in some occurrences but ruled out during investigation; no throttling responses were observed in gateway logs.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 23 reported cases:
 
 ## Root cause
 
-A downstream API service experiences elevated response latency — often due to backend conditions such as slow database queries, connection pool exhaustion, or capacity degradation — during the Integration Gateway's scheduled sync window. This causes outbound requests from the gateway to exceed the configured client timeout (typically 5 to 30 seconds), resulting in repeated 504 Gateway Timeout responses and exhaustion of the retry policy. The issue originates on the downstream service side rather than within the Integration Gateway itself.
+Elevated latency on downstream API services caused Integration Gateway outbound requests to exceed the configured timeout window, producing intermittent or sustained HTTP 504 Gateway Timeout responses. The downstream performance degradation was traced to backend conditions such as resource exhaustion, misconfigured connection pools, or missing database indexes. Token expiry and rate-limiting were investigated but not supported by available evidence as contributing factors.
 
 ## Diagnostics
 
@@ -75,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'Integration Gateway 504 timeout due to downstream API latency' when reporting it.
+Resolved by IT; downstream API latency exceeded the Integration Gateway timeout threshold, causing 504 Gateway Timeout errors and batch sync job failures during scheduled processing windows.
 
 ---
 

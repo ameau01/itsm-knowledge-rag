@@ -8,22 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Exchange Online mailbox-side sync fault affecting multiple client devices
+# Exchange Online Mailbox-Side Sync Fault Across Multiple Clients
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience inconsistent or failed email and calendar synchronization across multiple devices connected to the same Exchange Online mailbox. On the desktop Outlook client, the connection status may flicker between "Connected" and "Disconnected" throughout the day rather than dropping permanently, and new mail items may not appear reliably. On mobile devices (such as the iPhone Outlook app), the client may show a persistent "Disconnected" status with no new mail arriving, and the displayed data becomes stale.
+Affected users experience a failure of Outlook to sync new email and calendar data across multiple clients — both desktop and mobile — for the same Exchange Online mailbox. On mobile devices, the Outlook app shows stale data with no new messages arriving, while the desktop client displays a persistent or flickering Disconnected status. The issue is not limited to a single endpoint or platform; the same mailbox exhibits sync failure on both desktop and mobile simultaneously, distinguishing it from a client-side or device-specific problem.
 
-The issue is notable because it affects more than one client type — both desktop and mobile — for the same mailbox at the same time. Standard local troubleshooting steps such as rebuilding the Outlook desktop profile, toggling airplane mode, or restarting the mobile app do not fully resolve the problem. In some cases, the desktop client may temporarily resume syncing after a profile rebuild, but the mobile client remains stuck, or both clients continue to exhibit unreliable sync.
+Standard local remediation steps do not resolve the issue. Rebuilding the Outlook profile on the desktop may temporarily restore connectivity on that client, but mobile sync remains broken. Toggling airplane mode, restarting the mobile app, and refreshing client sessions have no effect. MDM compliance checks on enrolled mobile devices return normal results, and no Microsoft 365 service outage is reported by the organization or visible to colleagues on the same network.
 
-No broader Microsoft 365 service outage is reported, and colleagues using other Exchange Online mailboxes in the same office and on the same network are unaffected. Mobile device compliance checks through the organization's device management platform return normal results, and there is no endpoint policy block preventing access. The failure is isolated to the individual mailbox rather than to a specific device, network, or compliance condition.
+The failure is isolated to a single mailbox rather than a broader connectivity or tenant-level problem. Other users in the same office with different Exchange Online mailboxes are unaffected. Affected users are unable to rely on current mailbox data during the workday, impacting time-sensitive activities such as client-facing meetings.
 
 !!! note "Reported variations"
 
-    - Desktop Outlook may temporarily resume syncing after a local profile rebuild while the mobile client remains disconnected, giving the initial appearance of a mobile-only issue before the desktop symptoms return.
-    - Exchange Online message tracking may reveal HTTP 429 throttling responses during peak sync windows for the affected mailbox, suggesting server-side rate limiting as a contributing factor.
+    - In one case the desktop Outlook connection status flickered between Connected and Disconnected throughout the day rather than remaining steadily disconnected.
+    - In one case a desktop profile rebuild restored desktop sync, but the mobile client continued to show Disconnected with no new mail, leaving the issue partially resolved on only one platform.
+    - In one case the desktop client remained steadily Disconnected even after troubleshooting, with no partial restoration on any platform prior to escalation.
 
 ## Affected environment
 
@@ -36,7 +37,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The issue stems from a synchronization fault or service condition on the Exchange Online mailbox itself, rather than from a problem with the local Outlook profile, mobile device compliance, or network connectivity. Because multiple client types (desktop and mobile) are affected for the same mailbox and local remediation steps do not restore reliable sync, the root cause lies on the server side of the mail platform. In diagnosed cases, Exchange Online message tracking for the affected mailbox has shown throttling responses during peak synchronization windows, which can contribute to the sync failures seen across devices.
+A suspected Exchange Online service-side mailbox synchronization fault or transient service condition is affecting multiple client sessions for a single user. There is insufficient local evidence to attribute the failure to the Outlook profile, device compliance, or network connectivity. The issue manifests at the mailbox level rather than at the client or tenant level.
 
 ## Diagnostics
 
@@ -67,7 +68,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support with escalation to the Exchange Online messaging team; reference "suspected server-side mailbox sync fault" when reporting it.
+Resolved by IT; Exchange Online mailbox-level sync fault affecting multiple client platforms for a single user.
 
 ---
 

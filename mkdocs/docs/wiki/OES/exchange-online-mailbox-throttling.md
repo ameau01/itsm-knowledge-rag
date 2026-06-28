@@ -8,23 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Exchange Online mailbox throttling disrupting Outlook desktop and mobile sync
+# Exchange Online Mailbox Throttling Disrupting Client Synchronization
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience a sudden loss of email synchronization in both Outlook desktop and Outlook mobile, typically beginning in the morning hours. On the desktop client, Outlook displays a "Disconnected" status in the status bar, which may appear persistently or flicker intermittently between connected and disconnected states. On mobile devices, the Outlook app reports sync errors, displays "Last synced: never," or shows a persistent disconnected indicator despite normal network connectivity on both Wi-Fi and cellular.
+Affected users experience a sudden loss of email synchronization across Outlook desktop and Outlook mobile clients connected to their Exchange Online mailboxes. Desktop clients display a "Disconnected" status in the status bar, while mobile clients report sync errors or show a "last synced: never" indication. Outlook on the Web (OWA) typically continues to display incoming messages normally, confirming that the mailbox remains available at the service level even as thick clients fail to sync. The disruption often begins in the morning hours and persists through standard troubleshooting steps such as app restarts, device reboots, and toggling airplane mode.
 
-Notably, webmail access through Outlook on the Web (OWA) continues to function normally during the disruption, with new messages visible in the browser. This contrast between working OWA and failing desktop/mobile clients is a key characteristic of the issue. Standard user-side troubleshooting steps such as restarting devices, toggling airplane mode, or relaunching the Outlook app do not resolve the problem.
+Exchange Online diagnostics consistently reveal HTTP 429 throttling responses or EWS throttling entries against the affected mailboxes during sync attempts. Error code 0x800CCC0E has been observed during mobile sync failures alongside the throttling indicators. Rebuilding the Outlook desktop profile may restore mail flow on the desktop side, suggesting stale local profile or OST involvement, but the mobile client typically continues to fail even after the desktop recovers. Clearing and re-pairing the mobile ActiveSync partnership produces only brief or partial reconnection before sync breaks down again.
 
-Rebuilding the Outlook desktop profile or resetting the mobile ActiveSync partnership may produce brief, temporary recovery — new mail may flow for a short period before synchronization fails again. The persistence of the issue after these client-side fixes, combined with continued OWA availability, distinguishes this condition from a purely local profile corruption or a full mailbox outage. Affected users may also encounter ActiveSync error codes such as 0x800CCC0E on mobile devices.
+Cases in this category were escalated to Exchange Online backend support for throttle policy review and, where applicable, to MDM administrators after device non-compliance states were identified against affected mobile device partnerships.
 
 !!! note "Reported variations"
 
-    - Some affected users experience the issue only on mobile after a desktop Outlook profile rebuild restores desktop sync, with mobile ActiveSync connections continuing to receive throttling responses.
-    - A brief mobile device compliance hold reported by the organization's device management system may coincide with the throttling event, temporarily compounding the mobile sync failure before the device is confirmed compliant.
-    - In some cases, the desktop Outlook client intermittently flips between Connected and Disconnected states rather than remaining fully disconnected, making the issue appear transient on the desktop side.
+    - Desktop Outlook intermittently toggling between Connected and Disconnected states rather than remaining fully disconnected
+    - Split-client experience in which a desktop profile rebuild restores desktop sync while the mobile client remains in a failed state
+    - MDM reporting a brief device non-compliance hold on the mobile device partnership, compounding the sync failure
+    - Transient recovery of both desktop and mobile clients after ActiveSync re-pairing, followed by relapse into sync failure
+    - Error code 0x800CCC0E observed during mobile sync failures concurrent with HTTP 429 throttling responses
 
 ## Affected environment
 
@@ -37,7 +39,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-The primary cause is a throttling condition applied by Exchange Online against the affected user's mailbox, which limits or blocks client synchronization requests. This throttling generates HTTP 429 (too many requests) responses to desktop EWS and mobile ActiveSync connections, preventing Outlook desktop and mobile from maintaining a stable sync. While stale or corrupted local Outlook profiles and temporary mobile device compliance issues may contribute to the initial symptoms or create conflicting evidence, the lasting synchronization failure is driven by the server-side throttling rather than client-side factors alone.
+Exchange Online backend throttling was the primary cause, generating intermittent HTTP 429 responses and EWS throttling entries that interrupted ActiveSync and Outlook mobile connections. A stale or corrupted Outlook desktop profile and local OST file contributed to desktop-side disconnection, creating conflicting evidence, but were not the root cause of the persistent mobile sync failure. Recovery was achieved after a temporary throttle exception was applied at the service level.
 
 ## Diagnostics
 
@@ -73,7 +75,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support with assistance from the backend Exchange Online support team; reference 'Exchange Online mailbox throttling' when reporting it.
+Resolved by IT after Exchange Online backend support applied a temporary throttle exception and the desktop Outlook profile and mobile device partnership were reset.
 
 ---
 

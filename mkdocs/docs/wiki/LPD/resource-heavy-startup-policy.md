@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Post-login slowdown caused by resource-heavy corporate startup policy
+# Post-Login CPU Contention From Resource-Heavy Startup Policy Deployment
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience significant slowness on their managed Windows 10 laptops immediately after signing in. Within one to two minutes of login, CPU usage climbs to 70–90%, and common applications — including Outlook, Chrome, Teams, Edge, and Windows Explorer — take 20 to 60 seconds to open. Normal post-login work is noticeably delayed during this window.
+Affected users with managed Windows 10 corporate laptops report significant slowness immediately after signing in. CPU usage rapidly climbs to 70–90% within one to two minutes of login, and common productivity applications — including Outlook, Chrome, Teams, Edge, and Windows Explorer — take 20–60 seconds to open. Desktop interaction is noticeably delayed during the startup window, and normal post-login work is disrupted for several minutes before performance gradually improves. The issue is confined to individual endpoints rather than the broader network.
 
-The slowness is most pronounced in the first several minutes after login and may gradually improve as the startup workload subsides, though the delay is sustained enough to disrupt routine tasks. The issue is limited to the affected endpoint and does not indicate a broader network or hardware problem.
+Diagnostic review of affected devices reveals multiple resource-intensive processes competing for CPU cycles during the login phase, including endpoint management extensions, scheduled policy-enforcement tasks, asset inventory agents, synchronization triggers, and telemetry collectors — all launched simultaneously as part of the updated startup configuration. In some cases, a single enforced startup application is the dominant source of the CPU spike rather than a combination of competing processes. The onset of symptoms aligns directly with the timing of a corporate startup application policy push.
 
-Symptoms began appearing after a corporate startup policy was deployed to devices via endpoint management tooling, with the earliest reports coinciding with policy pushes on or around 2026-02-05. Affected users have been located across multiple office locations and belong to groups such as Sales - Mobile Workforce. Task Manager on affected devices shows elevated CPU consumption driven by startup-related processes and services running under the new policy.
+Affected users span multiple office locations and groups such as Sales and Mobile Workforce. The issue has been observed following policy pushes on consecutive days, indicating that successive rounds of startup policy revisions can independently trigger the same resource-contention behavior on newly targeted devices. In at least one case, the issue initially appeared attributable to a different root cause before diagnostics confirmed the startup policy as the actual trigger.
 
 !!! note "Reported variations"
 
-    - In some cases, a single startup application (such as an asset inventory agent) is the dominant source of CPU consumption rather than multiple competing processes.
-    - Some affected devices show duplicate sync triggers or redundant telemetry collectors layered on top of the primary startup workload, amplifying the resource contention.
-    - The specific startup policy name and deployment date may vary across affected groups (e.g., a sales-specific hardening policy versus a broader corporate startup application policy).
+    - In some cases, a specific enforced startup application (such as an asset inventory agent) is the dominant source of the CPU spike, rather than a combination of multiple competing processes.
+    - One affected user reported that performance partially self-recovered after several minutes, though applications remained slower than normal throughout the session.
+    - The problematic startup policy was delivered via Group Policy (GPO) in some instances and via Intune endpoint management in others, but the resulting symptoms were identical.
+    - At least one case initially appeared to have a different root cause (e.g., low disk space) before diagnostics confirmed the startup policy as the actual trigger.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-A recently applied corporate startup policy introduced or re-enabled multiple resource-heavy applications and services that run automatically at user login. These startup items — including inventory agents, policy-enforcement tasks, telemetry collectors, and duplicate sync triggers — compete for CPU and memory immediately after sign-in, causing sustained high utilization and delaying normal application launches. The issue is configuration-driven rather than related to hardware limitations or low disk space.
+A recently applied corporate startup policy introduced or re-enabled multiple resource-heavy startup items and service activity at user logon. The simultaneous launch of these processes caused sustained CPU and memory contention, delaying application launches and degrading post-login responsiveness on affected endpoints.
 
 ## Diagnostics
 
@@ -73,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'post-login slowdown from startup policy' when reporting it.
+Resolved by IT after identifying and adjusting the recently deployed startup application policy responsible for post-login resource contention on affected endpoints.
 
 ---
 

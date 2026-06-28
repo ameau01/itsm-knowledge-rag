@@ -8,24 +8,27 @@ curated: true
 self_serviceable: false
 ---
 
-# BitLocker activation failure due to stale or missing Intune encryption policy
+# Deprecated Intune Encryption Policy Prevents BitLocker Activation and Key Escrow
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their Intune-managed Windows device remains noncompliant for disk encryption after enrollment or a policy rollout. Company Portal or the Intune compliance dashboard reports that encryption is not enabled, and BitLocker does not activate automatically as expected. In many cases, no recovery key is visible in Azure AD or the Intune portal for the device, and the device is blocked from meeting corporate endpoint security requirements.
+Affected users with corporate-managed Windows 10 or Windows 11 devices report that BitLocker disk encryption does not activate following Intune enrollment. The devices appear as noncompliant for encryption in Company Portal and Intune compliance dashboards, and in most cases no recovery key is visible in the management portal. Investigation consistently reveals that the affected devices are assigned to a deprecated or legacy encryption policy rather than the current active policy version, preventing the encryption configuration from being applied or enforced.
 
-The local BitLocker status on the affected device typically shows "Protection Off" on the operating system drive, with no key protectors found. In some instances the TPM protector is reported as not initialized, which prevents encryption from starting entirely. In other cases, a TPM protector may be present and a recovery key may even appear escrowed in the tenant, yet local protection remains off and the device is still flagged as noncompliant — creating conflicting signals between local status and management-side telemetry.
+The TPM protector and key escrow state varied across affected devices. Some devices showed the TPM as not initialized, others had the TPM protector present but encryption protection still disabled, and in one case no key protectors were found at all. Where the TPM was uninitialized, encryption could not start and recovery key escrow failed entirely. Where the TPM protector existed but the policy was stale, conflicting telemetry arose — Intune reported noncompliance while a recovery key appeared escrowed in the tenant, yet local status showed protection off. In one case, a TPM initialization error was observed during an earlier provisioning attempt, though the TPM was later confirmed functional.
 
-Attempts to resolve the issue through device restarts, manual Intune syncs, or remote encryption commands from the Intune console do not bring the device into a compliant, encrypted state. The problem persists until the underlying policy assignment is corrected by IT support. Affected devices have been observed across multiple device groups, office locations, and both Windows 10 and Windows 11 hardware including Surface Pro devices.
+The issue affected devices across multiple offices and user groups. Affected users were unable to meet endpoint security compliance requirements, which blocked access to corporate resources or created gaps in recovery-key visibility for IT administrators. Other laptops within the same device groups were confirmed unaffected.
 
 !!! note "Reported variations"
 
-    - Some devices show a fully initialized TPM protector and a successfully escrowed recovery key in the tenant, yet BitLocker protection remains locally disabled and the device is marked noncompliant — indicating the policy was partially but not fully enforced.
-    - In certain cases the device was never assigned the correct policy at all (e.g., excluded from the target device group during onboarding) rather than being linked to a deprecated policy version.
-    - On at least one device, an assignment filter mismatch on the management side prevented the encryption profile from applying despite the device having full hardware readiness, including an initialized TPM.
-    - The TPM protector not-initialized state appears as a downstream effect of the missing policy in many cases, but is not always present — some devices have a healthy TPM yet still fail to encrypt due to the policy gap.
+    - One device was inadvertently excluded from its intended device group during onboarding, resulting in no encryption policy assignment rather than a stale one.
+    - One case exhibited conflicting telemetry: Intune showed encryption noncompliance while a recovery key was already escrowed in the tenant and the TPM protector existed locally, indicating partial but unenforced policy application.
+    - One device had no key protectors at all on the encrypted volume, with local status returning protection off and no protectors found.
+    - One ticket was raised by the affected user's manager rather than the user themselves, due to an upcoming client visit requiring compliance.
+    - One device had not completed an MDM sync since before the most recent policy rollout, compounding the stale policy assignment.
+    - A TPM initialization error was initially observed during an earlier provisioning attempt, though the TPM was subsequently found to be present and initialized.
+    - Peer devices in the same assigned group were confirmed unaffected and did not display the noncompliant encryption status.
 
 ## Affected environment
 
@@ -38,7 +41,7 @@ Distribution across 6 reported cases:
 
 ## Root cause
 
-The device is associated with a stale, deprecated, or incorrectly targeted Intune disk encryption policy rather than the current active policy. Because the effective encryption configuration never reaches the device, BitLocker cannot activate properly, the TPM protector may not initialize, and recovery key escrow to Azure AD or Intune fails or remains incomplete. This can occur when a device retains a reference to a retired policy version, is inadvertently excluded from the correct device group, or is affected by an assignment filter mismatch that prevents the current policy from applying.
+A deprecated or stale Intune Endpoint Encryption Policy reference remained associated with the affected devices, preventing the current active encryption policy from being received and applied. Without the correct policy, the TPM protector was not properly initialized or enforced, BitLocker encryption did not start, and recovery key escrow to the management service failed.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "Intune encryption policy not assigned or stale/deprecated policy" when reporting it.
+Resolved by IT; reference: deprecated or stale Intune encryption policy association preventing BitLocker activation and recovery key escrow.
 
 ---
 

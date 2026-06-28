@@ -8,22 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Shared printer queue failures due to spool directory permission changes
+# Print Spooler Fails Due to Incorrect Queue or Spool Directory Permissions
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to print through a shared printer queue hosted on the print server find that jobs enter the queue but never complete. The printer appears visible and accepts submissions, yet documents remain stuck without printing. Some users may see the printer show as offline in their print dialog, even though the device is reachable and the queue is not paused.
+Office users at a branch location reported that printing to a shared HP LaserJet hosted on the print server was failing. The printer remained visible in the shared queue and accepted job submissions, but jobs entered the queue without completing. Some users received access-related printing errors, while others observed the printer showing offline or encountered driver-unavailable and spooler-timeout messages. The issue was confirmed across multiple users on different floors of the building.
 
-In addition to stalled jobs, some workstations display access-related printing errors or spooler timeout messages rather than the offline or driver-related errors associated with other print issues. The errors point to a processing failure on the print server side rather than a problem with workstation connectivity or driver availability.
+Diagnostics ruled out a paused queue and an outdated or corrupt driver package. A test job submitted through the server-hosted queue failed during spooler processing and presented as an access error (EventID 7011), pointing to a permissions issue affecting the print queue or spool path rather than a driver fault. The failure was limited to processing on the print server side; affected workstations could see the printer and submit jobs, indicating workstation-level connectivity was intact.
 
-The issue typically affects multiple users across different floors or workgroups who share the same server-hosted print queue. Individual workstations can discover and connect to the printer normally, but no jobs are processed to completion regardless of which user or workstation submits them.
+The issue was resolved by restoring baseline ACLs for the print spooler service account, after which normal printing resumed for all affected users.
 
 !!! note "Reported variations"
 
-    - Some workstations may report the shared printer as offline rather than displaying an explicit access or spooler timeout error.
-    - The specific error presentation can vary by workstation, with some users seeing "driver unavailable" messages alongside the access errors, even though the driver package itself is intact.
+    - Some users reported the shared printer showing offline rather than receiving explicit access-related errors
+    - Driver-unavailable or spooler-timeout messages appeared on certain workstations alongside the primary queue-stuck behavior
+    - Users on multiple floors of the same building were affected, confirming the issue was not isolated to a single network segment
 
 ## Affected environment
 
@@ -36,7 +37,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-A recent Group Policy update changed the permissions on the shared printer queue's spool directory on the print server, removing write access for the print spooler service account. Without the necessary permissions, the Print Spooler service could not process submitted jobs, causing them to stall in the queue and triggering access-related errors on client workstations.
+Incorrect permissions on the affected shared printer queue or the associated spool directory on the print server prevented the Print Spooler service from processing submitted jobs. The spooler service account lacked the necessary ACLs to complete job rendering and output.
 
 ## Diagnostics
 
@@ -59,7 +60,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "spool directory permissions" when reporting it.
+The issue was resolved by IT after restoring correct permissions on the print queue and spool directory for the spooler service account.
 
 ---
 

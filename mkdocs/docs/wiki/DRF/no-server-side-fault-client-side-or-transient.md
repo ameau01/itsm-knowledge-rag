@@ -8,23 +8,22 @@ curated: true
 self_serviceable: false
 ---
 
-# Hostname resolution failures caused by client-side DNS cache or transient conditions
+# Client-Side DNS Cache or Local Network Condition Causing Resolution Failures
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience intermittent failures when attempting to reach internal services by hostname. Some workstations return "NXDOMAIN" (host not found) responses or resolve hostnames to outdated IP addresses belonging to decommissioned hosts, while other systems on the same network resolve the same hostnames successfully. The failures are most visible on clients that have recently changed networks, reconnected via VPN, or resumed from long-running sessions.
+Affected users in a corporate office environment reported intermittent DNS resolution failures when attempting to reach internal services by hostname. The issue manifested as NXDOMAIN responses or resolution to outdated IP addresses belonging to decommissioned hosts, even though other systems on the same network were resolving the same hostnames successfully. The problem primarily impacted access to internal endpoints such as service-discovery and application dependency registries.
 
-The inconsistency between machines is a hallmark of this issue: central DNS infrastructure returns correct, current answers when queried directly, yet individual endpoints continue to serve stale or incorrect results from their local caches. Access to internal endpoints such as service-discovery registries and application dependencies may be disrupted on the affected workstations, even though the underlying DNS records are accurate.
+Investigation confirmed that both authoritative DNS servers and corporate resolvers were returning correct, current records for the affected hostnames. The inconsistency between working and non-working systems pointed to endpoint-local conditions rather than a centralized DNS infrastructure fault. One affected workstation was found returning a stale cached IP address that had already been corrected in the authoritative zone during a prior change window, while another received NXDOMAIN responses despite correct zone data being present on the servers.
 
-Reports may come from multiple users in the same office at roughly the same time, which can initially suggest a broader infrastructure problem. However, the pattern typically narrows to a small number of endpoints rather than a site-wide outage.
+The issue was most visible on clients that had recently changed networks or resumed from long-running sessions. In the reported cases, resolution returned to normal after affected users flushed their local DNS caches or reconnected to the office VPN, consistent with a transient or client-side caching condition rather than a server-side fault.
 
 !!! note "Reported variations"
 
-    - Some affected workstations resolve hostnames to an older, decommissioned IP address rather than returning a "not found" error, making the issue appear to be a stale zone record on the server side.
-    - The issue may clear on its own after a user reconnects to the corporate VPN, with no other intervention required.
-    - Endpoints that have recently switched networks (e.g., moving between wired and wireless, or between office and remote connections) are disproportionately affected.
+    - One affected endpoint resolved an internal hostname to an outdated IP address associated with a previously decommissioned host, suggesting a stale local cache entry persisting beyond the authoritative zone correction.
+    - The issue cleared on one system only after the user reconnected to the corporate VPN, indicating that a network transition may have left the client with an unusable or outdated resolver configuration.
 
 ## Affected environment
 
@@ -36,7 +35,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-No fault is present in the central internal DNS service. The authoritative DNS servers and corporate resolvers return correct, current answers for the affected hostnames. The resolution failures originate from stale entries in the local DNS cache on individual workstations, local network configuration issues (such as endpoints pointing to an alternate resolver), or a transient condition that has already cleared by the time investigation begins.
+No fault was found in the central internal DNS service. Client-side DNS caching, local network settings, or an already-cleared transient condition caused the earlier hostname resolution failures. The issue was isolated to individual endpoints rather than the shared resolver or authoritative infrastructure.
 
 ## Diagnostics
 
@@ -59,7 +58,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'client-side DNS cache resolution failure' when reporting it.
+Resolved by IT; intermittent internal DNS resolution failures traced to client-side caching or local network conditions with no centralized DNS fault identified.
 
 ---
 

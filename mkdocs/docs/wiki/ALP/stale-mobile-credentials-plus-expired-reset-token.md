@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Mobile cached credentials and expired reset token combine to sustain AD lockout
+# Mobile Cached Credentials Trigger AD Lockout With Expired Reset Token
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find themselves unable to sign in to the corporate SSO Portal after a recent password change or password reset attempt. The SSO Portal displays an "account locked" message, and authentication fails from both mobile devices and, in some cases, desktop workstations. The issue typically begins when a mobile device — most commonly a corporate iPhone running iOS mail, Outlook, or Teams — continues submitting the previous password in the background after the user has changed or reset their credentials.
+Affected users experience Active Directory account lockouts triggered by mobile devices—primarily corporate iPhones, though managed Android devices are also represented—that continue submitting stale cached credentials after a password change or reset. Mail and collaboration apps such as Outlook, Teams, native iOS Mail, and Microsoft Authenticator retry authentication in the background using outdated saved passwords, rapidly exceeding the lockout threshold. Domain controller security logs (Event ID 4740/4625) show clusters of failed attempts originating from the mobile device's IP address, in some cases over fourteen failures within a short window.
 
-At the same time, attempts to recover through the self-service Password Reset Portal are unsuccessful because the originally issued reset token has expired. The portal returns an "expired token" or equivalent error message, preventing the user from completing a clean password reset. Because the mobile device keeps retrying with stale cached credentials, the Active Directory account relocks shortly after any manual unlock, creating a cycle in which neither the new password nor the reset workflow restores access.
+Compounding the lockout, the self-service password reset token issued by the Password Reset Portal expires before the user can complete the credential update. Token validity windows vary across environments, with observed time-to-live values ranging from fifteen minutes to several hours; in one case the token sat unused for over twenty-four hours. Users who return to the reset link encounter an expired-token error, leaving them without a viable self-service recovery path while the account remains locked and the mobile device continues generating failed attempts.
 
-The result is a complete loss of access to SSO-connected applications — including email, collaboration tools, and line-of-business systems — until both the lockout source and the expired token state are addressed together. The issue affects individual accounts rather than broad groups of users, and it has been observed across multiple office locations and network paths, including corporate Wi-Fi and home networks. In some cases, users who have recently switched phones find that credentials restored from a backup or still present on an old device contribute to the repeated failures.
+Even when the Password Reset Portal reports a successful reset, the account may relock almost immediately because the mobile device keeps submitting old credentials before the new password propagates across domain controllers. This self-reinforcing cycle of stale-credential submission, account lockout, and unusable reset token blocks access to all SSO-connected resources—including email, collaboration tools, CRM, and identity platforms—from both mobile and desktop clients. Affected users consistently report urgent business impact, citing time-sensitive deliverables or client commitments. Resolution requires administrative intervention to unlock the account, issue a fresh reset token, and confirm that cached credentials on the mobile device are cleared.
 
 !!! note "Reported variations"
 
-    - Users who recently switched phones may encounter the issue when credentials carried over from a device backup or still active on the old device continue submitting stale authentication attempts.
-    - In some cases, desktop sign-in works normally with the new password while mobile access alone triggers the lockout cycle, causing the account to relock before the desktop session can be used effectively.
-    - One instance involved a managed Android device rather than an iOS device, with the same pattern of cached credential replay and expired reset token.
-    - The expired reset token error message may vary in wording across attempts, with some users seeing "token expired," others seeing a named-error code such as TOKEN_EXPIRED_0041, and others receiving a generic prompt to request a new reset link.
+    - Desktop authentication succeeds with the new password while mobile authentication fails, with the lockout triggered exclusively by the mobile device
+    - Multiple mobile apps on the same device (e.g., Outlook, native iOS Mail, Teams, Microsoft Authenticator) each independently retry with stale credentials, accelerating the lockout
+    - The lockout recurs immediately after an initial account unlock because cached mobile credentials have not yet been cleared on the device
+    - A previous device continues submitting stale credentials after the user migrates to a new phone, with old device profiles or backup-restored credentials driving the failures
+    - Domain controller replication lag contributes to post-reset SSO failures, with updated credentials not propagating consistently across all domain controllers
+    - In at least one case the lockout preceded any password reset attempt; initial sign-in failures on the mobile device triggered the AD lockout policy before self-service recovery was initiated
+    - Token time-to-live values varied across environments, with observed windows ranging from fifteen minutes to four or more hours
+    - In one case the user removed and re-added the corporate account on the mobile device prior to contacting support, but the reset portal still reported the token as expired and SSO continued rejecting sign-in attempts
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 33 reported cases:
 
 ## Root cause
 
-A mobile device retains the user's previous password in its cached credentials after a password change and continues automatically submitting failed sign-in attempts against Active Directory. These repeated failures trigger the Active Directory account lockout policy, locking the account. In parallel, the self-service password reset token that was issued earlier expires before the user can successfully complete the reset and before the updated password propagates to Active Directory and the SSO platform. The combination of the ongoing mobile lockout source and the invalid reset token prevents normal recovery until both issues are resolved together.
+The Active Directory lockout policy was triggered by repeated failed authentication attempts from a mobile device that continued submitting stale cached credentials after a password change or reset. Simultaneously, the self-service password reset token expired before the credential update could be completed and propagated, preventing the user from resolving the lockout through self-service recovery.
 
 ## Diagnostics
 
@@ -74,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'mobile cached credentials with expired reset token lockout' when reporting it.
+Resolved by IT after unlocking the Active Directory account, issuing a new password reset token, and clearing stale cached credentials from the mobile device.
 
 ---
 

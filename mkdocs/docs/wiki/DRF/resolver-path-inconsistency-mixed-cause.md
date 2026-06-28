@@ -8,23 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Intermittent internal DNS failures due to resolver path inconsistency after maintenance
+# Inconsistent Internal Resolver Cache or Forwarder State After DNS Maintenance
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience intermittent failures when their machines attempt to resolve internal hostnames used by corporate applications and services. The failures manifest as a mix of responses: some lookups return NXDOMAIN (indicating the name does not exist), some time out entirely, some return SERVFAIL errors, and others return outdated IP addresses that no longer correspond to the correct backend server. The inconsistency means that the same hostname may resolve correctly on one attempt and fail on the next, making the problem difficult to predict.
+Affected users experience intermittent failures when resolving internal hostnames used by critical services such as database endpoints and backend application dependencies. Failures manifest as a mix of NXDOMAIN responses, SERVFAIL errors, and DNS lookup timeouts when querying internal resolvers. In some cases, lookups return stale A records pointing to outdated IP addresses rather than the current expected address. These resolution failures prevent name-based connectivity to internal services, causing deployment pipeline failures, application errors, and loss of access to internal tools.
 
-The issue is not confined to a single machine or network segment. Reports have shown the problem affecting multiple hosts across different racks, subnets, and office locations simultaneously. For example, users on one subnet may predominantly see timeouts while users on another see stale address responses or NXDOMAIN errors for the same internal hostname. This cross-subnet, cross-location pattern distinguishes the issue from a problem on any individual workstation or a single network segment.
+The issue presents non-uniformly across clients, subnets, and office locations. Hosts on one internal subnet or resolver path may experience consistent failures while hosts on a different subnet return correct results. Even within the same environment, the failure mode varies — some clients receive NXDOMAIN, others experience timeouts, and others receive outdated records — depending on which internal resolver or cache instance handles the query. Reports have spanned multiple racks within a single datacenter as well as multiple office locations.
 
-The practical impact is that internal services relying on name-based connections — such as database endpoints, payment backends, and other internally hosted applications — become intermittently unreachable. Deployment pipelines, application health checks, and monitoring dashboards may all flag failures during the affected period. The onset of symptoms has been observed following scheduled DNS maintenance windows, though the link to maintenance is not always immediately apparent to the reporting user.
+In reported cases, symptom onset correlated with recent DNS maintenance windows or zone migrations. Authoritative DNS servers responded correctly when queried directly, while the caching or forwarding resolvers serving affected clients returned inconsistent or incorrect answers. The exact resolver failure mode was not always conclusively isolated, as post-cache-flush behavior sometimes remained inconsistent and forwarder configuration could not be fully confirmed from available evidence.
 
 !!! note "Reported variations"
 
-    - Some affected subnets experienced predominantly NXDOMAIN responses while others saw timeouts or stale IP addresses for the same hostname, depending on which internal resolver served that subnet.
-    - In at least one case, flushing the resolver cache did not immediately restore consistent behavior, suggesting that forwarder configuration or routing — not just cached data — contributed to the inconsistency.
-    - The exact resolver failure mode could not always be conclusively isolated due to limited change history or rotated logs on the primary DNS servers.
+    - Some affected hosts returned stale A records pointing to a previous IP address following a recent endpoint migration, rather than returning an error
+    - Failures appeared only after a scheduled DNS maintenance window, with no symptoms reported prior to the change
+    - Approximately 40% of queries from a specific host returned NXDOMAIN while the remaining queries succeeded, indicating intermittent rather than total failure
+    - Change log evidence on the primary DNS server was unavailable due to log rotation, preventing full confirmation of authoritative record drift
+    - One resolver intermittently returned SERVFAIL for internal zone queries while authoritative servers responded correctly, but the exact failure mode could not be conclusively isolated even after cache flush
 
 ## Affected environment
 
@@ -36,7 +38,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-Scheduled DNS maintenance or zone changes left the internal DNS resolver infrastructure in an inconsistent state, with some resolvers serving stale cached data, incorrect forwarder routing, or a combination of both. Because multiple internal resolvers were affected — each potentially holding different outdated information — clients on different subnets received different (and often incorrect) answers for the same internal hostname. The authoritative DNS zone records themselves were typically healthy; the fault lay in how the resolvers cached or forwarded queries for internal zones.
+Intermittent internal DNS resolution failures were caused by stale or inconsistent data held by caching and forwarding resolvers following DNS maintenance or zone migrations. The resolver layer served outdated or incorrect answers for internal zones even though authoritative records were healthy, with the inconsistency affecting multiple subnets and regions. Misconfiguration or instability in the corporate resolver path compounded the issue, producing mixed NXDOMAIN, SERVFAIL, and stale-record responses across different resolver instances.
 
 ## Diagnostics
 
@@ -72,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "internal DNS resolver path inconsistency" when reporting it.
+Resolved by IT; reference as intermittent internal DNS resolution failures due to inconsistent resolver cache or forwarder state following DNS maintenance.
 
 ---
 

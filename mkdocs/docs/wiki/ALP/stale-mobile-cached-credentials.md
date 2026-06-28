@@ -8,26 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Post-reset account lockout caused by stale cached credentials on iOS mobile device
+# Recurring AD Lockouts From Stale Cached Credentials on iOS Mobile Devices
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users complete a corporate password reset through the Password Reset Portal and may initially be able to sign in successfully from a desktop or laptop. However, within minutes of the password change, the Active Directory account becomes locked again, and the SSO Portal at https://sso.corplabs.com returns an "account locked" or "account locked due to too many failed sign-in attempts" message. Access to corporate resources — including email, Outlook, Teams, SharePoint, and other SSO-connected applications — is blocked across all devices once the lockout takes effect.
+After completing a password reset through the corporate Password Reset Portal, affected users experience repeated Active Directory account lockouts. The new password functions correctly for desktop sign-in, but mobile devices — typically company iPhones running apps such as Outlook, Teams, Mail, and Safari — continue submitting the old cached credentials in the background. These stale authentication attempts rapidly exceed the AD lockout threshold, triggering Event ID 4740 lockout entries on the domain controller and re-locking the account within minutes of each unlock.
 
-The lockout is tied to the affected user's company-issued or personal iPhone, which continues submitting the previous password in the background after the reset. Corporate mail, Outlook, Teams, and other collaboration apps configured on the iOS device retain the old saved credentials and repeatedly attempt to authenticate against Active Directory without user intervention. These failed attempts accumulate rapidly — often reaching the lockout threshold within minutes — and trigger the Active Directory lockout policy (Event ID 4740), re-locking the account each time it is unlocked.
+The issue creates a persistent lockout cycle: each time the account is unlocked, the mobile device resumes retrying with outdated credentials, exhausting the failed-attempt counter again. Domain controller logs confirm the repeated failures originate from the mobile device's IP address, with automated retries occurring as frequently as every 60 seconds. In some cases, 14 or more failed attempts were recorded within a 25-minute window from a single device. Users remain locked out of all SSO-protected corporate resources — including Exchange Online, Teams, and internal tools — until the stale credentials on the mobile device are cleared.
 
-In many cases, desktop or laptop sign-in works normally with the new password, confirming that the reset itself completed successfully. The lockout cycle recurs each time the account is unlocked because the mobile device continues retrying with stale credentials until those cached credentials are cleared from the device. Some affected users also encounter expired password reset tokens when attempting self-service recovery while the account is in a locked state, further delaying access restoration.
-
-The issue has been reported across multiple offices and departments, affecting users connecting from both corporate Wi-Fi and remote networks. Authentication logs on the domain controller consistently trace the failed sign-in attempts back to the mobile device's IP address, with repeated failures logged at short intervals corresponding to app sync cycles such as Exchange ActiveSync.
+A secondary symptom compounds the problem: the lockout may block access to the Password Reset Portal itself, preventing self-service recovery. In some cases the reset token has also expired, leaving affected users unable to resolve the issue without direct service desk intervention. The lockout cycle has persisted for extended periods — in one case spanning over eleven hours across multiple unlock attempts — affecting users across multiple departments, office locations, and network environments.
 
 !!! note "Reported variations"
 
-    - In some cases, the affected user's self-service password reset token has expired by the time they attempt recovery, requiring a new token to be issued by IT support before the password can be updated.
-    - Some users experience the lockout cycle recurring multiple times over several hours or across multiple days, with the account re-locking shortly after each unlock because the mobile credential source was not addressed during earlier remediation.
-    - Occasionally, the stale device entry in the mobile device management system (Intune) must be disabled in addition to clearing cached credentials to fully stop the repeated authentication failures.
-    - A small number of affected users report that both SSO Portal access and Password Reset Portal access are simultaneously blocked, as the account lockout prevents authentication to either service.
+    - Desktop sign-in succeeds normally after the password reset while only the mobile device triggers lockouts, giving the impression the reset was partially successful.
+    - The lockout prevents access to both the SSO Portal and the Password Reset Portal simultaneously, leaving the user unable to self-remediate.
+    - Multiple lockout-and-unlock cycles occur over an extended period (e.g., overnight) when the mobile device continues retrying cached credentials at regular sync intervals.
+    - Saved passwords in the mobile browser (e.g., Safari) contribute to the lockout in addition to credentials stored in mail and collaboration apps.
+    - A previously issued password reset token became expired or unusable due to the repeated lockouts, requiring a fresh token to be generated.
+    - Some affected users were traveling or connecting from remote or home networks, indicating the issue is not tied to a specific network location.
+    - Some tickets required escalation to Identity Tier 2 to validate reset propagation across directory services and clear the mobile credential source.
+    - In at least one case the affected device was running an older mobile OS version, which may have contributed to credential caching behavior.
 
 ## Affected environment
 
@@ -40,7 +42,7 @@ Distribution across 23 reported cases:
 
 ## Root cause
 
-After a corporate password reset, iOS mobile devices retain the previous password in cached credentials used by mail, Outlook, Teams, and other corporate apps. These apps continue attempting to authenticate against Active Directory using the old password in the background, generating repeated failed sign-in attempts that exceed the lockout threshold and trigger the Active Directory account lockout policy. The lockout recurs each time the account is unlocked until the outdated credentials stored on the mobile device are removed and the corporate accounts are reconfigured with the new password.
+Cached credentials on the affected user's iOS mobile device continued submitting the old password to Active Directory and SSO-connected services after the password reset. The repeated failed authentication attempts triggered the AD lockout policy before the new password could be used successfully, creating a recurring lockout cycle until the stale credentials were removed from the device.
 
 ## Diagnostics
 
@@ -76,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'mobile cached credentials lockout after password reset' when reporting it.
+Resolved by IT after unlocking the Active Directory account and clearing stale cached credentials from the affected mobile device.
 
 ---
 

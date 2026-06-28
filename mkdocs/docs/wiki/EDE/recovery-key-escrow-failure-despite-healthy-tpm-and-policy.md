@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# BitLocker recovery key escrow failure despite healthy TPM and policy
+# Recovery Key Escrow Failure Leaves Device Noncompliant Despite Healthy TPM
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their corporate Windows laptop is flagged as noncompliant for disk encryption in the Intune or Endpoint Compliance portal, even though the device has a functioning TPM module and the correct encryption policy assigned. Company Portal displays disk encryption as noncompliant, and in some cases BitLocker may show as "Off" or "not enabled" in Windows Settings or via local status checks, while in other cases encryption has partially started or a protector exists locally. The common thread is that no recovery key is visible in Azure AD, Intune, or Microsoft Endpoint Manager for the affected device.
+Affected users with Intune-managed Windows 10 corporate endpoints experience a persistent noncompliant encryption state in the Device Compliance Service or Company Portal, despite having a functional TPM 2.0 module and a correctly assigned BitLocker encryption policy. The core issue is that the BitLocker recovery key fails to escrow to Azure AD or Intune during or after the encryption process, leaving the recovery key absent from the cloud device record. Without a successfully escrowed key, the compliance service does not recognize the device as meeting corporate encryption requirements.
 
-The missing recovery key prevents the device from reaching a fully compliant managed encryption state, because corporate encryption policy requires both local BitLocker enablement and successful backup of the recovery key to the management service. As a result, affected users may be blocked from accessing compliance-gated corporate resources or flagged during routine compliance audits, even though the device hardware and policy targeting are functioning normally.
+The failure manifests at different points in the device lifecycle. In some cases, the recovery key backup fails during initial enrollment; in others it occurs after a subsequent policy push on an already-enrolled device. Affected devices may display BitLocker protection as suspended, show BitLocker as not enabled in Windows Settings, or appear to have BitLocker components present locally while no key is visible in the management tenant. In at least one instance, BitLocker was confirmed entirely inactive on the system drive with no protectors found, meaning encryption had never been initiated despite correct policy assignment.
 
-In some cases, the escrow failure occurs during initial device enrollment, while in others it follows a policy push or a restart-triggered encryption attempt that partially succeeds. Affected devices may show error codes such as 0x87D1FDE8 (key backup failure), 0x80090010 (key upload error), or 0x80070005 (access denied) in BitLocker or MDM event logs, though these specific errors are not always surfaced to the end user. The compliance status remains stuck as noncompliant until the recovery key is successfully rotated, escrowed to the management service, and a device sync refreshes the compliance state.
+In all scenarios, the Company Portal compliance tile continues to report disk encryption as noncompliant, and affected users are unable to self-resolve the issue through manual sync attempts. The compliance block prevents affected users from meeting corporate endpoint encryption baselines and can restrict access to organizational resources. The issue has been observed across different business groups and office locations.
 
 !!! note "Reported variations"
 
-    - The escrow failure occurs during initial MDM enrollment, leaving BitLocker protection suspended with no recovery key recorded in the management service from the outset.
-    - An escrow upload timeout (e.g., Event ID 846) is followed by a later TPM protector reinitialization, creating conflicting local and cloud state that requires both key rotation and a forced sync to reconcile.
-    - Local checks show no BitLocker protectors listed on the OS drive despite TPM readiness and successful policy delivery, indicating the recovery key was never generated or backed up.
-    - The exact failure point in the escrow process cannot be conclusively identified from available diagnostics, though the practical impact — missing recovery key and noncompliant status — is the same.
+    - Recovery key backup fails during initial Intune enrollment with error code 0x87D1FDE8 (KeyBackupError).
+    - Recovery key escrow upload fails with error code 0x80090010 recorded in MDM/BitLocker event logs after BitLocker is started locally.
+    - Recovery key escrow fails with access-denied error 0x80070005 despite a valid TPM protector and corporate account enrollment.
+    - An escrow upload timeout (BitLocker-API Event ID 846) occurs before TPM protector initialization completes, resulting in a timing mismatch between local encryption state and cloud compliance status.
+    - BitLocker protection shows as suspended on the OS drive rather than disabled, yet the device is still flagged noncompliant due to the missing escrowed key.
+    - Compliance remains noncompliant even after a local TPM protector initialization and Intune sync because the recovery key escrow step itself has not succeeded.
+    - BitLocker components appear present locally but the escrow gap cannot be definitively attributed to either an endpoint failure or a management-side reporting delay.
+    - BitLocker is confirmed entirely inactive on the system drive with no protectors found, meaning encryption was never initiated despite correct policy assignment.
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 7 reported cases:
 
 ## Root cause
 
-BitLocker encryption either started or was ready to start after the TPM protector was initialized, but the recovery key failed to upload (escrow) to the cloud management service. Because corporate encryption policy requires both local encryption and a confirmed recovery key backup, the device remained noncompliant even though the hardware and policy delivery were working correctly. The escrow failure can be caused by access-denied errors, upload timeouts, or transient service issues during the key backup step, leaving the local encryption status and the cloud compliance record out of sync until the key is rotated and successfully backed up.
+BitLocker recovery key escrow failed or never completed during MDM enrollment or subsequent policy processing, leaving the device with a local protector present (or BitLocker still suspended) but no recovery key recorded in the management service. Errors such as key protection service failures, access-denied responses, or transient escrow timeouts prevented the recovery key from being uploaded to Azure AD or Intune, causing the cloud compliance state to remain out of sync with local encryption status.
 
 ## Diagnostics
 
@@ -73,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'BitLocker recovery key escrow failure' when reporting it.
+Resolved by IT after reprocessing encryption policy, rotating the recovery key, and confirming successful escrow to the management tenant.
 
 ---
 

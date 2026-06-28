@@ -8,20 +8,17 @@ curated: true
 self_serviceable: false
 ---
 
-# Post-MFA federation redirect failure causing apparent sign-in loop
+# Federated SSO Claim Mapping Fault Causes Post-MFA Session Loop
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users are unable to reach applications such as Salesforce and Office 365 through the SSO portal (sso.corplabs.com). After successfully completing multi-factor authentication — including approving an Okta Verify push notification on their phone — a brief loading screen appears, and the user is then returned to the MFA prompt instead of being directed to the requested application. This cycle repeats on every attempt, giving the strong impression that MFA is failing or not being accepted.
+Affected users were unable to access SaaS applications — including Salesforce, Office 365, and other targets — through the corporate SSO portal. The sign-in process appeared to loop back to the multi-factor authentication (MFA) prompt repeatedly: users would approve the Okta Verify push notification, see a brief loading screen, and then be returned to the MFA prompt rather than reaching the intended application. The issue began shortly after a scheduled identity platform change window that updated federation trust settings between Okta and Azure AD.
 
-The issue was first observed following an identity platform change window that updated federation trust settings between Okta and Azure AD. It primarily affects contractor accounts that were provisioned through a recently synced Azure AD security group. Users across different devices and network connections in the same office have reported identical behavior, and the loop persists regardless of which target application is selected from the SSO portal.
+Diagnostic investigation revealed that the behavior resembled an MFA loop but was not an MFA failure. Okta system logs showed a successful factor verification event followed by an immediate federation redirect failure, with the error indicating an invalid session state due to a missing group claim in the SAML assertion. MFA enrollment and conditional access policy assignments were confirmed healthy for all affected accounts. The root cause was traced to a misconfigured claim mapping in the Okta-to-Azure AD federation trust introduced during the change window, which omitted the contractor group claim from the SAML token.
 
-!!! note "Reported variations"
-
-    - The issue has so far been confirmed only for contractor accounts provisioned through the newly synced Azure AD contractor group; employees outside that group may not be affected.
-    - Some users may interpret the loop as an MFA enrollment or policy error, but diagnostics confirm that factor enrollment and conditional access policy assignments are healthy for affected accounts.
+The issue was observed among contractor accounts provisioned through a recently synced Azure AD contractor access group. Affected users reported the problem from the same office location and across multiple SaaS application targets, confirming the failure was not application-specific but tied to federated session handling for that contractor group.
 
 ## Affected environment
 
@@ -33,7 +30,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-A change to the federation trust configuration between Okta and Azure AD inadvertently omitted a required contractor group claim from the SAML assertion passed during sign-in. Although MFA completed successfully, the missing claim caused Azure AD to reject the session handoff, which redirected users back to the sign-in flow. The result appeared to be a repeated MFA prompt, but the actual failure occurred after MFA, during the federation redirect step.
+An upstream federated SSO processing fault occurred after MFA completion, preventing session establishment and redirecting users back to the sign-in flow. A misconfigured claim mapping in the Okta-to-Azure AD federation trust, introduced during a scheduled change window, omitted the contractor group claim from the SAML assertion, causing an invalid session state for affected contractor accounts.
 
 ## Diagnostics
 
@@ -57,7 +54,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'post-MFA federation session fault' when reporting it.
+Resolved by IT after correcting the federated claim mapping configuration that omitted the contractor group claim from the SAML assertion during the Okta-to-Azure AD trust update.
 
 ---
 

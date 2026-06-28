@@ -8,24 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Expired certificate served by load balancer after automated renewal failure
+# Expired Certificate on Load Balancer After Automated Renewal Failure
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to access internal web services over HTTPS encounter certificate-expired warnings in their browsers, typically displaying a "NET::ERR_CERT_DATE_INVALID" error. The issue prevents normal access to the service portal and causes dependent systems — such as API gateways, integration pipelines, inventory sync services, and automated health checks — to fail TLS handshakes as well. The result is a complete loss of secure connectivity to the affected endpoint.
+Affected users and dependent internal systems experience TLS handshake failures when attempting to connect to internal web services over HTTPS. Browsers display certificate date warnings (typically "NET::ERR_CERT_DATE_INVALID") when navigating to the service URL, and automated API calls, integration pipelines, health checks, and inventory sync processes that rely on the same endpoints begin failing TLS validation simultaneously. The affected internal web service is effectively unavailable over secure access for all clients hitting the endpoint.
 
-The issue typically becomes apparent shortly after the certificate's expiration date passes, with multiple users and teams reporting the problem at roughly the same time. Load balancer health checks against the backend pool also begin returning TLS errors, confirming that the problem is at the load balancer layer rather than on individual workstations or application servers. Browser certificate details show that the certificate's "Not After" date has lapsed, and the load balancer continues to present the expired certificate and its associated chain.
+Investigation reveals that the organization's load balancer is presenting an expired certificate for the internal service. The certificate's validity period has lapsed, and the full certificate chain — including the leaf certificate and any intermediate CA bundles — remains stale on the load balancer. OpenSSL client checks from diagnostic hosts confirm that the certificate common name and subject alternative name entries match the service, but the expiration date has passed. Multiple workstations and automated systems across affected offices reproduce the error.
 
-In reported cases, the outage has affected entire teams and offices simultaneously, since all HTTPS traffic to the service passes through the same load balancer. The issue persists until the certificate is renewed and the full certificate chain — including any intermediate certificates — is redeployed to the load balancer and its listener configuration is reloaded.
+The root cause traces back to the automated certificate renewal process failing to complete before the expiration date. In some cases the renewal job encountered an access-denied error due to permissions being revoked during a recent RBAC policy change; in others the renewal script returned a non-zero exit code on its last attempted invocation without triggering any notification. A contributing factor across all incidents is that certificate expiry monitoring or alerting had been disabled — often weeks or months prior to the expiration — as a result of a configuration change, so no pre-expiry warning was generated to prompt manual intervention.
 
 !!! note "Reported variations"
 
-    - The renewal job may fail due to a permissions change (e.g., an RBAC policy update revoking the service account's access to update the load balancer), rather than a script execution failure.
-    - The renewal script may execute but exit with an error code and no automatic retry, leaving the renewal incomplete without any visible alert.
-    - Certificate-expiry monitoring may have been disabled weeks or months before the expiration date, removing the safety-net alert that would otherwise warn of an approaching deadline.
-    - The intermediate certificate bundle on the load balancer may also be stale, requiring a full chain redeployment — not just the leaf certificate — to restore successful TLS validation for all clients.
+    - The automated renewal job failed specifically because its service account lost required permissions following an RBAC policy update, resulting in an "access denied" error when pushing the renewed chain to the load balancer.
+    - The renewal script executed but returned a non-zero exit code without generating an alert, and no subsequent retry was attempted before the certificate expired.
+    - The certificate expiry alerting rule was found to have been explicitly disabled weeks or months before the expiration event, preventing any pre-expiry notification from being raised.
+    - Load balancer health checks against backend pools reported TLS errors, compounding the outage by marking backends as unhealthy in addition to blocking direct user access.
+    - Dependent automated workflows — such as inventory sync services, DevOps integration pipelines, and monitoring dashboards — failed alongside browser-based access due to strict TLS validation.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-The automated certificate renewal process failed to complete before the existing certificate's expiration date, and the load balancer continued serving the now-expired certificate. In some cases the renewal job encountered a permissions error (such as a revoked service account permission) that prevented it from updating the load balancer configuration; in others the renewal script failed silently without retrying. Certificate-expiry monitoring that would normally alert before the renewal window closed had been inadvertently disabled, so no pre-expiry warning was generated and the missed renewal went unnoticed until users began experiencing TLS errors.
+The TLS certificate for an internal service expired on the load balancer because the automated renewal process failed to complete. The renewal job was unable to update the load balancer configuration due to missing permissions (access denied) following an RBAC policy change, and certificate expiry monitoring had been disabled, so no pre-expiry alert was raised to prompt manual remediation.
 
 ## Diagnostics
 
@@ -73,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "automated renewal process failed to complete" when reporting it.
+Resolved by IT after reauthorizing the renewal service account, deploying the renewed certificate chain to the load balancer, and re-enabling certificate expiry alerting.
 
 ---
 

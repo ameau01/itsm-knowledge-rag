@@ -8,24 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Corporate Wi-Fi authentication failures after incomplete certificate rollover propagation
+# Incomplete EAP-TLS Certificate Propagation Across Wireless Controller Cluster
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-After a scheduled wireless certificate rotation, affected users find that their managed laptops and mobile devices can no longer authenticate to the corporate Wi-Fi network. Devices across Windows, macOS, and Android platforms display errors such as "EAP-TLS certificate expired," "802.1X authentication failed," "Access denied by NAC," or "No network access" when attempting to connect to the corporate wireless SSID. In some cases, devices briefly join the network and receive an IP address for a few seconds before losing access; in others, authentication fails outright and no connection is established at all.
+Affected users across multiple offices report that managed Windows, macOS, and Android devices fail to authenticate or maintain connectivity on the corporate Wi-Fi SSID following a scheduled wireless certificate rollover. Devices attempting 802.1X/EAP-TLS authentication receive errors such as "EAP-TLS certificate expired," "certificate verification failed," or "Access denied by NAC," and are either unable to join the network or briefly associate before losing all network access. The issue affects users across multiple floors, teams, and device platforms simultaneously.
 
-The issue typically appears shortly after the certificate rollover maintenance window and can affect a large number of endpoints simultaneously — reports have involved dozens of devices across multiple office floors and locations. The disruption blocks normal wireless access to internal resources, leaving affected users unable to work over Wi-Fi.
+Investigation consistently reveals that the wireless controller's RADIUS server certificate has either expired or was not fully propagated to all nodes in the controller cluster after renewal. In some cases the renewed certificate is present on the primary controller but absent from secondary cluster members, causing authentication failures to persist even after an initial partial restoration of service. NAC and RADIUS logs confirm EAP-TLS trust chain errors as the root cause of client denials, with affected devices referencing stale or expired certificate data during the authentication handshake.
 
-Even after the renewed certificate is applied to the primary wireless controller, a subset of users may continue to experience failures. This occurs when the updated certificate has not been fully propagated to all nodes in the wireless controller cluster, meaning that devices routed through secondary controller nodes still encounter the expired certificate. Additionally, some endpoints — particularly older or Windows devices — retain stale or outdated Wi-Fi profile and certificate data locally, which causes continued authentication failures even after the backend certificate issue is fully corrected.
+After the correct certificate is deployed across all controller nodes and authentication services are restarted, most devices reconnect successfully. However, a subset of endpoints — particularly older clients or those with cached wireless profiles — continue to fail until the locally stored Wi-Fi profile is manually removed and the device is re-enrolled or rejoined to the corporate SSID. Temporary NAC exceptions may briefly restore access but do not resolve the underlying authentication failure.
 
 !!! note "Reported variations"
 
-    - Some devices join the corporate SSID and briefly obtain an IP address before access is revoked, rather than failing authentication immediately.
-    - A subset of Windows laptops require local Wi-Fi profile removal and re-enrollment to recover, even after the controller certificate is fully updated across all cluster nodes.
-    - In some cases, a temporary network access exception is configured to provide short-term connectivity, but normal authentication continues to fail until the full certificate chain is corrected and endpoint profiles are refreshed.
-    - Failures may appear intermittently rather than consistently when the renewed certificate is present on some controller nodes but not others, causing different outcomes depending on which node handles the connection.
+    - Some devices associate to the SSID and briefly obtain a DHCP lease before access is revoked, while others fail authentication immediately and never receive an IP address.
+    - A subset of Windows laptops require full wireless profile re-enrollment even after the server-side certificate is corrected, due to cached stale certificate references in the local supplicant configuration.
+    - In multi-node controller clusters, service may be restored for users authenticating through the primary controller while users roaming to or served by secondary nodes continue to experience failures.
+    - Temporary NAC policy exceptions provide short-lived connectivity but fail to persist across reconnection attempts the following day.
+    - Android and older client devices are disproportionately likely to require a manual forget-and-rejoin cycle compared to newer Windows or macOS endpoints.
 
 ## Affected environment
 
@@ -38,7 +39,7 @@ Distribution across 5 reported cases:
 
 ## Root cause
 
-During a scheduled certificate rotation, the renewed wireless server certificate and its trust chain are not fully propagated across all nodes in the wireless controller cluster or to the network access control (authentication) system. As a result, some authentication paths continue to present or validate against the expired certificate, causing wireless login failures for corporate devices. In addition, some managed endpoints retain outdated Wi-Fi profile or cached certificate data that prevents them from authenticating even after the controller-side certificate is corrected.
+The renewed EAP-TLS server certificate and trust chain were not fully propagated across all wireless controller cluster nodes and the NAC/RADIUS authentication infrastructure after a scheduled certificate rotation. As a result, some authentication paths continued to present or validate against expired certificate data, causing 802.1X failures. A subset of managed endpoints also retained stale or corrupt corporate Wi-Fi profiles, perpetuating certificate validation errors even after the primary controller was updated.
 
 ## Diagnostics
 
@@ -73,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'Corporate Wi-Fi certificate rollover propagation failure' when reporting it.
+Resolved by IT after fully propagating the renewed EAP-TLS certificate across all wireless controller cluster nodes, restarting authentication services, and re-enrolling affected endpoint Wi-Fi profiles.
 
 ---
 

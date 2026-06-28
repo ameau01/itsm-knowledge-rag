@@ -8,24 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Corporate Wi-Fi connectivity loss from stale or corrupt endpoint wireless profile
+# Corrupted Endpoint Wireless Profile Causes Intermittent 802.1X Authentication Failure
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their managed Windows laptops can see and join the corporate Wi-Fi SSID (such as CorpWiFi-5G or CorpNet-5G), but network access fails shortly after connection. The device typically shows "Connected, no network access" or "No Internet" within roughly a minute of joining, and internal resources — including file shares, internal websites, email, and code repositories — become unreachable. Rebooting the laptop or forgetting and rejoining the network may restore connectivity temporarily, but the issue recurs within 15 to 30 minutes.
+Affected users on Windows 10 laptops report that their devices successfully associate with the corporate Wi-Fi SSID but lose network access shortly after joining — typically within one minute. The wireless adapter displays a status of "Connected, no network access" or "No Internet," and internal resources such as wikis, repositories, file shares, and email become unreachable. Rebooting or forgetting and rejoining the SSID may temporarily restore connectivity, but the failure recurs within minutes to roughly 30 minutes. The issue is device-specific; personal devices and other corporate endpoints on the same floor and access points connect without difficulty.
 
-The problem is device-specific rather than a site-wide wireless outage. Other devices belonging to the same user (such as a personal phone on guest Wi-Fi) connect without difficulty, and the corporate SSID remains visible and functional for unaffected colleagues. In some cases the issue appears on a single laptop, while in others a small cluster of managed endpoints on the same office floor are affected simultaneously.
+Investigation consistently reveals a stale or corrupted client-side wireless profile on the affected endpoint. The local 802.1X supplicant references outdated certificate thumbprints or retains cached authentication state that causes EAP-TLS negotiation to fail after initial association. Wireless controller and RADIUS/NAC logs confirm dropped 802.1X sessions — typically with a "Session-Timeout" reason or an outright Access-Reject — along with stale entries in the NAC session table for the affected device. Prior remediation attempts such as certificate renewals provide only temporary relief when the underlying profile corruption is not fully addressed.
 
-The issue has been observed following scheduled wireless profile updates or certificate renewals. Even after a prior certificate renewal restores service briefly, the problem can return the next day. Affected users may see authentication rejected outright during the sign-in process, or they may authenticate initially but lose usable network access moments later, cycling through repeated disconnects.
+The issue has been observed on individual endpoints as well as in small clusters of managed laptops (up to approximately six devices) on the same office floor, particularly following scheduled wireless profile updates or certificate renewal events. In multi-device occurrences, the root cause traces to endpoint configuration drift where devices lack the current managed Wi-Fi profile and consequently fail NAC evaluation, rather than a broader infrastructure outage.
 
 !!! note "Reported variations"
 
-    - In some cases, intermittent disconnects persist even after an initial profile rebuild, particularly when the device roams to specific access points; connectivity stabilizes only after both the endpoint profile and the infrastructure-side session are cleared.
-    - A small group of managed laptops on the same office floor may be affected at once due to configuration drift, rather than the issue appearing on a single device in isolation.
-    - The issue may resurface the day after a certificate renewal that appeared to resolve it, indicating the underlying profile corruption was not fully addressed by the renewal alone.
-    - Some devices receive an outright authentication rejection during sign-in, while others authenticate briefly and then lose network access within a minute.
+    - Some affected devices experience intermittent disconnects specifically when roaming near certain access points, with transient controller-side instability observed during the recovery window but normalizing after endpoint remediation.
+    - In a subset of cases, the issue resurfaces the day after a prior certificate renewal that had only temporarily restored service, indicating the renewed certificate alone did not resolve the underlying stale profile state.
+    - A small cluster of managed laptops on the same office floor may be affected simultaneously following a scheduled wireless profile update, presenting as endpoint configuration drift rather than an isolated single-device problem.
+    - Some devices receive an outright RADIUS Access-Reject during EAP-TLS authentication rather than connecting briefly before losing access.
 
 ## Affected environment
 
@@ -38,7 +38,7 @@ Distribution across 5 reported cases:
 
 ## Root cause
 
-The corporate Wi-Fi profile stored on the affected endpoint becomes stale or corrupted, causing the device to reference outdated certificate information or cached authentication data when attempting to connect. This leads to failed or inconsistent network authentication, which in turn prevents the device from being properly authorized on the corporate network and receiving a stable network address. The issue is rooted in the individual device's local wireless configuration rather than in the broader wireless infrastructure or shared certificate systems.
+A corrupted or stale corporate wireless profile on the endpoint retained outdated certificate thumbprints and cached supplicant state, causing inconsistent 802.1X EAP-TLS authentication. This prevented full NAC authorization and resulted in repeated session drops or access rejections by the RADIUS infrastructure. In multi-device cases, scheduled profile updates introduced configuration drift across a subset of managed laptops.
 
 ## Diagnostics
 
@@ -73,7 +73,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale or corrupt client Wi-Fi profile" when reporting it.
+Resolved by IT through removal and re-provisioning of the corrupted corporate wireless profile and clearance of stale NAC session state on the affected endpoints.
 
 ---
 

@@ -8,23 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale gateway retry policy amplifies downstream latency into timeout storms
+# Stale Retry Policy Amplifies Downstream Latency Into Gateway Timeout Storms
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience intermittent failures of scheduled batch synchronization jobs that route through the Integration Gateway to downstream API services. The primary symptom is repeated HTTP 504 Gateway Timeout responses returned by the gateway, which cause sync jobs to fail or be significantly delayed. In observed incidents, nightly and periodic batch sync pipelines did not complete within their expected windows, delaying data availability for downstream fulfillment teams.
+Affected users experience failures during scheduled batch data synchronization jobs that route through the Integration Gateway to downstream API services. The issue manifests as repeated HTTP 504 Gateway Timeout responses when downstream service latency becomes elevated — in reported incidents, p99 latency spiked from approximately 1.2 seconds to 38 seconds, far exceeding the gateway's configured timeout window. Sync jobs fail or are significantly delayed, with failure windows lasting approximately 30 minutes or longer and delaying data availability for downstream consumers in affected fulfillment groups and queues.
 
-The timeout errors tend to cluster within defined failure windows — often lasting 20 to 40 minutes — during which downstream API response times spike well above normal levels (in one case, the 99th-percentile latency rose from roughly one second to nearly 40 seconds). Rather than subsiding, the failures intensify as the gateway's retry mechanism repeatedly re-sends requests that are unlikely to succeed, producing visible "retry storms" in monitoring traces.
+The core behavior observed is that the Integration Gateway's deprecated retry and backoff policy amplifies the impact of downstream latency rather than mitigating it. When downstream services slow down, the gateway's insufficiently bounded retries compound the load, producing retry storms visible in distributed tracing. This feedback loop causes the timeout condition to persist or worsen across the batch processing window, preventing sync jobs from completing successfully.
 
-Downstream data consumers, such as fulfillment groups dependent on inventory or order data, are directly affected by the delayed or missing sync results. Gateway pod restarts have not resolved the issue, and no recent deployment changes to timeout settings were identified at the time of the failures. Token or authentication errors are not observed in job logs; the failure pattern is consistently timeout-related.
+Gateway pod restarts alone do not resolve the issue. Temporarily increasing the gateway timeout threshold (for example, from 30 seconds to 60 seconds) reduces immediate failure counts for some traffic but does not address the underlying retry amplification. The issue is not related to authentication failures, token expiry, or rate-limiting errors; logs confirm that only timeout-class errors are present during the affected windows.
 
 !!! note "Reported variations"
 
-    - In some cases, transient downstream rate limiting or throttling pressure may have contributed to the latency, though this was not confirmed as a primary factor.
-    - Increasing the gateway timeout threshold (e.g., from 30 seconds to 60 seconds) reduced immediate failure rates for some affected traffic but did not address the underlying retry policy issue.
-    - Token expiry was initially suspected in at least one incident but was ruled out or remained unproven after investigation; job logs showed no authentication or permission errors.
+    - Nightly batch sync jobs fail entirely within the affected window, delaying data availability for downstream inventory consumers.
+    - Intermittent 504 responses affect order fulfillment sync pipelines, causing delayed but not always fully failed jobs.
+    - Retry storms are visible in distributed tracing, indicating compounding load on the downstream service during the timeout window.
+    - A gateway pod restart does not resolve the issue, and no recent deployment change to timeout settings is identified.
+    - Temporarily extending the gateway timeout threshold reduces immediate failure counts but does not eliminate the retry amplification behavior.
 
 ## Affected environment
 
@@ -36,7 +38,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-Elevated response times on downstream API services caused requests routed through the Integration Gateway to exceed the gateway's configured timeout threshold. The impact was significantly amplified because the gateway was still operating under a deprecated retry and backoff policy that extended ineffective retry attempts well beyond the useful integration window, generating retry storms instead of failing gracefully. The root issue is the combination of downstream latency spikes and the stale retry configuration, rather than any authentication or token expiry problem.
+Elevated downstream service latency caused upstream request timeouts through the Integration Gateway. The impact was amplified because the gateway was still configured with a stale, deprecated retry and backoff policy that extended retry behavior beyond the effective integration window, producing retry storms that compounded load on the already-slow downstream service. Available evidence points to downstream response slowness with possible transient throttling pressure rather than an authentication failure.
 
 ## Diagnostics
 
@@ -73,7 +75,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'Integration Gateway stale retry policy timeout failures' when reporting it.
+Resolved by IT; reference Integration Gateway deprecated retry policy causing 504 timeout storms during batch sync processing.
 
 ---
 

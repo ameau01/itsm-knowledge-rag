@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Expired or missing intermediate certificate in load balancer chain breaks TLS
+# Expired or Incomplete TLS Certificate Chain Served by Load Balancer
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to access internal web services over HTTPS encounter browser certificate warnings — most commonly "NET::ERR_CERT_DATE_INVALID" — and are unable to reach the service. Automated clients and API integrations connecting through the same endpoints fail during the TLS handshake, producing certificate validation errors in application logs. The issue typically affects all users and service accounts connecting to the impacted endpoint across multiple offices and regions simultaneously.
+Affected users attempting to access internal web services over HTTPS encounter TLS certificate errors that prevent normal connectivity. Browsers display certificate date-invalid warnings (such as NET::ERR_CERT_DATE_INVALID), while automated clients, API integrations, and backend monitoring services fail during the TLS handshake. The errors originate from load balancers serving certificate chains that are expired or incomplete — either the leaf certificate has passed its validity date, the intermediate certificate in the served chain is expired or missing, or both conditions are present simultaneously. Reports typically surface from multiple users and teams across affected offices, with both interactive browser sessions and automated service accounts unable to establish trusted connections.
 
-The warnings and failures stem from the load balancer that terminates TLS for the internal web service. In most cases, the endpoint (leaf) certificate has expired and has not been replaced on the load balancer, even though a renewed certificate may already exist. At the same time, the certificate chain served by the load balancer is incomplete or outdated — the required intermediate certificate is either missing from the bundle entirely or is itself expired. This combination means that even clients willing to overlook one problem cannot establish a trusted connection.
+The issue manifests as a complete or near-complete loss of HTTPS access to the affected internal service endpoint. Load balancer logs confirm chain validation errors and certificate date-invalid conditions beginning at the time of the reported outage. In some cases, certificate-management alerting that should have flagged upcoming expirations did not fire, meaning the expiration went undetected until users and dependent systems began failing. The disruption affects all internal clients connecting through the impacted load balancer virtual server, spanning workstations and automated integration hosts alike.
 
-Reports have involved multiple load balancer appliances and internal service hostnames, but the user-facing experience is consistent: browsers display date-validity errors, backend services log TLS handshake failures, and normal internal application access is blocked until the certificate and chain are corrected. In several instances, the certificate monitoring or renewal alerting that should have flagged the approaching expiration did not trigger before the outage began, meaning the issue was first discovered through direct user reports rather than automated alerts.
+The condition persists — blocking normal internal application access for affected user groups — until the certificate chain served by the load balancer is corrected and the updated profile is active. In at least one case, the impact extended to approximately 40 interactive users and 12 automated service accounts across a regional deployment.
 
 !!! note "Reported variations"
 
-    - In at least one instance the leaf certificate itself was still valid, but the load balancer served a broken chain containing an expired intermediate certificate, causing the same browser warnings and TLS failures despite a successful recent renewal.
-    - Some reports involved the renewed certificate existing on the infrastructure but not being activated in the load balancer's SSL profile, leaving the old expired certificate in place.
-    - Automated deployment pipelines and service accounts were affected alongside interactive browser users, with TLS errors appearing in CI/CD and monitoring tooling logs.
+    - In one instance, the leaf certificate itself remained valid, but the load balancer continued to serve an expired intermediate certificate following a recent renewal effort, causing the service to remain intermittently inaccessible until the corrected certificate bundle was applied to the load balancer's SSL profile.
+    - Some cases involved the intermediate certificate being entirely absent from the served chain rather than expired, resulting in both date-validity and chain-trust failures reported by clients.
+    - In certain environments, the initial chain update attempt on the load balancer failed because the correct intermediate certificate file was not available in the deployment bundle, prolonging the outage beyond the first remediation effort.
+    - Certificate-management monitoring rules were found to be misconfigured in at least one case, with incorrect alerting thresholds that prevented proactive detection of the approaching certificate expiration.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 5 reported cases:
 
 ## Root cause
 
-The load balancer serving TLS for the internal web service was configured with an expired or incomplete certificate chain. In most cases, the endpoint certificate had expired and the renewed replacement had not been fully deployed, while the intermediate certificate in the served bundle was either outdated or missing altogether. Contributing to the outage, certificate expiration monitoring and renewal alerting failed to fire before the certificates lapsed, so the condition was not caught proactively.
+The internal web service outage was caused by an expired CA-issued leaf TLS certificate combined with an outdated or missing intermediate certificate in the chain served by the load balancer. Certificate monitoring and renewal alerting failed to trigger before expiration, and in some cases a renewed leaf certificate was not properly installed or the deployment bundle lacked the correct intermediate certificate, leaving the load balancer presenting an incomplete or invalid chain.
 
 ## Diagnostics
 
@@ -64,16 +65,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Confirmed the certificate presented by the Load Balancer LB-EAST-01.corp.internal for internal-web-service (CN=appportal.corp.internal, serial 4A:3F:9C:01:BB:72) was past its <PERSON> date of 2025-12-23T00:00:00Z and no longer valid for production TLS connections.
-2. Requested and obtained a renewed end-entity TLS certificate from the internal Certificate Authority for the affected service endpoint appportal.corp.internal, new serial 7B:12:AE:44:CF:90, valid until 2026-12-23. CSR generated and submitted by <USER>, approved by <USER>.
-3. Updated the Load Balancer LB-EAST-01.corp.internal TLS configuration to deploy the renewed certificate (serial 7B:12:AE:44:CF:90) and attach the required intermediate certificate chain (CorpLabs Internal CA G2) to the appportal.corp.internal listener.
-4. Reloaded the Load Balancer LB-EAST-01.corp.internal configuration via the management console so new inbound TLS sessions presented the corrected certificate bundle; verified no active session drops during the reload window.
-5. Validated from the client side — including from <HOSTNAME> (<IP>, <USER>) and <HOSTNAME> (<USER>, <LOCATION> office) — that the service now completed TLS handshakes successfully without certificate date warnings or missing-chain validation failures.
-6. Restored and verified certificate expiration monitoring and renewal alerting for appportal.corp.internal in the cert-ops dashboard, configured to trigger at 30-day and 7-day thresholds, with notifications routed to <USER>@corp.internal and the cert-ops distribution list, to detect future certificate age and renewal job issues before service impact.
+1. Obtain a re-issued valid TLS certificate for the Internal Web Service from the internal Certificate Authority, ensuring the certificate SAN matches internal-web.corplabs.internal. Re-issuance was requested by <PERSON> (<USER>) and approved by <PERSON>.
+2. Deploy the renewed certificate and private key to the Internal Web Service containers in the <LOCATION> data center and reload the service so it presents the new non-expired certificate (new notAfter: 2026-12-17T23:59:59Z).
+3. Update the Load Balancer LB-EAST-02.corplabs.internal to include the correct intermediate certificate chain issued 2025-11-30, then reload the listener configuration so clients receive the full chain. Performed by <PERSON>.
+4. Validate the HTTPS endpoint from both service-side and client-side perspectives to confirm the certificate is current, the chain is complete, and TLS handshakes succeed without browser warnings. <PERSON> confirmed access restored from <HOSTNAME> and <PERSON> confirmed from her workstation.
+5. Restore and test certificate monitoring alerts and the automated renewal workflow so expiration and renewal failures are detected before the next renewal window. Alert rule for internal-web.corplabs.internal re-enabled and verified by <PERSON>; test alert fired successfully at 2025-12-18T20:15:00Z.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "expired or missing intermediate certificate on load balancer" when reporting it.
+Resolved by IT after updating the certificate chain and SSL profile on the affected load balancer; reference: expired or incomplete TLS chain on load balancer causing internal HTTPS service outage.
 
 ---
 

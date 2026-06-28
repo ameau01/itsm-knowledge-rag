@@ -8,21 +8,17 @@ curated: true
 self_serviceable: true
 ---
 
-# Intermittent post-login laptop slowdown without confirmed root cause
+# Intermittent Post-Login Slowdown With High Antimalware CPU Usage
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users may experience significant slowness on their Windows 10 corporate laptop shortly after signing in. When the issue occurs, core applications such as Outlook, web browsers, and File Explorer can take 20–30 seconds each to open, delaying the start of normal work. The slowdown appears to begin immediately after login and is most commonly reported in the morning after the laptop has been powered off overnight.
+The affected user reports intermittent, significant slowness on a corporate Windows 10 laptop immediately after sign-in. When the issue occurs, core productivity applications — including Outlook, a web browser, and File Explorer — take approximately 20–30 seconds each to become responsive, delaying the start of normal work activities such as accessing email and CRM tools. The slowdown is not consistently reproducible and appears to occur most frequently in the morning after the device has been powered off overnight, particularly when the user is working from a specific office location.
 
-The issue is intermittent and not consistently reproducible. During affected sessions, the Windows security process (MsMpEng.exe) has been observed consuming very high CPU usage — around 95% — which coincides with the sluggish application launches. However, the behavior may not appear during live diagnostic sessions, making it difficult to capture in real time.
+During an occurrence, the Windows Defender antimalware service executable (MsMpEng.exe) is observed consuming approximately 95% of CPU resources in Task Manager while applications are slow to open. The user notes that the behavior persists even after previously disabling some startup applications, suggesting the slowdown is not attributable to user-configured startup items alone.
 
-Affected users may notice that the slowdown clears on its own after some time, with the laptop returning to normal performance for the remainder of the session. Previously disabling startup applications has not reliably prevented the issue from recurring.
-
-!!! note "Reported variations"
-
-    - The issue may be more likely to occur when the laptop has been off overnight and is started at a specific office location, though this pattern has not been confirmed across multiple cases.
+The intermittent nature of the issue prevented full reproduction during a live support session, and available evidence was insufficient to conclusively confirm the underlying trigger.
 
 ## Affected environment
 
@@ -35,7 +31,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The exact root cause has not been confirmed. Diagnostics ruled out low disk space as a contributing factor, but available evidence was insufficient to determine whether an intermittent startup task or the Windows security scanning process is responsible for the post-login CPU spike. The issue remains only partially evidenced and requires further monitoring to establish a definitive cause.
+The affected user experienced intermittent post-login endpoint slowdown that was not reproducible during diagnostic sessions. Transient startup or security scanning activity was suspected, but no confirmed root cause was established.
 
 ## Diagnostics
 
@@ -58,7 +54,7 @@ Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'intermittent post-login slowdown — unconfirmed cause' when reporting it.
+Intermittent post-login slowdown with high antimalware CPU usage was investigated but could not be conclusively attributed to a confirmed root cause; resolved by IT through monitoring and prior troubleshooting steps.
 
 ---
 

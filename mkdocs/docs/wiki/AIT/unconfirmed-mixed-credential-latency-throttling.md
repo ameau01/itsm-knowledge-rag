@@ -8,23 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Integration Gateway job failures from mixed credential and throttling conditions
+# Integration Gateway Timeout and Sync Failures During Scheduled Batch Windows
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience failures in scheduled integration jobs that send data through the Integration Gateway to downstream API endpoints. The most visible symptom is missing or delayed records in downstream applications — such as absent ingest data during daily reconciliation, order data failing to appear in fulfillment systems, or backlogs of unsynced customer records accumulating before business hours. These gaps are typically noticed by operations or processing teams when expected data does not arrive on schedule.
+Affected users experience failures in scheduled integration jobs that transmit data through the Integration Gateway to downstream API endpoints. Jobs return HTTP 504 Gateway Timeout responses, and in some incidents HTTP 429 rate-limit responses are also observed. Retry attempts fail to clear the resulting backlog, with queue depth climbing rapidly — in observed cases reaching approximately 4,200 pending order records or 14,000 unsynced customer records. The user-visible impact is missing or delayed data in downstream applications, typically noticed during daily reconciliation or when operations dashboards reflect growing backlogs of unprocessed records.
 
-On the technical side, the Integration Gateway returns elevated HTTP 504 (Gateway Timeout) responses on outbound API calls, and in some cases HTTP 429 (rate-limit) responses are also present. Retry volumes increase sharply as the gateway attempts to resend failed requests, and queue depth can climb significantly — in reported incidents, backlogs have ranged from roughly 4,200 pending order records to approximately 14,000 unsynced customer records. The retry pressure and growing backlog can persist for the duration of the affected batch window, which has been observed during both early-morning UTC sync windows (around 02:00–04:00 UTC) and later scheduled windows (around 06:00–07:00 UTC).
+The interaction between authentication state and throttling behavior varies across incidents. In one confirmed case, the Integration Gateway was authenticating outbound API calls with an expired cached token — last rotated over 95 days prior against a 90-day TTL — and the downstream API simultaneously returned 429 throttling once retry storms developed. In another incident, credential failure could not be confirmed; the service account token passed post-incident validation, though runtime authentication state during the failure window remained uncertain. In that case, downstream endpoint latency spiked sharply (median response time climbing from approximately 220 ms to over 4,800 ms) with only isolated 429 responses observed.
 
-The issue affects data flowing through the Integration Gateway path specifically; direct submissions to downstream applications are not impacted. In some cases the failures are concentrated on a single gateway node or worker pod, while in others the pattern spans multiple batch jobs over an extended window. Monitoring dashboards typically show a spike in timeout events and, where applicable, authentication-retry activity during the affected period.
+Across all observed incidents, the failures are confined to the Integration Gateway processing path and do not affect direct application submissions. Impact begins during scheduled sync windows — typically overnight or early-morning UTC — and persists until token validity, retry behavior, and gateway timeout configurations are corrected or adjusted.
 
 !!! note "Reported variations"
 
-    - In at least one incident, downstream API latency alone appeared to be the primary contributor, with median response times climbing from approximately 220 milliseconds to over 4,800 milliseconds, while explicit authentication rejections (HTTP 401/403) and sustained rate-limiting responses were largely absent.
-    - In one case, only a very small number of requests (3 out of roughly 1,200) returned HTTP 429 throttling responses, making it unclear whether rate limiting played a meaningful role in the overall failure pattern.
-    - Some incidents were closed without a confirmed root cause because Integration Gateway logs and token rotation history for the failure window were not available for review.
+    - In some incidents, both an expired cached API token and HTTP 429 rate-limit responses from the downstream service are confirmed as contributing factors; in others, credential failure is not confirmed and the root cause remains mixed or inconclusive.
+    - Some incidents show prominent HTTP 429 rate-limit responses alongside 504 timeouts, while others exhibit primarily 504 and ETIMEDOUT failures with only isolated or absent 429 indicators.
+    - Downstream endpoint latency may spike significantly (e.g., p99 exceeding 6 seconds against a 30-second timeout threshold) even when explicit throttling or authentication rejection is not observed.
+    - Trace sampling limitations (e.g., 10% sampling rate) may restrict diagnostic coverage of the exact failed requests, leaving the root cause partially unconfirmed.
+    - In at least one incident, manual retry handling was initiated by operations staff to limit impact while the sync workflow remained blocked.
 
 ## Affected environment
 
@@ -36,7 +38,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-A combination of factors on the Integration Gateway can cause outbound API calls to fail and time out. In confirmed cases, the gateway was using an expired cached API token for its service account (the token had exceeded its 90-day validity period without being rotated), which caused authentication failures and a surge in retry attempts. At the same time, the downstream API service began rate-limiting requests (returning HTTP 429 responses), and the added retry pressure from both the expired token and the throttling pushed requests past the gateway's configured timeout threshold. In other instances, the root cause could not be conclusively isolated — the available evidence pointed to some mix of expired credentials, elevated downstream response times, and burst-based throttling, but incomplete gateway logs and limited trace sampling prevented confirmation of a single cause.
+A stale expired API token cached on the Integration Gateway caused failed or delayed authenticated requests, while concurrent downstream API rate limiting (HTTP 429) amplified retries and pushed requests past the gateway timeout window. However, the primary cause remains unconfirmed in some incidents because Integration Gateway logs for the failure window and token rotation history were not always available. Available evidence supports an upstream integration timeout condition affecting outbound calls, with the most likely contributors being expired integration credentials, downstream API latency beyond the configured timeout window, or API rate limiting during overnight batch processing.
 
 ## Diagnostics
 
@@ -71,7 +73,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "Integration Gateway mixed credential and throttling timeout failures" when reporting it.
+Resolved by IT; reference Integration Gateway batch sync failures with HTTP 504/429 responses and backlog accumulation during scheduled overnight processing windows.
 
 ---
 

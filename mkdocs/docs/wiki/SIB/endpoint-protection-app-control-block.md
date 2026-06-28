@@ -8,24 +8,27 @@ curated: true
 self_serviceable: false
 ---
 
-# Endpoint protection application control blocking approved software installer
+# Endpoint Protection Application Control Blocking Software Center Installer
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to install approved software from Software Center on managed Windows 10 corporate devices find that the installation is blocked by an endpoint protection or application control policy. The block may present in several ways: the application may fail to install with a policy-check error (such as "Installation blocked by policy," "Installer blocked by Endpoint Protection," or error codes like 0x80070005, 0x87D00324, or EP-4031), or the application may not appear in Software Center at all after the policy evaluation prevents the deployment from being presented.
+Affected users on managed Windows 10 corporate endpoints experience application installation failures when attempting to deploy software through Software Center. The endpoint protection application control policy actively blocks the installer, producing error messages such as "Installation blocked by policy," "Installation blocked by Endpoint Protection," or policy-related error codes including INSTALL_BLOCKED_POLICY_CHECK (0x80070005), 0x87D00324, or EP-4031. Device enrollment, Intune compliance status, and entitlement group membership are confirmed as healthy in all cases — the block originates solely from the endpoint protection allowlist or approval policy.
 
-In some cases, the application initially appears in the Software Center catalog but disappears after a failed installation attempt, and subsequent retries produce the same block. In other cases, the application is never visible in Software Center despite the device being enrolled, compliant, and correctly targeted for the deployment in Intune. Endpoint protection logs on the affected device typically show a quarantine or deny action against the installer, citing reasons such as an unapproved installer hash, an untrusted or unsigned publisher, or the application not being present in the approved applications policy.
+A common secondary symptom is that the requested application either does not appear in the Software Center catalog, disappears from the available applications list after a failed installation attempt, or is intermittently visible but consistently fails upon install initiation. Retrying the installation without a policy change produces the same denial. Endpoint protection logs on affected devices confirm a quarantine or deny action triggered by an application control rule against the installer package, intercepting it before Software Center can complete the deployment.
 
-The issue has been observed across multiple applications (including finance, productivity, VPN, and engineering tools) and across different offices and departments. It can affect a single user or multiple users on devices sharing the same endpoint protection policy scope. The underlying device management health and Intune compliance status are not impacted — the block is limited to the application installation workflow enforced by the endpoint security layer.
+The issue has been observed across multiple offices, departments, and application types — including VPN clients, productivity suites, line-of-business tools, and finance applications. Multiple users within the same deployment group can be simultaneously affected when the installer approval entry is missing from the relevant endpoint protection policy. Local IT personnel attempting a manual push of the installer encounter the same block, confirming the issue is not limited to the self-service Software Center workflow.
 
 !!! note "Reported variations"
 
-    - The application appears in Software Center and can be selected, but the installer is quarantined by endpoint protection upon execution, resulting in a policy-block message and the application disappearing from the catalog after the failed attempt.
-    - The application never appears in Software Center because the endpoint protection policy evaluation blocks the installer before the deployment is presented to the user.
-    - Multiple users on devices within the same policy scope (such as a department or office location) are affected simultaneously when the application is missing from a shared approved applications policy.
-    - The block is triggered by a specific rule name (such as "BlockUnknownInstallers" or "BlockUnsignedInstallers") rather than a general application approval policy, requiring a targeted security exception rather than a standard allowlist update.
+    - In some cases the endpoint protection block message specifically cites an unapproved or unknown publisher signature as the reason for denial.
+    - The application may briefly appear in Software Center before vanishing from the catalog after the initial blocked install attempt, rather than being absent from the start.
+    - Multiple users within the same deployment group can be affected simultaneously when the installer approval entry is missing from the endpoint protection application control policy assigned to that group.
+    - The block may reference a named policy (e.g., "BlockUnsignedInstallers" or a block-unknown-installers rule) rather than a generic policy-check failure code.
+    - Local IT personnel attempting a manual push of the installer encounter the same policy block, confirming the issue is not limited to the self-service Software Center workflow.
+    - In one case, endpoint protection logs specifically identified the installer hash value as the attribute triggering the deny action.
+    - One affected user reported inconsistent Software Center behavior during troubleshooting, with the application intermittently appearing or not appearing in the catalog.
 
 ## Affected environment
 
@@ -38,7 +41,7 @@ Distribution across 7 reported cases:
 
 ## Root cause
 
-An endpoint protection or application control policy on the managed device is blocking the software installer because the installer's hash, publisher signature, or application entry has not been added to the approved allowlist in the relevant security policy. This prevents Software Center from completing the installation workflow and, in some configurations, causes the application to disappear from the catalog after the failed attempt. The block occurs even when the user's entitlement, deployment targeting, and device compliance are all correct.
+An endpoint protection application control policy blocked the application installer because the installer's hash, publisher signature, or approval entry was not present in the approved-applications allowlist assigned to the affected devices. This prevented Software Center from completing or presenting the deployment despite valid entitlement and targeting.
 
 ## Diagnostics
 
@@ -73,7 +76,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'endpoint protection application control block' when reporting it.
+Resolved by the security team updating the endpoint protection allowlist to approve the blocked installer and refreshing policy on affected devices.
 
 ---
 

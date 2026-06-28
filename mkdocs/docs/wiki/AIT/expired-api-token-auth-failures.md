@@ -8,27 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Expired Integration Gateway API token causes sync job timeouts
+# Expired Integration Gateway API Token Causes Sync Timeouts
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Scheduled data synchronization jobs routed through the Integration Gateway begin failing during their overnight or nightly processing windows. Affected users typically discover the problem when morning reporting dashboards display stale data, integration job dashboards show runs in a failed state, or monitoring alerts fire for elevated error rates. The most prominent symptom is repeated HTTP 504 Gateway Timeout responses on outbound API calls from the gateway to downstream or partner API endpoints, often preceded or accompanied by HTTP 401 Unauthorized errors containing "token_expired" or "invalid_token" indicators.
+Affected users experience failures of scheduled data synchronization jobs when the Integration Gateway attempts authenticated API calls using an expired service account token. The issue typically surfaces during overnight or early-morning sync windows, when outbound calls begin returning HTTP 401 Unauthorized responses with token-expired indicators. The gateway's retry logic repeatedly attempts to re-authenticate with the same invalid credential, accumulating retries with exponential backoff until timeout thresholds are reached, at which point calls fail with HTTP 504 Gateway Timeout errors. In some cases, retry storms also trigger HTTP 429 Too Many Requests rate-limiting responses from downstream endpoints.
 
-The failures generally affect all integration jobs that rely on the same gateway service account credential rather than a single workflow. Reports have described anywhere from two failed job runs to fourteen or more scheduled tasks stalling in the same window, with backlogs ranging from roughly 1,200 to over 14,000 pending records. Data synchronization delays of several hours are common, impacting downstream consumers such as finance reconciliation, order processing, payroll, inventory, and analytics teams.
+The downstream impact is significant: scheduled sync workflows—including customer record synchronization, order fulfillment, finance reconciliation, HR data pipelines, and partner data delivery—stall or fail entirely. Pending job backlogs range from approximately 1,400 to over 14,000 records depending on sync volume. Data availability for dependent consumers such as morning dashboards, CRM pipelines, and compliance feeds is delayed by several hours. Affected users typically discover the problem through monitoring alerts during the batch window or during morning reviews when dashboards display stale or missing data.
 
-Gateway logs and monitoring dashboards show a pattern of authentication failures appearing first, followed by escalating retry activity that increases latency and exhausts connection or retry limits. In some cases the retry volume has also triggered HTTP 429 Too Many Requests (rate-limit) responses from the downstream API, compounding the timeout behavior. Restarting gateway pods or temporarily increasing request timeouts does not resolve the issue on its own, as the underlying authentication failures persist until the credential is refreshed.
-
-The issue has been observed across multiple environments and regions, affecting various downstream API endpoints and partner services. Affected service accounts consistently show that their API tokens have exceeded the expected rotation interval — whether a 30-day, 90-day, or vendor-specific policy window — without a successful refresh.
+Investigation consistently reveals that the bearer token or API credential assigned to the gateway service account has exceeded its mandatory rotation window. In some instances, an automated token rotation job fails silently before the sync window; in others, credentials simply age past the configured expiry policy without any rotation attempt. Gateway logs show failed token refresh attempts and cascading authentication errors, while API call latency increases dramatically from normal baselines to multiple seconds as retries consume gateway processing capacity.
 
 !!! note "Reported variations"
 
-    - In some instances the gateway configuration still referenced a deprecated or outdated authentication policy (e.g., an older policy version pointing to expired client credentials), which compounded the token validation failure.
-    - In at least one case, the volume of retries from the gateway was high enough to trigger HTTP 429 Too Many Requests (rate-limit) responses from the downstream API in addition to the 504 timeouts.
-    - Some reports noted elevated downstream API latency as a concurrent external factor, which overlapped with the authentication-driven retry storms and made initial triage more ambiguous.
-    - The issue has affected both single-workflow sync jobs and broad sets of integration profiles (e.g., customer records, inventory, order fulfillment, billing, and compliance feeds) simultaneously when they share the same expired credential.
-    - In one case, the failures spanned both staging and production environments because a shared integration service account token was used across both.
+    - In some cases, the automated token rotation job failed silently without generating an alert, allowing the credential to expire undetected before the sync window.
+    - The issue has been observed across multiple regions and infrastructure configurations, including standalone gateway hosts and Kubernetes-based pod deployments.
+    - In certain instances, only 504 Gateway Timeout responses were visible initially, with 401 Unauthorized errors surfacing only in deeper log analysis.
+    - HTTP 429 Too Many Requests responses accompanied some incidents due to retry storms, while other instances showed only 504 and 401 errors without rate-limiting behavior.
+    - The issue affected multiple environments simultaneously (staging and production) when a shared service account token was used across both.
+    - In some cases, the gateway configuration referenced an outdated token rotation policy version, compounding the missed rotation window.
+    - Downstream endpoints varied across incidents—including CRM synchronization, order fulfillment, partner APIs, and internal service endpoints—but the error pattern remained consistent.
+    - In one case, restarting the gateway pod and clearing its token cache did not resolve the issue, confirming the failure was credential-level rather than transient process state.
 
 ## Affected environment
 
@@ -41,7 +42,7 @@ Distribution across 18 reported cases:
 
 ## Root cause
 
-The Integration Gateway's API token for its outbound service account expired after the automated token rotation job either failed silently or did not execute within the required rotation window. With the credential no longer valid, all authenticated calls to the downstream API were rejected with 401 Unauthorized responses. The gateway's built-in retry logic then repeatedly attempted these failed requests, increasing latency and consuming connection resources until requests exceeded their timeout thresholds and returned 504 Gateway Timeout errors to the calling sync jobs.
+An expired API token on the Integration Gateway prevented authenticated calls to downstream API endpoints. The token had lapsed either because the automated credential rotation job failed or because the credential was not rotated within the required policy window, leaving the gateway using invalid credentials for all outbound authenticated requests.
 
 ## Diagnostics
 
@@ -77,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'expired Integration Gateway API token' when reporting it.
+Resolved by IT through rotation of the expired API token, redeployment of the updated credential to the Integration Gateway, and restart of affected services to restore authenticated sync processing.
 
 ---
 

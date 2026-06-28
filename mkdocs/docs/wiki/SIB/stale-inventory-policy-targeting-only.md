@@ -8,21 +8,21 @@ curated: true
 self_serviceable: false
 ---
 
-# Software Center application hidden by stale device inventory and policy state
+# Stale Endpoint Inventory and Policy State Blocking Application Deployment
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that a required application is missing from the Available applications list in Software Center, even though the application has been correctly assigned to their account. Attempts to install the application from a previously cached listing fail with a policy check error, such as "Installation blocked by policy" or error codes like 0x87D13B5C or 0x87D1041C. The issue is specific to the affected device; colleagues on other machines with the same entitlements can see and install the application without difficulty.
+Affected users on Windows 10 21H2 managed endpoints experience application installation failures when attempting to deploy software through Software Center. The issue manifests as a policy check failure error (error code 0x87D13B5C) or an "Installation blocked by policy" message. In addition to the blocking error, the target application may disappear from the Available applications catalog in Software Center, preventing self-service installation entirely. Application assignments in Intune are confirmed to be correctly targeted to the affected user accounts and devices; the failure is attributable to the endpoint operating on stale inventory and policy data, causing it to fail to recognize valid deployments.
 
-In some cases the application disappears from the Software Center catalog entirely after an earlier remediation, and subsequent installation attempts continue to be blocked. The device may not have completed a successful policy sync for an extended period (72 hours or more), causing it to operate on outdated deployment and availability data. The issue has been observed on Windows 10 21H2 managed endpoints across multiple office locations.
+The issue has been observed to recur on the same device after earlier remediation. In one instance, a user's initial incident involving one application was resolved, but the same device subsequently exhibited the identical stale-policy condition affecting a different application. The recurrence persisted until endpoint policy data was refreshed. In both occurrences, the affected user's entitlement group membership and application targeting were verified as correct, confirming that the failure was due to outdated deployment metadata rather than any misconfiguration in assignment or identity. The failure is endpoint-specific; other devices under the same entitlement group are unaffected.
 
 !!! note "Reported variations"
 
-    - The application may initially appear in a cached listing but fail to install, rather than being absent from the catalog from the outset.
-    - The error code displayed may vary (e.g., 0x87D13B5C or 0x87D1041C) depending on the specific policy evaluation failure encountered.
-    - The issue may recur on the same device after a prior remediation if the policy sync does not complete successfully.
+    - The blocked application may differ between occurrences on the same device (e.g., a CRM application in one instance and a sales demonstration tool in another), while the underlying stale-policy condition remains consistent.
+    - Some affected users report that colleagues on other devices in the same office and entitlement group can see and install the application without issue, confirming the problem is endpoint-specific rather than tenant-wide.
+    - The application may initially appear in a cached or stale Software Center listing but fail with a policy-block error on installation attempt, rather than being absent from the catalog from the outset.
 
 ## Affected environment
 
@@ -35,7 +35,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The device's inventory and policy state in the management platform (Intune / Software Center) had become stale, meaning the endpoint was not reflecting current application availability or policy evaluation data. Because the local client was working from outdated deployment metadata, it could not correctly determine that the user was entitled to the application, causing it to be hidden from the catalog and blocking installation attempts with a policy error. Refreshing the device inventory, triggering a policy sync, and clearing the local client cache resolved the stale data and restored normal application visibility and installation.
+Device inventory and policy state in Intune and Software Center were stale, so the endpoint did not have current application availability or policy evaluation data. This caused the entitlement evaluation for deployed applications to fail, meaning the applications were not shown correctly in Software Center and installation attempts were blocked by policy.
 
 ## Diagnostics
 
@@ -70,7 +70,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale inventory policy targeting" when reporting it.
+Resolved by IT; referenced as stale endpoint inventory and policy state causing application deployment failure.
 
 ---
 

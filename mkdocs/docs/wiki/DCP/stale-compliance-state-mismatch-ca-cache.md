@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale compliance cache mismatch between Intune and Conditional Access
+# Stale Compliance Signal Mismatch Between Intune and Conditional Access
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find themselves blocked from accessing Microsoft 365 resources — including Outlook, Exchange Online, Teams, and SharePoint — because Conditional Access evaluates their device as noncompliant for missing encryption. At the same time, the Intune portal and Company Portal both show the device as compliant, and BitLocker encryption appears active locally on the device. This creates a confusing situation in which the device appears healthy from every angle the user can see, yet sign-in attempts are denied with a device-not-compliant result.
+Affected users on Intune-managed Windows 10 and Windows 11 corporate laptops experience access blocks to Microsoft 365 services—including Outlook, Exchange Online, Teams, and SharePoint—due to Conditional Access evaluating their devices as noncompliant. The denial typically cites a missing or absent encryption signal, even though the devices have BitLocker encryption actively enabled and verified both locally and in the Company Portal or Intune portal. The core issue is a mismatch between the compliant state reported by Intune and the stale or outdated compliance signal consumed by Conditional Access during sign-in evaluation.
 
-The issue has been observed on both Windows 10 and Windows 11 managed laptops, affecting users across multiple offices and remote locations. In some cases the block is persistent, while in others it is intermittent — sign-in attempts may succeed briefly and then fail again. Manual sync attempts and reboots performed by the user do not immediately resolve the problem, and the conflicting status can persist for an extended period (an hour or more in reported cases).
+The block may be persistent or intermittent, with some affected users experiencing consistent denial while others see sporadic failures across sign-in attempts. Manual sync attempts and device reboots do not immediately resolve the discrepancy, as the stale compliance data continues to be referenced during token evaluation. In at least one case, the Intune service-side compliance record itself reflected a noncompliant encryption signal despite the endpoint's local encryption state being healthy, with BitLocker protection on and a TPM key protector present.
 
-Affected users typically notice the issue when core productivity applications such as Outlook or Teams stop connecting, or when browser-based access to SharePoint or Exchange is denied at sign-in. The Conditional Access denial may reference a missing encryption signal even though the device's local encryption status has not changed.
+The issue affects both remote workers and users connecting from office locations and is not tied to a specific network or IP range. Affected users are unable to perform normal work—including email, collaboration, and document access—until the stale compliance state is cleared and refreshed telemetry propagates to the Conditional Access evaluation layer. Sign-in logs confirm access denials with device-noncompliant error codes during the period of misalignment.
 
 !!! note "Reported variations"
 
-    - In some cases the block is intermittent rather than persistent, with sign-in attempts alternating between success and failure as Conditional Access evaluates different cached compliance snapshots.
-    - Some affected users see the device marked as noncompliant in Intune itself (rather than only in Conditional Access), even though the local encryption state is healthy and the device has synced recently.
-    - Propagation time after the stale state is cleared has varied, with some cases resolving within a few minutes and others requiring approximately 12 minutes of cache propagation before access is fully restored.
+    - In one case, Intune itself displayed a noncompliant signal for the encryption requirement even though the local device state confirmed BitLocker was active with a TPM key protector, suggesting the staleness extended to the Intune compliance record rather than only the Conditional Access cache.
+    - Some affected users experienced fully persistent access blocks, while others saw intermittent denials where sign-in attempts alternated between success and failure.
+    - One instance involved a Windows 11 22H2 device rather than Windows 10 21H2, indicating the issue is not limited to a single operating system version.
+    - In certain cases, temporary Conditional Access exclusion groups or grace windows were applied to restore user productivity while the compliance signal propagation completed.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 4 reported cases:
 
 ## Root cause
 
-A mismatch develops between the device compliance state recorded in Intune and the compliance signal consumed by Conditional Access during sign-in evaluation. Although the device has checked in successfully and Intune recognizes it as compliant with encryption enabled, Conditional Access continues to reference an older, stale copy of the compliance data that still indicates encryption is missing. This outdated signal persists until the compliance record is refreshed at the service layer and the updated status fully propagates through to the Conditional Access token evaluation path, which can take several minutes.
+Conditional Access consumed a stale or delayed device compliance signal for BitLocker encryption while Intune already showed the device as compliant. The encryption state had not fully propagated to the Conditional Access evaluation path, creating a temporary mismatch between Intune compliance status and access enforcement. The stale noncompliant signal continued to be used for token evaluation until the compliance record was refreshed and cache propagation completed.
 
 ## Diagnostics
 
@@ -73,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale compliance cache mismatch between Intune and Conditional Access" when reporting it.
+Resolved by IT after the stale device compliance signal was refreshed and propagation between Intune and Conditional Access completed, restoring normal access evaluation.
 
 ---
 

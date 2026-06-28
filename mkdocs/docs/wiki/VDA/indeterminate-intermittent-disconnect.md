@@ -8,22 +8,17 @@ curated: true
 self_serviceable: false
 ---
 
-# Intermittent VPN disconnects with no confirmed root cause
+# Intermittent GlobalProtect VPN Disconnections After Successful MFA Authentication
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience intermittent disconnections from the GlobalProtect VPN shortly after completing multi-factor authentication. The VPN client may briefly show a successful connection — indicated by the GlobalProtect icon turning green — before disconnecting within approximately five to ten seconds. During these brief connected moments, internal resources such as the corporate intranet and line-of-business applications remain unreachable or lose connectivity almost immediately.
+An affected remote user experienced intermittent VPN disconnections while connecting to the corporate network via GlobalProtect from a managed Windows laptop. The VPN session dropped around the time of the Okta MFA prompt, rendering internal sites such as the intranet application and line-of-business applications unreachable. The disconnections could not be reproduced consistently during the support session.
 
-The disconnections do not follow a consistent pattern and may not be reproducible on demand during a support session. The issue has been observed across different network environments (for example, home networks and co-working spaces), suggesting it is not tied to a specific external connection. Okta multi-factor authentication itself completes successfully each time — the push notification is approved and confirmed — yet the VPN session fails to persist afterward.
+The affected user confirmed that the Okta push notification was successfully approved each time, with authentication completing as expected. The GlobalProtect client briefly indicated a successful connection — the system tray icon turned green — before disconnecting within approximately five to ten seconds. Internal applications never became accessible during these brief sessions. The same behavior was observed from two different external networks.
 
-Because the behavior is intermittent and the available diagnostic evidence does not point to a single failure, affected users may perceive the issue as unpredictable. The VPN connection may occasionally succeed on a subsequent attempt without any user-side changes.
-
-!!! note "Reported variations"
-
-    - In some cases the VPN icon may not turn green at all before the session drops, making the disconnect appear to occur during — rather than after — the authentication step.
-    - The issue may temporarily resolve on its own after switching to an alternate access path, without any configuration change on the user's device.
+Diagnostic review ruled out an expired or mismatched device certificate on the affected endpoint. However, the remaining collected logs did not isolate whether the disconnect originated from transient client behavior, a network interruption, or a gateway-side event. The root cause could not be confirmed to a single failure point from the available evidence.
 
 ## Affected environment
 
@@ -36,7 +31,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The root cause of the disconnections could not be definitively determined from the available evidence. Certificate-related causes — such as an expired or mismatched device certificate — were investigated and ruled out. The remaining diagnostic data did not isolate whether the disconnects stemmed from transient VPN client behavior, a network interruption between the user's device and the gateway, or an event on the gateway side itself.
+Insufficient evidence was available to determine a definitive root cause. Certificate-related causes were ruled out during diagnostic review, and the remaining disconnect behavior appeared intermittent with no single failure point identified.
 
 ## Diagnostics
 
@@ -59,7 +54,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "intermittent VPN disconnect after MFA" when reporting it.
+Resolved by IT; reference intermittent GlobalProtect VPN disconnections following successful Okta MFA authentication with no confirmed root cause.
 
 ---
 

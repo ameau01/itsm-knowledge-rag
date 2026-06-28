@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Expired device certificate causes VPN tunnel teardown after MFA approval
+# Expired Device Certificate Causes Post-MFA GlobalProtect Tunnel Teardown
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users on corporate-managed Windows 10, Windows 11, and macOS laptops are unable to maintain a GlobalProtect VPN connection despite successfully completing Okta MFA authentication. After approving the Okta push notification — which completes without error and shows a green checkmark — the GlobalProtect client briefly displays a "Connected" status for anywhere from two to forty seconds before the tunnel disconnects automatically. Once the tunnel drops, all internal applications and resources, including intranet portals, Confluence, Jira, HR portals, CRM systems, Salesforce, file shares, and email, become completely unreachable. Repeated reconnection attempts produce the same cycle of successful MFA approval followed by immediate disconnection.
+Affected users on corporate-managed Windows 10, Windows 11, and macOS endpoints experience immediate GlobalProtect VPN disconnections after successfully completing Okta MFA authentication. The VPN client briefly displays a "Connected" status for approximately 2 to 40 seconds following a successful push approval, then the tunnel tears down automatically. Once disconnected, all internal resources — including intranet portals, HR and finance systems, CRM, Confluence, Jira, SharePoint, Salesforce, SMB file shares, email, and SSH bastion access — become completely unreachable. Repeated reconnection attempts reproduce the same cycle of successful MFA followed by momentary connectivity and rapid disconnection.
 
-The issue has been observed across multiple offices and regions, affecting users in Sales, Engineering, Finance, Marketing, and other groups. In many cases, several users on the same team or in the same location experience the problem simultaneously. The behavior typically begins shortly after a scheduled device certificate rotation window or maintenance period, and affected users may notice a certificate expiration warning in the system tray or endpoint certificate store. The GlobalProtect client itself does not always display a visible error message — some users report the status simply flips back to "Disconnected" without explanation, while others see a brief error flash in the status bar.
+Gateway and client-side log analysis consistently reveals that the tunnel teardown is triggered by a TLS handshake or device certificate validation failure occurring during the post-authentication phase. The affected endpoints present expired device certificates issued by the organization's internal Device Certificate Service. The gateway rejects the session with a certificate-expired error despite valid user-level MFA credentials. In several cases, the certificate expirations aligned with scheduled rotation windows that failed to complete renewals on all endpoints, or followed Windows cumulative updates that prevented automatic certificate renewal.
 
-Some affected endpoints also carry a stale GlobalProtect VPN profile that references an outdated certificate thumbprint. In those cases, even after a certificate renewal is performed, the tunnel may continue to fail until the cached VPN profile is also refreshed. A subset of users have experienced a recurrence of the issue after an initial fix when the certificate was renewed but the local VPN profile was not updated to reflect the new certificate.
+The issue has been observed across multiple offices, geographic regions, and VPN gateways, affecting individual users as well as groups of users whose certificates expired around the same date. It is not related to network connection type and reproduces on both wired and wireless connections. In some cases, stale GlobalProtect VPN profiles cached on affected endpoints — referencing outdated certificate thumbprints — compound the failure or cause recurrence after initial remediation. Standard user-side troubleshooting such as client restarts, device reboots, and local profile refreshes does not resolve the problem while the expired certificate remains in the endpoint's certificate store.
 
 !!! note "Reported variations"
 
-    - On some endpoints, a stale GlobalProtect VPN profile cached locally continued to reference the old certificate thumbprint, causing the tunnel to fail even after the device certificate was renewed until the profile was also refreshed.
-    - A subset of users experienced the issue recurring after an initial resolution because the earlier certificate renewal was performed without a corresponding VPN profile refresh on the endpoint.
-    - In at least one case, an improperly re-enrolled certificate combined with an inconsistent conditional access group assignment prevented the renewed certificate and active VPN profile from aligning with the expected access policy.
-    - Some users reported the tunnel staying connected for as little as two to three seconds, while others observed connections lasting up to forty seconds before teardown, depending on the timing of the post-authentication certificate validation step.
-    - The issue was observed on both macOS 12 and Windows (10 and 11) managed endpoints, though the majority of reports involved Windows devices.
+    - Tunnel uptime before disconnection varied from as little as 2 seconds to as long as 40 seconds after reaching "Connected" status, depending on when post-MFA certificate validation occurred.
+    - Some affected endpoints also carried stale GlobalProtect VPN profiles referencing outdated certificate thumbprints, requiring both certificate renewal and profile refresh to fully resolve.
+    - In some cases the GlobalProtect client entered a persistent reauthentication loop after disconnection rather than simply dropping the session.
+    - The issue was observed on macOS 12 endpoints in addition to Windows 10 and Windows 11 managed laptops, requiring platform-specific re-enrollment workflows.
+    - In at least one case the device certificate was not expired but had been improperly re-enrolled during a previous rotation cycle, producing the same validation failure.
+    - Some users reported seeing device certificate expiration warnings in the system tray days before the VPN connectivity issue manifested.
+    - In certain instances, Windows cumulative security updates prevented automatic certificate renewal, leaving the endpoint certificate in an expired state.
+    - The issue affected both individual endpoints and clusters of users within the same team or certificate rotation batch simultaneously.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 53 reported cases:
 
 ## Root cause
 
-The device certificate installed on the affected endpoint has expired, causing GlobalProtect to fail certificate validation during the post-authentication stage that follows a successful Okta MFA approval. Although the MFA step completes normally, the VPN gateway rejects the expired device certificate during the subsequent security handshake and immediately terminates the tunnel. On some endpoints, a stale locally cached VPN profile that still references the old certificate compounds the problem, preventing the renewed certificate from being used correctly during reconnection.
+Expired device certificates on affected managed endpoints caused GlobalProtect post-authentication certificate validation to fail immediately after successful Okta MFA approval, triggering VPN tunnel teardown. In some cases, stale GlobalProtect VPN profiles that referenced outdated certificate thumbprints compounded the issue or caused recurrence after initial certificate renewal.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'expired device certificate post-MFA VPN disconnect' when reporting it.
+Resolved by IT through device certificate renewal via the Device Certificate Service and, where applicable, a GlobalProtect VPN profile refresh on the affected endpoint.
 
 ---
 

@@ -8,24 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Software installation blocked by missing entitlement group and endpoint protection policy
+# Missing Entitlement Group Membership With Endpoint Protection Blocking
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to install a required application from Software Center find that the application is either not visible in the catalog or that the installation fails immediately with a policy check error. Common error messages include "user not entitled," "installation blocked by Endpoint Protection," and "policy check failed: entitlement not found," with error codes such as 0x80180014, 0x87D00231, or 0x80070490. The application may also be absent from Intune or Company Portal approvals, leaving no alternative installation path available.
+Affected users on corporate-managed Windows endpoints attempt to install a required application through Software Center but encounter installation failures. The application either does not appear in the Software Center catalog at all or is visible but immediately blocked when installation is attempted. Common error messages include "user not entitled" (error 0x80180014), "policy check failed" (errors 0x87D00231 and 0x80070490), and "entitlement not found." Standard self-remediation steps such as restarting the device, restarting Software Center, clearing the SCCM cache, and forcing an Intune sync do not resolve the issue. Colleagues in the same team or role have the application available and can install it without difficulty.
 
-In some cases the installer never launches at all, with Software Center reporting that Endpoint Protection has blocked the application before execution begins. In other cases the installer starts but is immediately quarantined by the endpoint security software. Affected users typically report that colleagues on the same team already have the application installed and available, suggesting the issue is specific to the individual user's account or device rather than a broader outage.
+Investigation consistently reveals that the affected user's Active Directory account is missing from the security group used to target the application deployment. Because group membership is the criterion for Intune or SCCM policy targeting, the application is either not offered to the device or fails policy evaluation during installation.
 
-Standard self-service troubleshooting steps — including restarting the device, restarting Software Center, clearing the configuration manager cache, and forcing an Intune sync from Company Portal or device settings — do not resolve the issue. The block persists across reboots and sync attempts because the underlying conditions require administrative changes that are outside the user's control.
+In most cases, a compounding factor is also identified: Endpoint Protection on the device actively blocks or quarantines the application installer due to application control policy. This manifests as quarantine notifications from the endpoint protection agent, installer hash denials, or policy check failures that prevent the installer from launching. The endpoint protection block is frequently discovered as a secondary condition that must also be addressed before installation can succeed. In some instances, however, the missing group membership alone accounts for the failure, and endpoint protection approval is noted only as a precautionary verification step.
 
 !!! note "Reported variations"
 
-    - The application may appear in Software Center but fail to install, rather than being entirely absent from the catalog.
-    - Endpoint Protection may actively quarantine the installer file during execution rather than blocking it before launch.
-    - The application may be missing from Intune or Company Portal approvals in addition to being blocked in Software Center, removing all self-service installation paths.
-    - The specific error code displayed varies across instances (e.g., 0x80180014, 0x87D00231, 0x80070490), though all reflect the same underlying policy check failure.
+    - The application is completely absent from the Software Center catalog rather than visible but blocked, with Intune showing the device is not targeted for the app.
+    - Endpoint Protection quarantines the installer on execution, producing a visible security notification on the device in addition to the policy check failure.
+    - The installer is denied before it ever launches, with Software Center displaying "Installation blocked by Endpoint Protection" and no installer window appearing.
+    - The application is visible in Software Center but absent from Intune app approvals under the user's account, indicating a gap between deployment visibility and entitlement targeting.
+    - A direct installation attempt from a network share fails with a PolicyCheckFailed error, bypassing Software Center but encountering the same underlying policy restriction.
 
 ## Affected environment
 
@@ -38,7 +39,7 @@ Distribution across 5 reported cases:
 
 ## Root cause
 
-The issue results from two conditions acting together. First, the affected user's account is not a member of the required entitlement or deployment security group in Active Directory or Intune, so the application is not targeted to their device through normal software distribution. Second, the application's installer package has not been approved or allow-listed in the endpoint protection application control policy, causing the security software to block or quarantine the installer when it attempts to run. Both conditions must be corrected — the entitlement group membership must be added and the installer must be approved in the endpoint security policy — before the application can be successfully installed.
+The affected user's Active Directory account was not a member of the required application entitlement security group, so the deployment was not targeted correctly and the application remained unavailable or failed policy evaluation. Concurrently, Endpoint Protection application control policy blocked or quarantined the installer, requiring separate security approval and policy refresh before installation could proceed.
 
 ## Diagnostics
 
@@ -65,15 +66,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Verified the required SalesApp entitlement assignment in Intune endpoint management and identified that <HOSTNAME> (enrolled to <USER>, <EMP_ID>) was not a member of the SG-SalesApp-Deploy group used to target the application for deployment.
-2. Added device <HOSTNAME> and user <USER> to the SG-SalesApp-Deploy entitlement group in Intune so the application would become eligible and visible in Software Center for <PERSON> at the <LOCATION> office.
-3. Updated Endpoint Protection application control policy to allow the approved SalesApp installer package (SalesAppSetup.exe) that had been blocked during prior direct install attempts; change approved by <PERSON> on the security team.
-4. Forced an Intune device inventory and policy sync on <HOSTNAME> (IP <IP>) to refresh group targeting, application assignment, and Endpoint Protection policy visibility on the endpoint.
-5. Retried the installation from Software Center on <HOSTNAME> and confirmed SalesApp installed successfully for <USER> after policy and entitlement updates were applied. <PERSON> confirmed the application launched without issues.
+1. Review the Endpoint Protection or application control block event for the Contoso Secure Client installer (ContosoSecureClient_4.7.2_x64.msi) on <HOSTNAME> and confirm the installer or publisher is being denied by current security policy. Cross-reference the deny event logged at 08:22 UTC on the endpoint.
+2. Escalate to the <PERSON> or security administration team (<PERSON>, <USER>) to approve the installer signature or whitelist the approved publisher for the managed deployment package of Contoso Secure Client v4.7.2 across EMEA-managed endpoints.
+3. Verify the user <USER> (<EMP_ID>) or device <HOSTNAME> is assigned to the required 'SG-ContosoSecureClient-EMEA' entitlement group and add the missing entitlement if it is not present. Confirm group membership replication in the Intune portal.
+4. Force a policy and inventory refresh in Intune on <HOSTNAME> after the security allow rule and entitlement update have replicated to the endpoint. Verify the new policy assignment appears in the device sync log.
+5. Retry the installation of Contoso Secure Client from Software Center on <HOSTNAME> and confirm the application installs without the Endpoint Protection policy check failure. Notify <EMAIL> upon successful completion.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'missing entitlement group membership plus endpoint protection block' when reporting it.
+Resolved by IT by adding the affected user to the required entitlement security group and ensuring Endpoint Protection approval and policy synchronization were completed.
 
 ---
 

@@ -8,21 +8,22 @@ curated: true
 self_serviceable: false
 ---
 
-# Account lockout after password reset due to expired reset token
+# Incomplete Password Reset Due to Expired Reset Token
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience continued sign-in failures after completing a corporate password reset through the Password Reset Portal. Despite following the reset process, authentication to the SSO Portal and Microsoft 365 applications does not succeed, and the account may become locked again shortly after the reset attempt.
+Affected users experience persistent sign-in failures across the SSO portal and Microsoft 365 applications after completing a corporate password reset through the Password Reset Portal. Despite the reset appearing to finish successfully, the new password is not accepted consistently, and the affected user's Active Directory account becomes locked again shortly afterward.
 
-The issue typically manifests across multiple devices — for example, both a desktop and a mobile device — rather than being isolated to a single endpoint. Users report that the new password does not appear to be accepted consistently, even though the reset process itself seemed to complete. Account lockouts in Active Directory may recur in quick succession, preventing access to corporate resources.
+The issue manifests across multiple devices, such as desktops and mobile devices, rather than being isolated to a single endpoint. Although initial investigation may consider stale cached credentials on mobile devices or other endpoints as a potential locking source, diagnostics rule these out as the cause of the continued lockouts.
 
-Because the symptoms resemble those of a stale cached credential on a secondary device, initial investigation may explore that possibility. However, authentication logs in these cases do not show a persistent stale-credential source from mobile or other endpoints; the lockouts stem from the reset itself not having completed successfully.
+The confirmed root cause is an invalid or incomplete prior reset state. Reissuing a valid reset token resolves the issue, restoring normal password propagation and sign-in behavior across all affected services and devices.
 
 !!! note "Reported variations"
 
-    - Initial triage may suspect a stale cached credential on a mobile device (e.g., a saved password in a mail app or browser), but diagnostics confirm no continuing stale-credential source from any endpoint.
+    - The affected user's Active Directory account is observed as locked on a specific domain controller shortly after the reset attempt.
+    - The affected user has saved or cached credentials on a mobile device, but these are ruled out as the source of the continued lockouts.
 
 ## Affected environment
 
@@ -35,7 +36,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The password reset token used during the prior reset attempt had expired or was otherwise invalid, so the reset did not fully complete. As a result, the user's credentials were not properly updated in directory services, and subsequent sign-in attempts continued to fail and trigger account lockouts. Reissuing a valid reset token allowed the password change to propagate correctly and restored normal authentication.
+The previous password reset did not complete successfully because the reset token had expired or was no longer valid. This left the affected user attempting authentication with credentials that were not fully updated in directory services.
 
 ## Diagnostics
 
@@ -58,7 +59,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'expired reset token causing account lockout' when reporting it.
+Resolved by IT after reissuing a valid password reset token to complete credential propagation across directory services.
 
 ---
 

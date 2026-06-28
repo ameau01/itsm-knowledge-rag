@@ -8,22 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale VPN profile blocking renewed device certificate after renewal
+# Stale VPN Profile After Certificate Renewal Causes Tunnel Teardown
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience a VPN disconnection within seconds of successfully authenticating. The Okta MFA push notification is approved without issue, and the GlobalProtect client briefly displays a "Connected" status — typically for three to ten seconds — before dropping back to "Disconnected." During the brief connection window, internal resources such as the corporate intranet, file shares, and internal email remain unreachable or fail to load before the tunnel is torn down.
+Affected users on managed Windows 10 laptops experience repeated GlobalProtect VPN disconnections shortly after successful Okta MFA authentication. The VPN client briefly displays a "Connected" status for approximately three to ten seconds before dropping back to "Disconnected." During the brief connection window, internal resources such as the corporate intranet, SMB file shares, and internal-only email remain unreachable. The disconnection behavior is consistent and reproducible across multiple connection attempts from the same endpoint.
 
-The issue has been observed on managed Windows 10 laptops connecting from office locations. Users report that the behavior is fully reproducible across multiple connection attempts in the same session, with identical results each time. Colleagues on the same team and network may not be affected, indicating the problem is specific to the individual endpoint rather than a site-wide outage.
+The issue arises after a device certificate renewal has been performed or pushed to the endpoint. Although the renewed certificate is present, the endpoint retains an outdated local VPN profile that references the previous certificate association. This mismatch causes the VPN gateway to tear down the tunnel immediately after authentication succeeds. Gateway and client log review confirms that MFA authentication and tunnel establishment complete successfully before the termination occurs, ruling out credential or MFA issues.
 
-A distinguishing characteristic of this issue is that it recurs after a prior device certificate renewal that initially appeared to restore service. The certificate renewal alone does not permanently resolve the disconnection, and the same post-authentication tunnel teardown returns — sometimes within days — because the underlying profile state on the endpoint was not corrected during the earlier fix.
+The problem is isolated to specific endpoints rather than being a network-wide or account-wide condition. In observed cases, a colleague on the same team connecting from the same office location did not experience the issue, indicating that the root cause is tied to the individual device's local profile state.
 
 !!! note "Reported variations"
 
-    - In some cases, a prior certificate renewal by desktop support temporarily restored VPN connectivity, but the issue returned because the stale profile association was not cleared at the time of the renewal.
-    - The stale profile has been observed dating back several months before the most recent certificate renewal, indicating the mismatch can persist across multiple renewal cycles if not explicitly corrected.
+    - In one case, the affected user reported that internal-only email access was also unreachable during the brief connection window, in addition to intranet and file share resources.
+    - One affected endpoint retained a stale VPN profile dated approximately two months prior to the most recent certificate push, confirming a significant gap between the profile timestamp and the renewed certificate.
+    - Not all devices on the same team or office network were affected; a colleague of one affected user on the same team did not experience the disconnection, underscoring the endpoint-specific nature of the issue.
 
 ## Affected environment
 
@@ -36,7 +37,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The GlobalProtect client on the affected endpoint retains a stale VPN profile that was associated with the previous device certificate. When the Device Certificate Service renews the device certificate, the endpoint does not automatically update this local profile-to-certificate association. As a result, after successful MFA authentication, the VPN gateway detects a mismatch between the renewed certificate and the outdated profile during post-authentication validation and immediately tears down the tunnel.
+The GlobalProtect client retained a stale local VPN profile after a device certificate renewal, creating a mismatch between the renewed certificate and the active profile's certificate association. After successful MFA authentication, the gateway session failed device certificate validation and posture checks, tearing down the tunnel during reauthentication.
 
 ## Diagnostics
 
@@ -71,7 +72,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'stale VPN profile after certificate renewal' when reporting it.
+Resolved by IT; stale GlobalProtect VPN profile and certificate association mismatch causing post-MFA tunnel teardown.
 
 ---
 

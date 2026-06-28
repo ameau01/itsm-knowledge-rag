@@ -8,27 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# MFA prompt loop caused by stale Okta factor enrollment records
+# Stale Okta MFA Enrollment Records Cause SSO Challenge Loop
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users are unable to complete sign-in through the corporate SSO Portal. After entering primary credentials successfully, the authentication flow advances to the multi-factor authentication (MFA) step, but once the user approves the push notification or enters a verification code, the session returns to the MFA challenge again instead of granting access. This loop repeats indefinitely, and no successful session is established regardless of how many times the factor is approved.
+Affected users attempting to sign in to the corporate Okta-backed SSO portal are unable to complete authentication. After entering primary credentials and approving the MFA challenge (via Okta Verify push or TOTP), the browser immediately returns to the MFA prompt rather than granting a session. This loop prevents access to downstream SaaS applications such as Salesforce, Workday, Confluence, Office 365, Google Workspace, and Slack. In some cases an explicit "Authentication failed" or AUTH-401 error appears between iterations; in others the prompt silently reappears with no error displayed. The behavior persists across multiple browsers, incognito sessions, alternate devices, and after client-side steps such as clearing cache or reinstalling the authenticator app.
 
-The issue blocks access to all downstream applications delivered through the SSO Portal, including Salesforce, Workday, Confluence, Office 365, Google Workspace, and other federated services. It is not limited to a single application — affected users encounter the same loop across every app launched from the portal. In some cases, the browser displays an "Authentication failed" or similar message before cycling back to the MFA prompt; in other cases, no explicit error is shown.
+The issue affects individual accounts and groups of up to approximately 14 users simultaneously, spanning multiple office locations, departments, and both internal employees and recently onboarded contractor accounts. Some affected users report that certain federated applications (e.g., ServiceNow) remain accessible while others are blocked, giving the appearance of an application-specific problem.
 
-The MFA loop persists across browsers (Chrome, Edge, Firefox), across incognito and private browsing sessions, and across entirely separate devices such as a personal computer or mobile phone browser. Clearing browser cache and cookies, reinstalling the authenticator app, and rebooting the workstation do not resolve the behavior. This cross-device, cross-browser persistence distinguishes the issue from a local browser or endpoint problem.
-
-Reports have involved both individual users and groups of users across multiple offices and departments, including Sales, Engineering, Marketing, and contractor populations. The onset has been linked to events such as MFA migrations, directory synchronizations, authenticator app reinstalls, phone replacements, or device changes — any event that can leave the identity provider's factor enrollment records out of alignment with the user's current authenticator state.
+Okta system logs for impacted accounts consistently show successful primary authentication followed by repeated factor challenge events, token validation failures (AUTH-401, ERR_MFA_ENROLL_STALE, invalid_token, access_denied, invalid_grant), factor-mismatch errors, and rejected SAML assertions. Investigation confirms that enrolled MFA factor identifiers no longer match the users' current authenticator state, with access policy memberships and application assignments verified as correct in each case.
 
 !!! note "Reported variations"
 
-    - Some affected users see explicit authentication failure messages (e.g., "Authentication failed" or HTTP 401/403 responses) between MFA loop cycles, while others see no error at all and are silently returned to the challenge screen.
-    - In multi-user incidents following a migration or directory sync, a subset of users in the same group may retain access to certain applications (e.g., ServiceNow) while being blocked from others delivered through the SSO Portal.
-    - Contractor or externally onboarded accounts may experience the loop intermittently rather than consistently, with occasional successful sign-ins interspersed among failures.
-    - In some cases, duplicate factor enrollment records (e.g., two TOTP entries from different dates) are present on the account, producing explicit factor-mismatch events in authentication logs.
-    - Clock drift on the authenticator device may compound the issue when stale TOTP-based enrollments are involved, though correcting the device clock alone does not resolve the loop.
+    - In one incident, approximately 14 Sales group accounts were affected simultaneously following a scheduled MFA factor migration from legacy TOTP to Okta Verify push.
+    - Some accounts contained duplicate TOTP factor enrollments (one stale, one current), with the stale entry triggering factor-mismatch events on each authentication attempt.
+    - In one case, the affected user's phone clock was not set to automatic; correcting this alone did not resolve the loop.
+    - A mobile device OS update initially suggested an authenticator or clock-drift issue but was ultimately traced to stale factor enrollment.
+    - Certain federated applications such as ServiceNow remained accessible while others were blocked, giving the appearance of an application-specific problem.
+    - Contractor accounts exhibited intermittent behavior, with at least one user able to complete sign-in on one occasion but failing on subsequent attempts.
+    - The issue affected users whose Okta Verify factor enrollment predated a recent Azure AD group migration, suggesting the migration contributed to enrollment staleness.
+    - Prior self-service remediation attempts by users — including cache cleanup and re-adding the authenticator — did not resolve the loop, consistent with a server-side enrollment problem.
 
 ## Affected environment
 
@@ -41,7 +42,7 @@ Distribution across 20 reported cases:
 
 ## Root cause
 
-The identity provider (Okta or Azure AD) retains outdated, duplicate, or mismatched MFA factor enrollment records for the affected user accounts. These stale records cause the system to challenge against a factor state that no longer matches the user's current authenticator registration, so each MFA verification attempt fails to satisfy the session requirement and triggers a new challenge. The condition typically arises after events such as an MFA migration, a directory synchronization, a device change, or an authenticator app reinstall that leaves old enrollment data in place without a clean re-registration.
+Stale or mismatched MFA factor enrollment records within the Okta tenant caused device and credential bindings to fall out of sync with affected users' current authenticator state. The condition has been observed following organizational MFA migrations (e.g., legacy TOTP to Okta Verify push), mobile device changes, authenticator app reinstallations, and directory synchronization events such as Azure AD Connect syncs or group migrations. In each scenario, the factor enrollment retained by Okta no longer matched the active authenticator instance, causing the identity provider to reject verification and re-issue the MFA challenge in a continuous loop.
 
 ## Diagnostics
 
@@ -77,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale MFA factor enrollment" when reporting it.
+Affected users and their managers typically open tickets describing an inability to complete SSO login due to a repeating MFA prompt, often referencing a stale MFA enrollment prompt loop or endless MFA challenge after sign-in.
 
 ---
 

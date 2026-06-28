@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# MFA prompt loop from combined stale enrollment and conditional access policy desync
+# Stale MFA Enrollment and Group Policy Mismatch Cause SSO Authentication Loop
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to sign in to SaaS applications — such as Salesforce, Confluence, Office 365, Concur, and others — through the corporate SSO portal are repeatedly returned to the MFA challenge screen after successfully completing primary authentication and approving the MFA prompt (typically via Okta Verify push). Instead of reaching the target application, the sign-in flow cycles back to another MFA challenge or displays an authentication rejection message such as "Sign-in rejected," "Login rejected," or "401 MFA required." The loop persists regardless of browser, device, or network, and clearing cookies or switching browsers does not resolve it.
+Affected users across multiple departments—including Sales, Marketing, Engineering, Operations, and external contractor groups—were unable to complete sign-in to SaaS applications (such as Salesforce, Office 365, Concur, Confluence, Slack, Workday, and G Suite) through the corporate SSO portal federated with Okta and Azure AD. After entering valid credentials and approving the Okta Verify MFA prompt, users were immediately returned to another MFA challenge rather than being granted access. The loop persisted regardless of the application selected, the device used, or whether browser caches were cleared. In some cases, explicit error messages appeared, including "Sign-in rejected," "Authentication rejected," "verification failed," or HTTP 401 MFA_REQUIRED responses.
 
-The issue has been observed across multiple departments and groups, including Sales, Engineering, Finance, Marketing, and external contractor populations. It typically emerges shortly after a scheduled identity configuration change, group synchronization, or conditional access policy update — often within hours of the change window. Affected users may number from a handful to over a hundred, depending on the scope of the group or policy involved.
+Okta system logs for affected accounts consistently showed repeated MFA challenge events with no successful verification callback, including token mismatch errors and SAML assertion rejections. Azure AD sign-in logs reflected corresponding conditional access denial events. In several instances, Azure AD showed successful token issuance for sessions that Okta simultaneously rejected, highlighting a desynchronization between the two identity platforms.
 
-Okta authentication logs for affected accounts show repeated MFA challenge events with no successful session token issued, and in some cases display specific errors such as enrollment token mismatches or SAML assertion rejections. Azure AD sign-in logs may simultaneously show successful upstream token issuance for the same sessions, creating an apparent contradiction where authentication succeeds at one layer but fails to complete downstream. The net effect is that affected users are fully blocked from accessing business-critical applications through SSO for the duration of the issue.
+The issue consistently emerged following recent identity infrastructure changes—conditional access policy updates, Azure AD group attribute modifications, or scheduled identity sync operations. Investigation across all reported cases identified two co-occurring conditions: stale MFA factor enrollments on affected Okta accounts (sometimes tied to previously decommissioned devices or pre-migration factor schemas) and a group-based conditional access policy mismatch in Azure AD caused by incomplete group membership propagation or references to deprecated policy versions. Together, these conditions caused the authentication flow to loop indefinitely without completing the SSO handoff.
 
 !!! note "Reported variations"
 
-    - Some users see a "verification failed" message instead of being returned to the MFA prompt, particularly when the stale enrollment is the dominant factor.
-    - In some cases, Azure AD sign-in logs show token rejection errors (such as AADSTS50020) tied to a specific group — such as an external contractors group — that require separate policy review even after the primary MFA loop is resolved.
-    - A deprecated or legacy conditional access policy (referencing outdated enrollment mappings or policy versions) may be the specific source of the policy mismatch, rather than a newly pushed change.
-    - Users who recently re-enrolled their authenticator may be disproportionately affected when a legacy policy evaluates outdated enrollment attributes against the new factor registration.
-    - Intermittent authenticator clock skew warnings may appear alongside the stale enrollment and policy mismatch, though clock drift is not the primary cause of the loop.
+    - Some affected users received an explicit "Sign-in rejected" or "access_denied" message rather than a silent MFA loop, with no corresponding approval activity visible in the authenticator app.
+    - Azure AD logs for certain external contractor accounts showed token rejection errors specific to the contractor group conditional access rule set, confirming the issue was not limited to internal employees.
+    - In one case, temporarily reassigning an affected user to a legacy access group immediately restored access, confirming the policy scope mismatch.
+    - A legacy conditional access policy referencing deprecated enrollment mapping attributes from a pre-migration factor schema remained enabled, causing the loop specifically for users who re-enrolled after a factor migration.
+    - Some affected users experienced intermittent access rather than a complete block, with the MFA loop occurring inconsistently across sign-in attempts.
+    - One affected user confirmed that a colleague in the same Azure AD access group could sign in normally, indicating the issue was account-specific on a subset of group members.
+    - A subset of users required individual MFA enrollment resets even after the policy-level fix was applied, due to factor enrollment metadata recorded under the old policy version.
+    - An authenticator clock skew warning was observed on one affected device during the failure window, though the loop persisted independent of time synchronization.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 15 reported cases:
 
 ## Root cause
 
-A combination of two identity-layer issues causes the authentication loop. First, affected user accounts retain stale MFA enrollment records in Okta — factor bindings that are outdated, tied to decommissioned devices, or inconsistent with the current policy version — which cause MFA verification to fail or loop even after the user approves the prompt. Second, a concurrent conditional access policy or group mapping change (such as a group synchronization between Azure AD and Okta, a policy scope update, or a claim mapping modification) results in affected users being evaluated against incorrect, deprecated, or misaligned access rules. Neither issue alone fully explains the behavior; the stale enrollments cause MFA verification failures, while the policy or group mismatch prevents the SSO session from completing even when MFA would otherwise succeed, together creating a persistent authentication loop.
+Stale MFA enrollment records persisted on affected user accounts following identity sync operations or policy migrations between Azure AD and Okta. Concurrently, group-based conditional access policies referenced outdated group mappings, deprecated policy versions, or stale group object identifiers introduced during scheduled sync cycles or policy change windows. The combination of mismatched factor enrollment state and incorrect policy scope evaluation caused repeated MFA challenges without successful session completion.
 
 ## Diagnostics
 
@@ -66,15 +69,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Reviewed Okta sign-on activity for affected users (<USER>, <USER>, <USER>) and confirmed repeated MFA challenge behavior followed by rejected assertions during Salesforce and Confluence launches — <USER> alone had 7 failed MFA cycles logged between 15:45–16:10 UTC on 2026-04-09.
-2. Cleared active Okta sessions for impacted accounts (<USER>, <USER>, <USER>, and 3 additional Sales-External users identified in the <LOCATION> office) to remove stale authentication state before retesting sign-in.
-3. Reset MFA enrollment for confirmed affected users so they could re-register a valid active factor and complete a clean challenge flow — <USER> re-enrolled successfully from <HOSTNAME> at 16:48 UTC and confirmed Salesforce access.
-4. Corrected the Azure AD group-to-Okta assignment for the Sales-External mapping (reconciling the 14-member Azure AD group with Okta's 9-member assignment) so users were evaluated against the intended access policy and application assignment. <PERSON> (<EMAIL>) confirmed the sync configuration has been updated to prevent future drift.
-5. Validated successful SSO access with test accounts <USER> and <USER> after MFA re-enrollment and mapping correction, then monitored sign-on logs for one business day to confirm no recurrence across all Sales-External users in the <LOCATION> region.
+1. Reviewed Okta authentication logs for affected users (<USER>, <USER>, <USER>, <USER>) and confirmed repeated factor verification failures consistent with stale MFA enrollment bindings across all four Sales accounts in the <LOCATION> office.
+2. Reset MFA enrollment for impacted user accounts in Okta to remove the invalid factor associations. Identity team lead <PERSON> (<USER>, <EMP_ID>) performed the bulk reset for all affected Sales users.
+3. Guided users through re-enrolling Okta Verify or their approved authenticator method and confirmed successful factor registration. <PERSON> (<USER>), <PERSON> (<USER>), <PERSON> (<USER>), and <PERSON> (<USER>) each completed re-enrollment and verified a successful push notification.
+4. Validated successful SSO login to Salesforce and other affected SaaS applications after re-enrollment. Each user confirmed access to Salesforce, Concur, and Office 365 from their respective workstations without further MFA loop behavior.
+5. Reviewed and corrected group membership alignment with the conditional access policy so affected users matched the intended access scope. The Sales-SSO-Access group in Azure AD was reconciled by <USER> to ensure all <LOCATION> Sales team members were properly targeted.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale MFA enrollment and conditional access policy desync" when reporting it.
+Resolved by IT after resetting stale MFA factor enrollments and correcting the Azure AD group-based conditional access policy scope to restore SSO authentication.
 
 ---
 

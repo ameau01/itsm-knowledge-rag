@@ -8,23 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Downstream API rate limiting causes integration job timeouts
+# Downstream API Rate-Limit Throttling Causes Gateway Timeout Integration Failures
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users observe that scheduled or real-time integration jobs begin failing with timeout errors during periods of high request volume, such as overnight batch processing or nightly ingestion runs. The failures typically appear as repeated 504 Gateway Timeout errors in application and gateway logs, and monitoring dashboards show a sharp increase in downstream response times alongside elevated error rates from the external API endpoint.
+Affected users experience failures of scheduled and real-time integration jobs that route through the Integration Gateway when downstream external API endpoints enforce rate limits. The issue typically manifests as repeated HTTP 504 Gateway Timeout errors observed in application and gateway logs. Monitoring dashboards show sharply rising downstream latency, with p99 response times exceeding normal thresholds, and elevated error rates from external API endpoints. Integration jobs that previously completed successfully begin failing within minutes of onset, blocking normal data synchronization workflows.
 
-The issue can affect multiple integration workflows simultaneously — both scheduled batch syncs and real-time data synchronization jobs may fail or stall. Users may notice that data updates stop flowing, backlogs accumulate in the gateway worker queue, and previously successful jobs no longer complete within their expected windows. Individual test calls to the downstream API endpoint may still succeed, which can make the issue appear intermittent or suggest a partial outage rather than a throughput-related problem.
+The underlying mechanism involves the external API returning HTTP 429 (Too Many Requests) responses due to quota enforcement, particularly during periods of high request volume such as nightly batch ingestion or overnight sync windows. The Integration Gateway's retry logic causes pending requests to queue rapidly — climbing from a handful to over a hundred within minutes — until each request exceeds the gateway's timeout threshold. This retry-stacking behavior converts the downstream throttling condition into widespread gateway timeouts visible to end users and dependent applications.
 
-In some cases, initial error logs may also include unrelated status codes such as 401 Unauthorized alongside the 504 timeouts, which can complicate early triage. However, investigation typically confirms that authentication credentials remain valid and that the root failure is the volume of requests exceeding the downstream API's rate or quota limits.
+The issue affects integration paths used by reporting applications and customer data synchronization services alike, creating backlogs in gateway worker queues and delaying or entirely preventing data record updates. Affected teams observe that the downstream endpoint remains reachable and responds normally to individual test calls, confirming the external service is not fully unavailable — rather, the volume of concurrent or retried requests triggers rate-limit enforcement that cascades into job failures across the integration platform.
 
 !!! note "Reported variations"
 
-    - Initial error logs may include 401 Unauthorized responses alongside the 504 timeouts, potentially suggesting an authentication issue, even though credentials are confirmed valid upon investigation.
-    - The issue may surface only during overnight or off-hours batch windows when large record volumes (e.g., thousands of queued records) are processed in a short period, while daytime or lower-volume operations continue to function normally.
-    - Individual manual test calls to the downstream API endpoint may succeed, masking the rate-limiting condition and giving the impression that the external service is fully operational.
+    - Initial error logs may include HTTP 401 Unauthorized responses alongside the 504 timeouts, leading to an initial suspicion of authentication or credential rotation issues before downstream throttling is confirmed as the root cause.
+    - Both real-time data sync jobs and scheduled batch ingestion jobs may be affected simultaneously when they share the same integration gateway path and downstream API quota.
+    - The gateway worker queue backlog may persist and continue growing even after the initial throttling event, as retries from earlier failed jobs compound with new incoming requests.
 
 ## Affected environment
 
@@ -36,7 +36,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The downstream external API enforces rate or quota limits on the integration client, and when request volume exceeds those limits — particularly during large batch processing windows — the API returns sustained throttling responses. These throttling responses cause the Integration Gateway to retry failed requests repeatedly, which increases the number of pending requests in the retry queue and drives up overall latency. As retries accumulate, individual requests eventually exceed the gateway's timeout threshold, resulting in timeout errors that cause integration job failures and delayed data synchronization.
+The downstream API enforced rate limits against the integration client, producing sustained HTTP 429 Too Many Requests responses. Gateway retries accumulated under elevated latency, exhausted the effective timeout window, and resulted in HTTP 504 Gateway Timeout errors that caused integration job failures and delayed data syncs.
 
 ## Diagnostics
 
@@ -70,7 +70,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'downstream rate-limiting throttling' when reporting it.
+Resolved by IT after identifying that downstream API rate-limit enforcement triggered retry exhaustion and gateway timeouts across integration jobs.
 
 ---
 

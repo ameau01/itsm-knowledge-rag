@@ -8,27 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale DNS resolver cache serving outdated records after internal zone change
+# Stale Resolver Cache Serving Outdated Records After Internal Zone Update
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-After a recent change to an internal DNS zone record — such as an A record update following a service migration or infrastructure change — affected users experience intermittent failures when attempting to reach internal services by hostname. Lookups may return an outdated IP address pointing to a decommissioned or previous endpoint, NXDOMAIN responses indicating the hostname does not exist, SERVFAIL errors, or DNS query timeouts. These failures typically alternate unpredictably: some queries return the correct new address while others return stale data or errors, depending on which internal resolver or cache answers the request.
+After an internal DNS zone record change — such as an A record update during a service or infrastructure migration — affected users and dependent services experience intermittent name-resolution failures for internal hostnames. Lookups against corporate recursive resolvers return a mix of outdated A records (pointing to previous or decommissioned IP addresses), NXDOMAIN errors, SERVFAIL responses, and timeouts, even though the authoritative DNS servers already reflect the correct, updated entry. Direct IP connectivity to the target service remains functional, confirming the issue is confined to DNS name resolution.
 
-The issue is confined to internal name resolution through corporate recursive resolvers and caching forwarders. Direct connectivity to the service by its current IP address continues to work normally, confirming that the service itself is available and the problem lies in the DNS resolution path. Affected users are generally concentrated on specific office subnets or datacenter segments served by the resolvers that hold stale data, though multiple sites can be involved if several resolvers or downstream forwarders retain outdated cache entries.
+The behavior is resolver-specific: one resolver in the environment may return the expected record while another continues to serve stale cached data, causing inconsistent results depending on which resolver handles a given query. Some clients observe correct and incorrect answers alternating on repeated lookups. The inconsistency typically spans multiple subnets, office locations, or datacenter segments served by overlapping resolver infrastructure, creating partial-outage conditions.
 
-The authoritative internal DNS zone already contains the correct, updated record. The discrepancy is between what the authoritative servers hold and what the recursive resolvers and forwarders are serving from their local caches. This mismatch can persist for an extended period — sometimes hours or longer — because the cached entries carry elevated or long-lived TTL values that delay automatic refresh. In some cases, different resolvers in the same environment return different answers, causing the issue to appear inconsistent across users and applications even within the same office.
-
-Impact ranges from individual workstation lookup failures to broader disruption of application-to-application connectivity, CI/CD pipelines, monitoring health checks, and internal service discovery for any system that relies on hostname-based access through the affected resolver infrastructure.
+The impact extends beyond individual users to CI/CD pipelines, automated service-to-service communication, health-check and monitoring systems, internal service registries, and any system relying on hostname-based lookups. Investigation consistently reveals a mismatch between cached entries on one or more recursive resolvers and the current authoritative zone data, with resolver cache metadata showing entries last refreshed before the zone update. In some cases, resolver latency spikes and timeouts of 30–60 seconds accompany the stale responses.
 
 !!! note "Reported variations"
 
-    - Some resolvers serve a stale negative cache entry (cached NXDOMAIN) rather than a stale A record, causing the hostname to appear nonexistent even though the correct record exists in the authoritative zone.
-    - The issue may affect only a subset of resolvers in the environment while others have already refreshed, producing a split where users on different subnets or offices see different results for the same hostname.
-    - In some cases, a resolver does not honor TTL expiry or refresh behavior correctly, requiring a service restart in addition to a cache flush before it begins returning current data.
-    - Downstream caching forwarders may retain stale data independently of the primary resolver, causing mixed responses to persist even after the primary resolver cache has been cleared.
-    - Occasionally the authoritative zone serial number was not incremented or the zone was not fully reloaded at the time of the record change, compounding the propagation delay across resolver layers.
+    - Some resolvers return NXDOMAIN or SERVFAIL rather than a stale A record, particularly when the resolver holds a cached negative response from a brief zone transfer hiccup.
+    - Caching forwarders downstream of the primary resolver continue serving stale data even after the primary resolver cache has been cleared, requiring independent cache flushes on each downstream node.
+    - A resolver fails to honor TTL refresh behavior correctly, requiring a full service restart rather than a simple cache flush to begin returning current records.
+    - Records with very high TTL values (e.g., 86400 seconds) tied to decommissioned hosts persist in resolver caches long after the zone has been updated.
+    - Some clients observe a mix of correct and incorrect responses on repeated queries, with stale answers appearing intermittently rather than consistently.
+    - The stale resolution issue spans multiple office locations and datacenter segments when those sites share overlapping resolver infrastructure.
+    - An aggressive caching policy or long-running resolver process (without restart) prevents cache entries from being refreshed on schedule.
+    - Automated health checks, monitoring platforms, and dependent service registries co-report the resolution failures alongside end-user reports.
 
 ## Affected environment
 
@@ -41,7 +42,7 @@ Distribution across 23 reported cases:
 
 ## Root cause
 
-After an internal DNS zone record is updated, one or more internal recursive resolvers or caching forwarders continue serving previously cached data instead of fetching the current record from the authoritative zone. This typically occurs because the cached entry has a long TTL that has not yet expired, or because the resolver did not properly refresh from the authoritative source after the zone change. The result is that clients querying different resolvers — or even the same resolver at different times — receive inconsistent answers until the stale cache entries are cleared and the resolver picks up the updated zone data.
+Internal DNS recursive resolvers retained stale cached A records after the authoritative internal zone was updated, continuing to serve outdated or negative-cached responses instead of fetching the current record. High TTL values on the original cached entries prevented resolvers from re-fetching the updated record within a reasonable window after the change, prolonging the staleness period.
 
 ## Diagnostics
 
@@ -77,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'stale DNS resolver cache after record change' when reporting it.
+Resolved by IT flushing stale cache entries on affected internal resolver infrastructure and, where necessary, reloading the authoritative zone or restarting the resolver service, after which lookups returned the correct authoritative address and application connectivity was restored.
 
 ---
 

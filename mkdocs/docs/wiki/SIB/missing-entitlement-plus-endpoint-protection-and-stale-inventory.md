@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Application install blocked by missing entitlement, stale inventory, and endpoint protection
+# Missing Entitlement, Stale Inventory, and Endpoint Protection Block Combined
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to install a required application from Software Center find that the application is either not visible at all or appears intermittently but fails immediately when installation is attempted. Error messages vary but commonly include "blocked by policy," "blocked by Endpoint Protection," "installation blocked by policy check," or specific error codes such as 0x80070490 or 0x87D1041C. In some cases the application briefly appears after a sync or reboot but then disappears again or returns the same block on the next attempt.
+Affected users on managed Windows 10 Enterprise devices report that required applications are unavailable or blocked in Software Center. The target application either does not appear in the Software Center interface, appears intermittently, or is listed with a persistent "Blocked" status. When installation is attempted, users receive messages such as "blocked by policy," "blocked by Endpoint Protection," or "installation blocked by policy check," and in some cases error codes such as 0x80070490 or 0x87D1041C are returned. No download or installation proceeds, and the issue persists across Software Center restarts and device reboots.
 
-The issue typically presents as a combination of symptoms rather than a single failure. Users may see the application listed in Software Center but receive a policy block when clicking Install, or the application may be entirely absent from the available software list. In either scenario, no download or installation progress occurs and the status remains at "Blocked" or returns a policy check failure. Attempts to install directly from a network installer path produce the same policy error.
+Investigation consistently reveals three co-occurring factors on affected devices. First, the user's account is missing membership in the required Intune entitlement or deployment group, meaning the application is not correctly targeted. Second, the device's Intune inventory and policy state is stale — with the last successful check-in ranging from 48 hours to 14 days prior — preventing updated assignments from reaching the endpoint. Third, Endpoint Protection application control is actively quarantining or blocking the installer.
 
-The problem has been observed across multiple applications and office locations on managed Windows 10 devices. In several cases, affected users report that colleagues on the same floor or team were able to install the same application without difficulty, making the issue appear inconsistent. Rebooting the device, restarting Software Center, or performing a Company Portal sync does not resolve the issue on its own, and in some instances the ticket was reopened after an initial fix attempt failed to take full effect.
+Correcting any single factor in isolation does not resolve the issue. In some cases, an entitlement group correction or an Intune inventory refresh temporarily restores application visibility, but the blocked state returns after a reboot because the remaining conditions have not been addressed. Resolution requires remediation of all three factors before the application becomes available and installable through Software Center.
 
 !!! note "Reported variations"
 
-    - The application may appear briefly in Software Center after an inventory refresh or policy re-push but revert to a blocked or missing state after a reboot, indicating that entitlement or security changes have not fully propagated.
-    - Some affected users see the application listed but blocked, while others on the same device or account find it entirely absent from Software Center, depending on the timing of stale inventory relative to the entitlement gap.
-    - In certain cases the device inventory gap spans 14 days or more, significantly delaying the visibility of any corrective changes made to entitlement group membership.
-    - Attempting installation via a direct network share path rather than Software Center produces the same policy block error, confirming the endpoint protection component of the issue.
+    - In some instances, the application appears listed in Software Center but is marked with a persistent "Blocked" status and no download initiates, rather than being entirely absent from the interface.
+    - One affected user received error code 0x80070490 when attempting to run the installer directly from a network deployment share rather than through Software Center.
+    - One user reported error code 0x87D1041C accompanying the policy block during each installation attempt, including after an Intune inventory refresh and policy re-push.
+    - In at least one case, an initial entitlement group correction was made but did not take effect on the endpoint, leading the user to reopen the ticket after rebooting and retrying without success.
+    - In one case the application briefly became available after an Intune refresh but reverted to a blocked state following a device reboot, demonstrating incomplete synchronization of entitlement and assignment data.
+    - One user reported the Endpoint Protection component specifically flagged the application installer file during execution, contributing to the installation failure alongside the missing entitlement.
+    - The particular application blocked varies across tickets — including line-of-business applications, marketing tools, and VPN clients — but the underlying combination of missing entitlement, stale inventory, and endpoint protection block is consistent.
+    - Some affected devices are located at different regional offices, and the application visibility issue may affect multiple devices assigned to the same site when entitlement and inventory conditions overlap.
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 7 reported cases:
 
 ## Root cause
 
-The application deployment is blocked by three overlapping conditions on the affected device. First, the user or device is not a member of the required entitlement group in Intune, so the application is not properly targeted for deployment. Second, the device's inventory and policy data in Intune is stale — often days or weeks out of date — which prevents any entitlement corrections or policy changes from reaching the endpoint promptly. Third, Endpoint Protection's application control policy is actively blocking or quarantining the installer, adding a security-layer denial on top of the targeting failure. All three conditions must be resolved and re-synchronized before the application becomes available and installable.
+Application deployment was blocked by a combination of missing Intune entitlement group membership, stale device inventory preventing current policy targeting from propagating to Software Center, and Endpoint Protection application control quarantining the installer. All three conditions had to be present simultaneously for the issue to manifest, and correcting only one or two factors was insufficient to restore normal application availability.
 
 ## Diagnostics
 
@@ -73,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'application blocked by missing entitlement, stale inventory, and endpoint protection' when reporting it.
+Resolved by IT by correcting entitlement group membership, forcing a device inventory synchronization and policy refresh, and clearing the Endpoint Protection application control block.
 
 ---
 

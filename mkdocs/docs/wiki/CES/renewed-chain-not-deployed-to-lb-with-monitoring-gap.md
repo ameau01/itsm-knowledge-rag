@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Expired certificate persisted on load balancer due to incomplete chain deployment and monitoring gap
+# Renewed Certificate Chain Not Deployed to Load Balancer Before Expiry
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to access the internal web service over HTTPS encounter browser certificate warnings — most commonly NET::ERR_CERT_DATE_INVALID or ERR_CERT_DATE_INVALID — and are unable to load the service securely. Automated health checks, CI/CD pipelines, and service-to-service API calls routed through the load balancer also fail during the TLS handshake, often returning 502, 523, or 525 errors. The service appears completely unavailable over HTTPS for all users and systems that rely on the load-balanced endpoint.
+Affected users attempting to access internal web services over HTTPS encountered browser certificate warnings — most commonly NET::ERR_CERT_DATE_INVALID and ERR_CERT_DATE_INVALID — along with TLS handshake failures that rendered services unreachable. The issue was reported across multiple offices and internal networks simultaneously, affecting both interactive browser sessions and programmatic clients such as CI/CD pipelines, API consumers, health-check monitors, and service-to-service integrations. Dependent systems experienced cascading failures including 502/523/525 HTTP errors, broken automation workflows, and disrupted business-critical applications such as payroll and inventory management.
 
-In many cases, a certificate renewal has already been performed at the internal Certificate Authority, and the renewed certificate may even be available on the backend service or in the CA store. However, the load balancer continues to present the old, expired certificate and an outdated or incomplete certificate chain to connecting clients. As a result, even after an initial remediation attempt targeting the backend or the leaf certificate alone, users and monitoring continue to report the same TLS failures. The issue can persist or reappear after a partial fix if the full certificate chain — including the current intermediate certificate — is not deployed to all load balancer nodes.
+Investigation consistently revealed that the load balancer fronting the affected service continued to present an expired leaf certificate and an outdated or incomplete intermediate certificate chain, even though a renewed certificate had already been issued by the internal Certificate Authority. The renewed certificate and full chain were never successfully deployed to the load balancer's TLS termination configuration. In some cases a prior deployment attempt had been reported as complete but no corresponding configuration change existed on the load balancer. Restarting or reloading the load balancer service alone did not resolve the issue, as the listener configuration still referenced the old certificate material.
 
-The outage is typically widespread, affecting users across multiple offices and network segments simultaneously, as well as automated systems such as monitoring probes, integration test runners, and deployment pipelines. Reports often come from several teams at once, and the scope of impact may include downstream services that depend on the internal web service endpoint for authenticated or encrypted communication. In environments with multiple load balancer nodes, the issue may present intermittently if some nodes received the updated certificate while others did not.
+A contributing factor across these incidents was a gap in certificate expiration monitoring. Pre-expiry alerting rules had been inadvertently disabled, suppressed, or misconfigured — in some cases during a prior maintenance window — so no advance warning was generated before the certificate expired. This monitoring gap allowed the incomplete deployment to go undetected until users and automated probes began reporting TLS failures.
 
 !!! note "Reported variations"
 
-    - In some instances, the renewed leaf certificate was deployed to the backend service but not to the load balancer, causing the outage to persist or reappear after an initial fix was reported as complete.
-    - In multi-node load balancer environments, the renewed certificate chain was deployed to some nodes but not all, resulting in intermittent TLS failures depending on which node handled a given request.
-    - In certain cases, the certificate renewal job completed at the Certificate Authority but the deployment automation did not execute for the current renewal cycle, leaving the load balancer configuration unchanged.
-    - Some incidents involved a monitoring suppression filter or a misconfigured alerting threshold (e.g., set to zero days) that specifically prevented the pre-expiry notification from reaching the responsible team.
-    - Restarting or reloading the load balancer process alone did not resolve the issue when the renewed certificate bundle had never been staged on the load balancer filesystem or referenced in its configuration.
+    - In one instance, only the renewed leaf certificate was deployed to the load balancer while the intermediate CA bundle was omitted, resulting in an incomplete trust chain rather than a fully expired certificate.
+    - In one case, the renewed certificate was inconsistently deployed across a multi-node load balancer cluster, causing intermittent TLS failures depending on which node handled the request.
+    - In one incident, the initial certificate bundle import to the load balancer failed due to incorrect chain ordering; the intermediate CA certificate had to be reordered before the root certificate for the reload to succeed.
+    - Some incidents involved the expired certificate appearing on both the load balancer and the direct backend application port, indicating the stale certificate was present at multiple layers.
+    - One environment used a Kubernetes ingress controller with a TLS secret still referencing the expired certificate bundle, rather than a traditional load balancer binding.
+    - The monitoring suppression mechanism varied: in some cases a prior maintenance window disabled the alerting rule, while in others a misconfigured threshold or manually added filter suppressed the alert.
+    - Downstream impacts ranged from CI/CD pipeline failures and blocked sprint deployments to disrupted payroll integrations and internal API authentication failures.
+    - Certain incidents were first detected by automated Nagios health checks or synthetic monitoring probes rather than by end-user reports.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 46 reported cases:
 
 ## Root cause
 
-The TLS certificate for the internal web service expired, and the renewed certificate along with the full updated certificate chain was not deployed to the load balancer that terminates TLS for client connections. The load balancer continued presenting the old expired certificate and stale intermediate chain to all connecting clients. Certificate expiry monitoring and renewal alerting were either misconfigured, suppressed, or inactive, so no advance warning was raised before the expiration date, allowing the outage to occur without preemptive intervention.
+The TLS certificate for the internal web service expired, and the renewed certificate along with its full chain from the internal Certificate Authority was not deployed to the load balancer's TLS termination configuration. The load balancer continued serving the expired leaf certificate and stale intermediate chain to clients. Certificate expiration monitoring and renewal alerting were inactive, misconfigured, or suppressed, preventing advance warning and allowing the deployment gap to persist until service impact occurred.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'expired certificate not deployed to load balancer with monitoring gap' when reporting it.
+Resolved by IT; expired TLS certificate and stale chain on load balancer replaced with renewed full certificate chain after deployment gap and monitoring alert failure were identified.
 
 ---
 

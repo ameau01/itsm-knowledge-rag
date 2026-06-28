@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Missing or incorrect conditional forwarder causing intermittent internal DNS failures
+# Missing or Incorrect Conditional Forwarder on Internal DNS Resolver
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience intermittent failures when attempting to reach internal services by hostname. DNS lookups against corporate resolvers return a mix of NXDOMAIN responses, timeouts, SERVFAIL errors, or outdated IP addresses, while the same hostnames resolve correctly when queried directly against the authoritative internal DNS server or from other network segments. The failures typically affect users on specific subnets or office locations rather than the entire organization, and colleagues in other parts of the network often confirm that the same hostnames resolve without issue from their side.
+Affected users experience intermittent DNS resolution failures when looking up internal hostnames through specific corporate resolvers. Queries return NXDOMAIN, SERVFAIL, or time out, while the same records resolve successfully against the authoritative internal DNS servers or from other subnets and office locations. Direct access to services by IP address succeeds in all cases, confirming that underlying applications and network paths are healthy. The failures disrupt internal dashboards, authentication endpoints, API gateways, CI/CD pipelines, automated deployments, and service-discovery workflows, often initially appearing to be application outages rather than DNS issues.
 
-The inconsistency can manifest in several ways. Some users see only NXDOMAIN errors, while others receive stale addresses pointing to decommissioned or retired service IPs. In some cases, repeated lookups from the same workstation alternate between successful and failed responses. Applications and automated workflows that depend on internal hostname resolution — such as CI/CD pipelines, API gateways, batch processing, and service-discovery systems — may experience connection failures, authentication timeouts, or degraded functionality even though the underlying service remains reachable by direct IP address.
+The inconsistency is resolver-specific and often subnet-specific: one internal recursive resolver returns correct results while another serving a different subnet or site returns negative or stale responses for the same hostname. In some cases, a public resolver returns a valid address while corporate resolvers fail. Affected users in multiple offices may observe different failure modes simultaneously — some receiving NXDOMAIN, others experiencing timeouts or stale A records pointing to outdated IP addresses — contributing to confusion about the scope of the outage.
 
-The issue often surfaces after infrastructure changes such as DNS record updates, resolver maintenance windows, or the decommissioning of upstream DNS servers, though it may also appear without a clearly visible triggering event from the affected user's perspective. Impact can span multiple office locations and subnets if more than one resolver is affected, and the intermittent nature of the failures can make the problem difficult to confirm without comparing results across different resolver paths.
+The root cause is a missing, outdated, or partially incorrect conditional forwarder configuration on the affected resolver. The forwarder may be absent entirely, may reference a decommissioned upstream server, or may inconsistently forward the internal zone. Stale negative-cache entries compound the problem, causing the resolver to continue serving incorrect responses even after authoritative zone data is correct. Once forwarder targets are corrected and resolver caches flushed, name resolution returns to normal across affected hosts and subnets.
 
 !!! note "Reported variations"
 
-    - Some resolvers return a previously valid but now retired IP address instead of NXDOMAIN, causing connections to silently fail or reach a decommissioned host rather than producing an obvious lookup error.
-    - The issue may affect both primary and secondary resolvers simultaneously if the conditional forwarder was removed or never added on both, resulting in broader impact across subnets and sites.
-    - A cache flush alone may not fully resolve the problem; if the underlying forwarder entry remains missing or incorrect, the resolver re-caches negative responses and failures resume shortly after the flush.
-    - Domain controller resolvers serving the corporate Active Directory forwarding path may be independently affected, producing SERVFAIL spikes alongside NXDOMAIN from standard resolvers.
-    - Public or external DNS resolvers may return valid addresses for the same hostname while internal resolvers fail, leading users to suspect an internal network or application outage rather than a DNS configuration issue.
+    - In some cases the resolver round-robins between a valid and a decommissioned forwarder target, causing approximately 20–30% of queries to fail while the remainder succeed, producing partial rather than total resolution failure.
+    - Certain incidents present with stale cached IP addresses (resolving to an older, incorrect IP) rather than NXDOMAIN, causing connections to fail silently against the old endpoint.
+    - A cache flush alone may not resolve the issue if the stale or missing forwarder entry remains in place, as the resolver re-caches negative responses on subsequent queries to the dead target.
+    - The failure may affect multiple internal zones or hostnames simultaneously when the conditional forwarder covers a parent domain, broadening the blast radius beyond a single service record.
+    - Cross-site impact has been observed when multiple office locations share the same misconfigured resolver instance, causing geographically dispersed users to report identical symptoms independently.
+    - SERVFAIL spikes were observed in network monitoring during the resolution failure window, correlating with the resolver misconfiguration.
+    - Automated deployments and CI/CD pipelines were blocked in one incident due to intermittent NXDOMAIN responses for an internal service hostname.
+    - The issue may emerge following scheduled DNS record updates or maintenance windows, with certain resolvers continuing to serve outdated or negative responses after authoritative zone data has been corrected.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 13 reported cases:
 
 ## Root cause
 
-One or more internal DNS resolvers are missing the required conditional forwarder for the affected internal zone, or the forwarder is pointing to an outdated or decommissioned upstream server. Without a correct forwarding path, queries routed through those resolvers never reach the authoritative DNS server that holds the current record. The resolver then caches the resulting negative or incorrect response, causing it to continue serving stale NXDOMAIN or outdated address answers to clients even after the underlying issue is identified, until both the forwarding configuration and the cached entries are corrected.
+One or more internal DNS resolvers had a missing, outdated, or incorrectly configured conditional forwarder for the affected internal zone. This caused queries to be routed incorrectly — returning NXDOMAIN, SERVFAIL, timeouts, or stale cached records — while other resolvers with correct forwarder configurations continued to return the authoritative answer. Stale negative-cache entries on affected resolvers perpetuated the failures until both the forwarder configuration and cache state were corrected.
 
 ## Diagnostics
 
@@ -75,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'missing or incorrect conditional forwarder – internal DNS resolution failure' when reporting it.
+Resolved by IT after correcting the conditional forwarder configuration on the affected internal DNS resolvers and flushing stale cached entries.
 
 ---
 

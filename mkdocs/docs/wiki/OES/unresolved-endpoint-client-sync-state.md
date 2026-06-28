@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Outlook desktop and mobile sync failure due to endpoint client state corruption
+# Stale Outlook Profile and Unhealthy Mobile Sync Partnership Block Mailbox Access
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience a simultaneous loss of email synchronization on both Outlook desktop (Windows 10) and Outlook mobile (iOS), while Exchange Online webmail (OWA) continues to display current messages normally. On the desktop, Outlook shows a "Disconnected" status in the status bar, and the inbox remains frozen at the last successful sync timestamp — often hours or days old. On mobile, new mail stops arriving entirely, and in some cases the Outlook mobile app displays an "Account requires attention" message.
+Affected users — primarily in Sales, Field Ops, and Corporate Sales organizational units — report that both Outlook desktop (Windows 10) and Outlook mobile (managed iPhones) simultaneously stop synchronizing mailbox content. The desktop client displays a "Disconnected" or intermittently cycling disconnection status in the status bar, while mobile devices cease receiving new mail entirely, with the account flagged as requiring attention. Last-sync timestamps remain stale, ranging from several hours to approximately 48 hours. Despite client-side failures, Outlook on the web (OWA) continues to display current messages for the same mailboxes, confirming that Exchange Online availability is not impacted.
 
-The issue has been observed across multiple users and offices, particularly within the Sales and Field Ops groups. It is not associated with a Microsoft 365 service-wide outage or tenant-level throttling, and affected users can confirm that their mailbox is current by logging into OWA. Restarting Outlook or removing and re-adding the account on the mobile device does not resolve the problem on its own.
+The issue has been observed following scheduled Microsoft 365 tenant maintenance windows, with multiple users across different office locations affected in close succession. Exchange Online server-side telemetry may show intermittent successful sync activity for affected mailboxes, presenting a mixed-state condition rather than a complete outage. Microsoft 365 service health dashboards do not report a broader service disruption, and colleagues on the same team remain unaffected.
 
-In some cases, the managed mobile device (typically an iPhone enrolled via MDM) appears as non-compliant in the Company Portal app or shows an unhealthy sync partnership in the MDM console. Desktop Outlook may show intermittent disconnection rather than a continuous outage, and Exchange Online server-side telemetry may reflect partial or intermittent sync success even while the user's clients remain stale. The issue can affect individual users or groups of users simultaneously, particularly following a tenant maintenance window.
+On the mobile side, managed devices enrolled via Intune may display a non-compliant status in the Company Portal app, and stale or unhealthy device partnerships are found registered against affected mailboxes in the Exchange Online administration console. In at least one instance, an outdated MDM legacy-block rule originally scoped for decommissioned older iOS endpoints was found incorrectly matching current devices post-maintenance. On the desktop side, the Outlook profile enters a corrupted or unhealthy state; creating a clean profile on the same workstation restores synchronization immediately.
 
 !!! note "Reported variations"
 
-    - In some cases, the mobile device is explicitly flagged as non-compliant in the MDM console or Company Portal app, while in others no compliance warning is visible to the user.
-    - An outdated MDM legacy-block rule originally scoped for decommissioned iOS 12 endpoints was found matching current iOS 14 devices after a tenant maintenance window, causing sync failures for otherwise compliant mobile devices.
-    - Some users experience intermittent rather than continuous disconnection on Outlook desktop, with Exchange Online telemetry showing partial sync success even though the client remains effectively stale.
-    - The issue has occurred as an isolated single-user incident as well as a multi-user event affecting several accounts across multiple office locations simultaneously.
+    - Some affected users report the issue beginning immediately on the first business day following a weekend maintenance window, while others experience onset mid-week with no obvious triggering event.
+    - In certain cases, Intune explicitly reports the mobile device as non-compliant, whereas other affected users see no compliance warning in the Company Portal despite experiencing the same sync failure.
+    - Exchange Online logs for some mailboxes show intermittent successful sync activity from the server side, presenting a mixed-state condition rather than a complete synchronization failure.
+    - An outdated MDM legacy-block policy originally targeting decommissioned older iOS devices was found matching current iOS devices post-maintenance, contributing to mobile sync failures for compliant endpoints.
+    - The duration of the sync outage varies, with some users experiencing stale mail for several hours and others reporting no client updates for up to approximately 48 hours before remediation.
+    - Desktop Outlook showed intermittent disconnection cycling rather than a persistent disconnected state in some cases.
+    - In one case, forcing a resync via Exchange Online PowerShell restored partial header updates on the desktop, but full folder synchronization required a complete profile rebuild.
+    - One affected user had not recently changed their password or rebuilt their profile prior to the issue onset.
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 7 reported cases:
 
 ## Root cause
 
-The issue is caused by a combination of problems on the user's own devices rather than a failure of the Exchange Online mail service itself. On the desktop side, the local Outlook profile and cached mailbox data become stale or corrupted, preventing the client from maintaining a healthy connection to Exchange Online. On the mobile side, the device's sync partnership with Exchange Online becomes outdated or the device falls out of compliance with the organization's mobile device management (MDM) policy, which blocks the phone from synchronizing mail. In at least one instance, an outdated MDM policy rule originally intended for decommissioned older devices was incorrectly matching current devices after a maintenance window, contributing to the sync failure.
+Mailbox sync failures were caused by a corrupted or stale Outlook desktop profile combined with an unhealthy mobile sync partnership and device compliance state on the mobile endpoint. An outdated MDM legacy-block rule in the sync policy, originally targeting decommissioned iOS devices, was found interfering with current device synchronization after a tenant maintenance window. These endpoint-side conditions disrupted Exchange Online reauthentication and synchronization while server-side mailbox availability remained healthy.
 
 ## Diagnostics
 
@@ -74,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'Outlook desktop and mobile endpoint sync failure' when reporting it.
+Resolved by IT through remediation of the stale Outlook desktop profile and reset of the mobile sync partnership and device compliance state.
 
 ---
 

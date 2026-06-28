@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Corporate Wi-Fi outage caused by expired wireless controller authentication certificate
+# Expired Wireless Controller or RADIUS Certificate Blocks 802.1X Authentication
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users are unable to connect to the corporate Wi-Fi network (typically the secured enterprise SSID) on managed laptops, phones, and BYOD devices. Devices can see and select the corporate wireless network, but the connection fails during the authentication step. Depending on the device and operating system, the failure may present in different ways: some devices display an explicit "authentication failed" or "certificate expired" error immediately after attempting to join, while others appear to connect briefly before showing "Connected, no internet" or "No network access" and then disconnecting. In all cases, the device does not receive a usable network address or access to internal resources.
+Affected users across multiple office locations report that managed and personal devices (Windows, macOS, iOS, and Android) fail to authenticate to corporate Wi-Fi SSIDs. Devices detect and associate with the network but fail during the 802.1X EAP-TLS handshake, producing errors such as "authentication failed," "certificate expired," or "secure connection failed." Users are left without corporate network access, and the issue impacts large groups simultaneously — spanning multiple floors, departments, and geographic sites served by the same wireless controller or RADIUS infrastructure.
 
-The issue typically affects a broad group of users across one or more office floors or sites simultaneously, rather than a single device or individual. Both Windows and macOS laptops, as well as iOS and Android mobile devices, are impacted. Wired Ethernet connections and guest Wi-Fi networks continue to work normally, indicating the problem is isolated to the corporate wireless authentication path.
+The failure consistently originates from an expired server-side TLS certificate presented during EAP authentication. Some devices fail outright and disconnect immediately, while others briefly associate and display a "Connected, no internet" or "No Internet, secured" status before losing access. In certain cases, devices obtain only a link-local address rather than a valid DHCP lease. Wireless controller, RADIUS, and NAC logs show repeated Access-Reject events with certificate-expired reason codes accumulating after the expiration timestamp. Wired connectivity and guest wireless SSIDs remain fully functional, confirming the issue is isolated to the secured corporate wireless authentication path.
 
-The onset of the issue often coincides with a scheduled certificate rotation or maintenance window, though in some cases the certificate simply reaches its natural expiration date. Users who attempt common self-help steps — such as forgetting and rejoining the wireless network, rebooting their device, or re-entering their credentials — find that these actions do not restore connectivity.
+Standard client-side troubleshooting — including rebooting devices, forgetting and rejoining the SSID, or re-entering credentials — does not restore connectivity while the expired certificate remains in place. The onset of failures frequently coincides with a scheduled certificate rotation window during which the renewed certificate was not properly applied or the prior certificate was allowed to lapse.
 
 !!! note "Reported variations"
 
-    - A subset of devices continue to fail even after the expired certificate is renewed on the wireless infrastructure, because the device has retained a stale or corrupt cached Wi-Fi profile from the previous certificate state. These devices require the saved wireless profile to be removed and re-enrolled (sometimes through the MDM portal) before they can reconnect successfully.
-    - Some older or legacy devices are disproportionately affected and may require manual reprovisioning or a profile refresh after the certificate replacement, even when newer hardware reconnects automatically.
-    - In multi-site deployments, the issue may affect more than one office location if the same wireless controller or RADIUS certificate serves multiple sites.
-    - Intermittent disconnections may persist briefly after the certificate is renewed, particularly while the updated certificate propagates across all nodes in the RADIUS cluster or controller group.
+    - Some devices displayed explicit certificate trust warnings or 802.1X certificate problem alerts (particularly on mobile devices), while others showed only generic authentication failure messages or disconnected silently
+    - In at least one instance, the expired certificate was an intermediate certificate in the authentication chain rather than the primary server certificate
+    - The issue affected EAP-PEAP authentication in addition to EAP-TLS at some sites, as the expired server certificate impacted both methods
+    - BYOD devices (personal smartphones and tablets) were affected alongside managed laptops, with both device types failing identically
+    - In multi-node RADIUS cluster deployments, all cluster members presented the same expired certificate, causing site-wide authentication rejection rather than a partial outage
+    - At certain sites the certificate expired minutes before a scheduled certificate refresh window opened, creating a narrow gap during which no valid certificate was in place
+    - Affected devices sometimes obtained an APIPA (link-local) address instead of a valid DHCP lease, indicating authentication was rejected before network access was granted
+    - A subset of endpoints required Wi-Fi profile removal and certificate re-enrollment (sometimes via MDM) after the infrastructure certificate was renewed, due to retained stale trust or profile state on the endpoint
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 34 reported cases:
 
 ## Root cause
 
-The security certificate used by the wireless controller and RADIUS authentication service to verify its identity during corporate Wi-Fi sign-in has expired. When a device attempts to connect using the standard enterprise authentication method (EAP-TLS), the device detects that the server certificate is no longer valid and rejects the connection, or the network access control system denies the session. This prevents all devices authenticating through the affected controller from completing the wireless sign-in process and obtaining network access. In some cases, the certificate failed to update automatically during a scheduled rotation window, leaving the expired certificate in place.
+The TLS server certificate used by the wireless controller or RADIUS infrastructure for 802.1X EAP-TLS authentication expired, causing all client certificate validation attempts to fail. The RADIUS service continued presenting the expired certificate during EAP handshakes, resulting in Access-Reject responses and NAC denial for every authenticating endpoint. In some incidents, the expiration occurred during or immediately before a scheduled certificate rotation window, indicating the renewed certificate was not applied before the prior certificate lapsed.
 
 ## Diagnostics
 
@@ -73,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'expired wireless controller authentication certificate' when reporting it.
+The issue was resolved after the expired wireless controller and RADIUS server certificate was renewed and applied to the authentication infrastructure, with affected endpoint profiles remediated where necessary.
 
 ---
 

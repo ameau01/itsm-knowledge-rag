@@ -8,25 +8,26 @@ curated: true
 self_serviceable: false
 ---
 
-# Software install blocked by missing entitlement and stale device inventory
+# Missing Entitlement Group Membership Combined With Stale Device Inventory
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to install a required application from Software Center find that the application is either missing from the catalog entirely or listed with the Install button greyed out. Attempts to proceed with installation return entitlement-related error messages such as "EntitlementCheckFailed," "installation blocked," or error codes like 0x80246002 and ERR_ENT_403. The application may also be absent from Company Portal. In some cases, the app is not returned by any search in Software Center.
+Affected users on corporate-managed Windows endpoints attempt to install a required application from Software Center but find it either missing from the catalog entirely or listed with the Install button greyed out. When the application is visible and installation is attempted, an entitlement policy failure is returned — reported variously as "EntitlementCheckFailed," an entitlement-related error code, or an "installation blocked" message referencing an entitlement check against the user's account. The application may also be absent from Company Portal with no actionable error displayed. Rebooting and retrying does not resolve the issue.
 
-An initial remediation step — such as refreshing the device inventory or triggering a policy sync — may appear to partially resolve the issue by clearing a transient policy mismatch, but the application remains unavailable or blocked afterward. This can give the impression that the fix was only partially successful or that the problem has recurred. The underlying entitlement gap is not addressed by an inventory refresh alone.
+Investigation reveals two contributing factors. The affected user's account is not a member of the required application-specific entitlement group in Azure AD, so the Intune deployment policy does not target the user or device and the application is not offered or installable. Concurrently, the device's Intune inventory and policy state is stale — last-sync timestamps are often 24 hours or more old — meaning that even after entitlement group membership is corrected, updated policy is not reflected on the endpoint until a manual inventory and policy refresh is performed.
 
-The issue affects users across different applications and departments. Reported examples include finance, sales, and marketing applications on Windows 10 managed devices. In each case, the user's account is not reflected as a member of the required software entitlement group for the application, and the device's management inventory or policy data has not been updated recently — sometimes for more than 24 to 48 hours — which compounds the problem by preventing timely policy reevaluation even after the entitlement is corrected.
+In some cases a prior support action had already added the user to the correct entitlement group, but the change did not propagate to the device due to the stale inventory state, causing the issue to persist or recur. The combination of missing entitlement assignment and outdated device policy sync prevents Software Center from presenting the application as available or allowing installation to proceed.
 
 !!! note "Reported variations"
 
-    - The application may appear listed in Software Center with the Install button greyed out rather than being completely absent from the catalog.
-    - A prior support action may have already added entitlement access, but the change is not reflected on the device due to stale inventory, causing the issue to appear to recur.
-    - Error messages vary by application and may include "EntitlementCheckFailed," error code 0x80246002, error code 0x87D00324, or ERR_ENT_403.
-    - In some cases, a direct local installer attempt also fails with an entitlement block, not only the Software Center path.
-    - The application may be missing from both Software Center and Company Portal simultaneously.
+    - The application appears in Software Center but with the Install button disabled and an explicit entitlement policy failure code displayed upon retry.
+    - The application is completely absent from both Software Center and Company Portal, with no error message surfaced to the user.
+    - A direct local installer attempt outside Software Center also fails, returning "installation blocked" with an entitlement check error code.
+    - The device shows a recent Company Portal sync timestamp, yet Intune inventory remains stale and does not reflect the user's current group membership or role changes.
+    - A previous entitlement remediation was applied but the issue returned because the device policy state was not refreshed to reflect the updated group membership.
+    - The installation attempt returns a general download or install error code alongside the underlying entitlement policy check failure.
 
 ## Affected environment
 
@@ -39,7 +40,7 @@ Distribution across 5 reported cases:
 
 ## Root cause
 
-The affected user is not assigned to the required software entitlement group in the directory, so the application deployment policy is never targeted to their device. At the same time, the device's management inventory and policy data is stale (often not synced for 24 hours or more), which prevents Software Center from recognizing any entitlement or policy changes. Both issues must be resolved together — adding the entitlement group membership alone is insufficient until the device inventory is refreshed and policy is reevaluated.
+The affected user was not a member of the required application entitlement group in Azure AD, so the deployment policy was not targeted to the endpoint. A stale Intune device inventory and policy state further obscured the issue by preventing updated group membership from being reflected on the device, causing Software Center policy evaluation to continue failing the entitlement check even after the initial access correction.
 
 ## Diagnostics
 
@@ -74,7 +75,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "missing entitlement plus stale inventory" when reporting it.
+Resolved by IT after adding the affected user to the required entitlement group and refreshing stale device inventory and policy state so Software Center correctly reflected the updated deployment targeting.
 
 ---
 

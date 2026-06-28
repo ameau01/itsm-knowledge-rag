@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Shared drive access denied due to missing AD group and stale credentials combined
+# Compound Missing AD Group Membership and Stale Cached Credentials Block Share Access
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to open a department shared drive from a mapped network drive or direct UNC path on a domain-joined Windows workstation receive repeated credential prompts followed by an "Access is denied" error (often error code 0x80070005). The mapped drive letter may still appear in File Explorer, but opening the target department folder fails after the user enters valid domain credentials. Other network shares on the same file server or other servers typically continue to work normally, and colleagues on the same team or subnet can access the same shared folder without issue, confirming the problem is account-specific rather than a general server or network outage.
+Affected users on domain-joined Windows 10 workstations report being unable to open departmental shared drives (most commonly Finance, but also Sales and Engineering) via mapped network drives or direct UNC paths. The mapped drive repeatedly prompts for credentials and then returns an "Access is denied" error (frequently surfaced as 0x80070005 or NT_STATUS_ACCESS_DENIED). The issue is isolated to specific user accounts — colleagues on the same team with valid group membership can access the same share without difficulty, confirming the problem is not a broader server or network outage.
 
-The issue commonly appears after an Active Directory group cleanup, a recent password change, a weekend maintenance window, or an AD group membership update that has not yet taken effect on the user's workstation session. In some cases, the user's access had been working as recently as the previous day or the previous week. The credential prompt may cycle repeatedly — the user enters correct domain credentials, only to be denied again — because the workstation is presenting outdated cached credentials or session tokens that do not reflect the user's current entitlements.
+Investigation consistently reveals a compound condition: the affected user's Active Directory account is missing the required security group that governs access to the department share, and the workstation retains stale cached credentials or an outdated security token that has not been refreshed to reflect the current account state. The stale credential causes the repeated prompt cycle — the workstation presents outdated authentication material, the file server rejects it, and the user is re-prompted in a loop before ultimately receiving access denial. In some cases the user appears in a related distribution list but not in the security group actually referenced by the share ACL, creating a false impression of valid membership.
 
-The problem affects various department shares (Finance, Engineering, HR, Sales, and others) across different file servers and mapped drive letters. Affected users are typically found to be missing from the Active Directory security group that controls access to the share, while simultaneously having stale cached SMB or Windows credentials stored on the workstation from a prior session. In some instances, broken NTFS permission inheritance on a subfolder or a legacy per-user access control entry on the shared folder further complicates the effective permissions, contributing to inconsistent or contradictory access behavior even after group membership is partially addressed.
+Contributing factors observed across tickets include broken NTFS permission inheritance or explicit deny entries on subfolders, legacy individual-SID ACL entries from prior migrations conflicting with the group-based model, stale Group Policy Object references affecting drive-mapping behavior, and delayed token evaluation on the file server following same-day AD group changes. The issue typically surfaces after a password reset, an AD group cleanup, or a weekend maintenance window.
 
 !!! note "Reported variations"
 
-    - In some cases, a legacy explicit per-user access control entry on the shared folder from a prior migration conflicts with the expected group-based permissions, requiring the ACL to be standardized before access is fully restored.
-    - Broken NTFS permission inheritance on a subfolder (rather than the top-level share) may cause access to fail for specific subfolders even after the user's group membership is corrected at the share level.
-    - The issue may surface immediately after a corporate password reset, with the old cached credential in Windows Credential Manager preventing the new password from being used for the mapped drive session.
-    - A stale group policy–based drive mapping reference may contribute to outdated mapping behavior on the workstation alongside the permission and credential issues.
-    - File server–side group membership evaluation may lag behind the Active Directory change, causing continued access denial even when the user's AD group membership appears correct, until the server's security context is also refreshed.
+    - Onset immediately following a corporate password reset, with stale Credential Manager entries retaining the old password on the mapped drive.
+    - Missing group membership resulted from a newly submitted access request that had not yet propagated to the user's logon token, rather than an inadvertent removal.
+    - File server retained stale group evaluation from before a same-day AD membership update, delaying recognition of newly granted entitlements.
+    - Broken NTFS permission inheritance or an explicit deny entry on a subfolder compounded the missing-group condition, blocking access even after group membership was corrected.
+    - A legacy explicit allow entry tied to an individual user SID from a prior migration created conflicting ACL state alongside the expected group-based permissions.
+    - A stale Group Policy Object reference (e.g., an outdated shared-drive mapping policy) contributed to drive-mapping misbehavior on the affected workstation.
+    - Affected user's account appeared in a departmental distribution list but not in the corresponding security group referenced by the share ACL, giving a false appearance of valid membership.
+    - One affected user attempted self-remediation by deleting and remapping the drive via command-line tools without success; the issue persisted until the underlying entitlement and credential state were corrected.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 17 reported cases:
 
 ## Root cause
 
-The affected user's Active Directory account is missing membership in the security group required for access to the department shared drive — often due to an AD group cleanup, organizational restructure, or a membership change that has not yet propagated. At the same time, the user's workstation retains stale cached SMB credentials or an outdated Kerberos session token from a previous logon, which causes the file server to repeatedly reject authentication attempts and trigger credential prompts. In some cases, broken NTFS permission inheritance on a subfolder or a leftover per-user access control entry on the shared folder introduces additional permission conflicts that compound the access failure.
+The affected user's Active Directory account was missing the required security group membership granting access to the departmental shared drive, often due to an AD group cleanup, organizational restructure, or a newly requested addition that had not yet propagated. The condition was compounded by stale cached SMB credentials or an unrefreshed Kerberos token on the workstation, causing repeated credential prompts and continued access denial even when correct credentials were supplied. In several cases, broken NTFS permission inheritance or legacy per-user ACL entries on the share further contributed to the access failure.
 
 ## Diagnostics
 
@@ -75,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'shared drive access denied – missing AD group and stale credentials' when reporting it.
+Resolved by IT by restoring the correct Active Directory security group membership, clearing stale cached credentials, and refreshing the user's security token and session context.
 
 ---
 

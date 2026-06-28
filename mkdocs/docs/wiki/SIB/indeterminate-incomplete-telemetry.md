@@ -8,23 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# FinanceApp deployment failure with incomplete endpoint telemetry during diagnostics
+# FinanceApp Unavailable in Software Center Despite Valid Entitlement
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users report that FinanceApp v4.2.1 is unavailable in the Software Center catalog on their managed Windows devices. The application does not appear in the list of available software even after multiple manual policy refresh cycles, machine reboots, and sign-out/sign-in attempts. In some cases, attempting to install the application through an alternative method — such as a forwarded deployment link or a manually downloaded installer — results in an authorization or entitlement error, or a security policy block notification.
+Affected users on managed corporate Windows devices reported that FinanceApp v4.2.1 could not be installed from Software Center. The application was either entirely absent from the Software Center catalog or unavailable for installation, despite the users being confirmed or expected members of the appropriate entitlement groups. Standard self-service remediation steps — including manual machine policy retrieval cycles, Software Center restarts, sign-out/sign-in attempts, and full device reboots — did not resolve the issue.
 
-The issue prevents affected users from completing finance workflows, particularly during time-sensitive periods such as quarter-end reporting and reconciliation. Users may belong to the correct entitlement group (such as FIN-FinanceApp-Entitlement or Finance-Analysts) and their devices may be properly enrolled in the endpoint management platform, yet the application still fails to appear or install.
+When affected users attempted alternative installation methods, such as running the approved installer package directly or accessing a forwarded available-deployments link, the installations were blocked. Users received authorization or entitlement error messages indicating they were not permitted to install the application. In some instances, users encountered an additional security policy block when attempting manual installation from an internal portal. The issue directly impacted finance workflows, as the affected users required FinanceApp to complete time-sensitive quarter-end reporting and reconciliation tasks.
 
-A distinguishing characteristic of this issue is that standard diagnostic checks do not return sufficient or reliable data to isolate a single root cause. The device management client and the endpoint protection agent on the affected device may both be in a degraded reporting state — for example, showing stale last-contact timestamps — which limits the ability of IT support to determine whether the problem stems from entitlement synchronization, policy processing failure, or a security control action. As a result, the issue may remain open longer than usual while normal endpoint reporting is restored or a deeper platform review is conducted.
+In both cases, the devices were enrolled in the organization's management platform and connected to the corporate network at the time of the reports. Diagnostic data was limited on one device due to a degraded management client state, which constrained the ability to isolate a confirmed root cause.
 
 !!! note "Reported variations"
 
-    - In some cases, the FinanceApp deployment targeting in the management platform is confirmed to be misconfigured or not evaluating correctly against the device, even though the user holds valid entitlement group membership and no endpoint security block is active.
-    - Some affected users report that manually running the FinanceApp installer triggers a security policy block notification (referencing a rule such as "BlockUnapprovedInstall"), though this may be a secondary symptom rather than the primary cause when endpoint telemetry is incomplete.
-    - The device management client and endpoint protection agent may show significantly stale reporting timestamps (e.g., several days old), indicating a broader endpoint health issue beyond the FinanceApp installation problem alone.
+    - In one case, the application was absent from the catalog due to a backend deployment targeting misconfiguration in the management platform, which prevented correct policy evaluation against the device scope despite valid entitlement group membership.
+    - In another case, the user additionally encountered an explicit Endpoint Protection security block (referencing a policy rule for unapproved installations) when attempting to run the installer manually from an internal portal.
+    - One affected device exhibited a degraded management client state, with stale policy and protection agent reporting dates, which prevented diagnostic tools from returning sufficient telemetry to isolate the root cause.
 
 ## Affected environment
 
@@ -37,7 +37,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The root cause cannot be conclusively determined because the device management client and endpoint protection agent on the affected device are not returning complete or current telemetry during the diagnostic window. This degraded reporting state prevents IT support from isolating whether the FinanceApp installation failure is caused by an entitlement synchronization problem, a policy processing failure on the device, or an endpoint security control action. In at least one instance, the underlying issue was traced to a backend deployment targeting misconfiguration in the endpoint management platform, but this finding could not be generalized across all cases due to the incomplete diagnostic data.
+FinanceApp deployment targeting was misconfigured or not being processed correctly in the endpoint management platform, preventing correct policy evaluation against the device scope despite valid entitlement group membership. A confirmed root cause could not be fully determined because device management and security telemetry were incomplete during diagnostics.
 
 ## Diagnostics
 
@@ -69,7 +69,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "FinanceApp install failure – incomplete telemetry" when reporting it.
+Resolved by IT; FinanceApp deployment targeting misconfiguration with incomplete diagnostic telemetry.
 
 ---
 

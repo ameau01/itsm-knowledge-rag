@@ -8,22 +8,23 @@ curated: true
 self_serviceable: true
 ---
 
-# Intermittent print job stalling linked to document rendering or printer-side processing
+# Intermittent Print Job Stalling on Complex Documents
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users at the site reported that documents sent to the shared HP LaserJet MFP through the PS-PRINT01 print server were not printing reliably. Print jobs submitted from workstations remained stuck at 0% in the queue for extended periods — in some cases over 30 minutes — while the print queue itself appeared available on the server. The disruption affected users across multiple departments and at least three floors.
+Affected users across multiple departments reported that documents sent to a shared multifunction printer via the print server remained stuck in the queue, failing to print reliably. Print jobs stalled at zero percent progress for extended periods, and submitted jobs either hung indefinitely or experienced significant delays. The printer queue on the print server remained available, and multiple users confirmed the same behavior from different workstations mapped to the same shared printer.
 
-On the print server, queued jobs displayed a "Driver unavailable" status, and from the affected workstations the printer appeared offline. Multiple users confirmed the same behavior when printing through the same shared queue (\\PS-PRINT01\HP-3F-CLR01). The issue was not limited to a single machine or user account; staff from different departments and floors experienced identical symptoms.
+On the print server, queued jobs displayed a "Driver unavailable" status, while affected users saw the printer appearing offline from their workstations. Standard queue and driver diagnostics did not reveal a consistent driver failure on the server side, and the spooler behavior was only partially reproducible during troubleshooting.
 
-Notably, the stalling was intermittent rather than total. Simple test pages processed successfully, while larger or more complex documents — such as a 48-page PDF — repeatedly failed to complete. This pattern suggested the queue and driver were broadly functional, but certain jobs triggered stalls that blocked subsequent printing for other users until the backlog was cleared.
+A simple test page submitted from one workstation processed successfully, indicating that the queue itself was functional. However, larger or more complex jobs — including a multi-page PDF — failed repeatedly on retries. This pattern pointed to an intermittent rendering or printer-side processing issue that could not be fully isolated through standard diagnostics alone.
 
 !!! note "Reported variations"
 
-    - Some affected users saw a "Driver unavailable" message on the print server queue, while others saw only an offline status on their workstations.
-    - The stalling behavior was more pronounced with large or complex documents (e.g., multi-page PDFs) and did not occur with simple test pages.
+    - Some users reported only an "offline" printer status on their workstations rather than the "Driver unavailable" message seen on the server side.
+    - The issue was observed across at least three floors, suggesting it was not isolated to a single network segment or department.
+    - Small or simple print jobs (e.g., a single test page) completed successfully, while larger multi-page documents consistently stalled.
 
 ## Affected environment
 
@@ -36,7 +37,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-Standard checks on the print server found no abnormalities with the queue configuration, driver packages, or spooler service, and the issue was only partially reproducible. Because simple test pages printed successfully while larger or more complex documents stalled repeatedly, the failure appears related to how specific document content is rendered or processed by the printer, rather than a consistent server-side or driver fault. The root cause was not fully isolated by initial diagnostics and has been escalated for further vendor or platform review.
+Intermittent print job processing failures occurred that were not explained by queue state or driver version. The issue appeared related to specific document rendering or downstream printer handling. The root cause could not be fully isolated through standard diagnostics and required further vendor or platform escalation.
 
 ## Diagnostics
 
@@ -59,7 +60,7 @@ Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "unresolved rendering escalation – print job stalling" when reporting it.
+Intermittent print job stalling on complex documents escalated for further vendor or platform investigation by IT.
 
 ---
 

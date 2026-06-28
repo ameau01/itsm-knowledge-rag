@@ -8,22 +8,17 @@ curated: true
 self_serviceable: false
 ---
 
-# Unconfirmed TLS certificate presentation issue with insufficient diagnostic evidence
+# Suspected Transient Certificate-Serving Fault on Load Balancer Unconfirmed
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users accessing the internal web service reported TLS certificate warnings in their browsers, specifically "ERR_CERT_DATE_INVALID" errors when navigating to the service URL. At the same time, dependent internal API calls routed through the API gateway began failing with TLS handshake errors, compounding the service disruption for both interactive users and automated consumers.
+Affected users at a corporate office reported TLS certificate warnings and failed connections when accessing an internal web service through an F5 load balancer. Browsers displayed a certificate date-invalid error when navigating to the service URL, and dependent internal API calls through the API gateway began failing TLS handshake validation simultaneously. The issue was initially surfaced by a platform engineer via internal chat and was subsequently confirmed by multiple users at the same site.
 
-The issue was reported by multiple users across different locations and workstations, suggesting it was not isolated to a single machine or network segment. However, the symptoms were not consistently reproducible during the diagnostic review period — the certificate-related errors observed by users did not always align with what the investigating team found when examining the load balancer configuration at the time of review.
+An affected workstation was used to reproduce the browser-side certificate warning, and a second user at the same office independently confirmed identical symptoms. The application remained unavailable to some internal consumers following the certificate-related alerts.
 
-This inconsistency left open the possibility that the fault was transient, limited to a specific network path, or had already resolved itself before validation could be completed. As a result, the full scope and root cause of the disruption could not be definitively confirmed from the available evidence.
-
-!!! note "Reported variations"
-
-    - In some cases, only browser-based access triggered the certificate warning while command-line or scripted checks against the same endpoint did not reproduce the error at the time of review.
-    - Dependent internal API calls failed with TLS handshake errors simultaneously, even though the API gateway endpoint was not the primary subject of the user report.
+However, the available troubleshooting data did not consistently show an expired certificate or chain defect on the F5 partition serving the relevant virtual IP at the time of diagnostic review. The investigation was unable to conclusively determine whether the certificate-serving fault was transient in nature, isolated to a specific client path or load balancer partition, or had already cleared before validation could be completed. Despite this evidentiary gap, the reported symptoms were consistent with a certificate-serving problem, and a matching fix was applied, after which the reported service impact cleared.
 
 ## Affected environment
 
@@ -35,7 +30,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The available diagnostics did not confirm an active certificate expiration or a defective certificate chain on the load balancer serving the affected internal web endpoint. User-reported symptoms were consistent with a certificate-serving problem, but gaps in diagnostic access and incomplete monitoring history prevented confirmation of whether the fault was transient, specific to certain network paths, or had already cleared before the investigation was completed.
+Insufficient evidence existed to confirm a certificate expiration outage. The incident may have involved a transient or path-specific load balancer certificate presentation issue, but diagnostic access gaps and incomplete monitoring history prevented confirmation of the root cause.
 
 ## Diagnostics
 
@@ -59,7 +54,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "unconfirmed TLS certificate presentation issue" when reporting it.
+Resolved by IT after applying a certificate-related fix to the F5 load balancer, though the root cause remained unconfirmed due to insufficient evidence captured during the active incident window.
 
 ---
 

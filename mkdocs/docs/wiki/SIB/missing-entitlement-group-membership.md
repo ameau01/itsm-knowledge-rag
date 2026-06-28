@@ -8,24 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Software Center install blocked due to missing entitlement group membership
+# Missing Entitlement Group Membership Blocks Application Install
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to install an application from Software Center on a managed Windows device find that the application is either missing entirely from the Software Center catalog or present but blocked when installation is attempted. Error messages vary but commonly include phrases such as "Installation blocked by policy," "Entitlement check failed: user/device not authorized to install this application," or "Not available for this user," sometimes accompanied by error codes such as 0x87D00231, 0x80180014, 0x87D1061E, 0x87D00607, or 0xE000020B. The application may also be absent from Company Portal. In all cases the device is enrolled, compliant, and otherwise healthy — the block is specific to the application in question rather than a general device or security issue.
+Affected users report that a required business application is missing from the Software Center or Company Portal catalog and cannot be installed through normal self-service deployment. When installation is attempted—via a direct link, alternate install path, or after a manual catalog refresh—the request is blocked with an entitlement or policy error. Observed messages include "Entitlement check failed: user/device not authorized," "Not available for this user," "Installation blocked by policy," and "Installation blocked: entitlement check failed." Associated error codes and statuses seen in client logs or on-screen include 0x87D00231, 0x80180014, 0x87D00607, 0x87D1061E, 0xE000020B, and POLICY_CHECK_FAILED.
 
-The issue typically surfaces when a user searches or browses for the application in Software Center and cannot find it, or when the user follows a direct link or install path and receives a policy or entitlement error. Standard self-help steps — restarting Software Center, signing out and back in, forcing a policy sync through Configuration Manager client actions, or clearing the local Software Center cache — do not resolve the problem.
+In some cases the application is entirely absent from the catalog with no error shown until a direct install is attempted. In others, the application appears after a Software Center refresh but still fails on installation. The block may surface in both Software Center and Company Portal simultaneously in co-managed environments.
 
-The affected applications span a range of business software (finance tools, productivity suites, creative applications, line-of-business utilities, and others). The common thread is that the user's account or device has not been added to the specific entitlement or deployment group required for the application's policy assignment, so the managed software deployment system does not target or authorize the installation for that user.
+Investigation consistently confirms that the affected device is properly enrolled and compliant in Intune, with no endpoint protection or security blocks present. The root cause is that the affected user's account is not a member of the required application entitlement security group in Entra ID or Active Directory. Without this membership, the Intune deployment is neither offered nor permitted by policy evaluation. Standard client-side troubleshooting—restarting Software Center, signing out, or forcing a policy sync—does not resolve the issue, as the gap exists at the directory level. In some instances, a stale Intune policy sync state on the device further delays catalog visibility.
 
 !!! note "Reported variations"
 
-    - The application may initially be completely absent from the Software Center catalog and then, after a refresh attempt, appear but still fail with a policy or entitlement error rather than installing successfully.
-    - In co-managed environments the application may also be missing from Company Portal in addition to Software Center.
-    - The specific error code displayed varies by application and environment configuration (e.g., 0x87D00231, 0x80180014, 0x87D1061E, 0x87D00607, 0xE000020B, or a POLICY_CHECK_FAILED message), but all trace back to the same missing entitlement group membership.
-    - In some cases the client log references "PolicyCheckFailed" rather than displaying a user-facing error message in the Software Center interface.
+    - The application is entirely absent from the catalog with no error shown until a direct install path is attempted.
+    - The application appears in Software Center only after a manual refresh but still fails with a policy or entitlement error on install attempt.
+    - The block appears in both Software Center and Company Portal simultaneously in co-managed ConfigMgr/Intune environments.
+    - Client-side logs surface a POLICY_CHECK_FAILED status rather than a numeric error code.
+    - Error code 0x87D1061E ("Installation blocked by policy") returned during the install attempt.
+    - Error code 0xE000020B ("Installation blocked: entitlement check failed") returned during the install attempt.
+    - Different numeric error codes (0x87D00231, 0x80180014, 0x87D00607) are returned depending on the application and deployment configuration, but all trace to the same missing group membership.
+    - Stale Intune device sync contributing to delayed or missing application catalog visibility.
 
 ## Affected environment
 
@@ -38,7 +42,7 @@ Distribution across 11 reported cases:
 
 ## Root cause
 
-The affected user's account or device is not a member of the entitlement group (an Azure AD or Intune security group) that controls which users and devices receive the application deployment. Because the account is absent from this group, the management platform does not target the application to the device, and Software Center either hides the application from the catalog or blocks the installation during its policy entitlement check. Once the correct group membership is added and a policy refresh completes, the application becomes visible and installs normally.
+The affected user's account was not a member of the required entitlement security group in Entra ID or Active Directory used for Intune application assignment targeting. Because the deployment group membership was missing, policy evaluation did not authorize or present the application, and Software Center blocked the installation.
 
 ## Diagnostics
 
@@ -65,15 +69,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Validated that the user <USER> (<EMP_ID>) was missing from the ContosoApp entitlement group (ContosoApp_Users) required for Software Center eligibility on device <HOSTNAME>.
-2. Added the user <USER> to the ContosoApp Entitlement group in AD/Intune (CN=<USER>,OU=Corp Users,DC=corplabs,DC=internal added to ContosoApp_Users) and allowed the membership change to synchronize to endpoint management policy.
-3. Refreshed device inventory on <HOSTNAME> and triggered a client policy sync so the updated application targeting would be reevaluated on the laptop at the <LOCATION> office.
-4. Verified the ContosoApp assignment was correctly published and visible to the entitled endpoint <HOSTNAME> in Software Center after policy refresh, confirming <USER> now appeared in the targeted user collection.
-5. Retried the install and confirmed <PERSON> was no longer blocked by policy and installed successfully on the endpoint <HOSTNAME> for user <USER>.
+1. Verified that SalesApp was configured to require entitlement-based assignment in the Intune/ConfigMgr co-management environment and confirmed the affected user <USER> (<PERSON>, <EMP_ID>, <LOCATION> office) was missing from the required SG-SalesApp-Entitled group in Azure AD.
+2. <PERSON> from the endpoint management team added the user account <EMAIL> to the SG-SalesApp-Entitled entitlement group in Azure AD so the application deployment became available to the user.
+3. Requested a device sync and policy refresh on <HOSTNAME> through Company Portal and ConfigMgr client actions to accelerate assignment and inventory propagation to the endpoint.
+4. Confirmed the SalesApp application became visible to <USER> in both Company Portal and Software Center after the policy refresh completed, and that Software Center on <HOSTNAME> recognized the updated targeting without the previous 0x80180014 block.
+5. Retried the SalesApp installation from Software Center on <HOSTNAME> and verified the install completed successfully without the previous policy block. <PERSON> confirmed the application launched and functioned as expected.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'Software Center install blocked – missing entitlement group membership' when reporting it.
+Resolved by IT by adding the affected user to the required entitlement security group and triggering a policy refresh; missing entitlement group membership blocking application deployment.
 
 ---
 

@@ -68,6 +68,13 @@ coverage.xml
 *~
 .DS_Store
 
+# --- FUSE mount artifacts (placeholders for files deleted while still open; transient junk) ---
+.fuse_hidden*
+
+# --- SQLite sidecar files (WAL / shared-memory; transient, regenerated alongside the .db) ---
+*.db-wal
+*.db-shm
+
 # --- Generated artifacts (not source) ---
 data/wiki/
 data/generated/

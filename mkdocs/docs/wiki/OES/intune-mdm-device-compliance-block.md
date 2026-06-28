@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Intune device compliance block disrupting Exchange Online mobile and desktop sync
+# Intune Device Compliance Block Disrupts Exchange Online Mobile Sync
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience a loss of email synchronization on managed mobile devices (iOS and Android) running Outlook, and in many cases on Outlook for Windows as well. The mobile Outlook app typically displays a "Disconnected" banner or shows a stale "Last synced" timestamp, and new messages stop arriving entirely — sometimes for several hours. Push notifications may also cease. On the desktop, Outlook may show a "Disconnected" status in the bottom status bar, with send/receive operations failing or delivering messages only after significant delay.
+Affected users experience a loss of email synchronization on managed mobile devices (iOS and Android) running Outlook Mobile, which typically displays a "Disconnected" banner, "Last synced: never," or simply stops delivering new messages and push notifications. The disruption often begins abruptly — correlating with the device being marked non-compliant in Intune MDM — while mailbox access through Outlook on the web and, in most cases, the desktop Outlook client continues to function normally, confirming the underlying mailbox remains healthy.
 
-A distinguishing characteristic of this issue is a split between clients: Exchange Online webmail (OWA) generally continues to show current mailbox content, confirming that the mailbox itself remains available, while one or both Outlook clients are unable to sync. In some cases desktop Outlook recovers after a profile rebuild or restart, but the mobile client remains stalled until the underlying device compliance state is addressed. Users may also recall seeing an Intune or Company Portal compliance notification on their mobile device that was dismissed or left incomplete before the sync failure began.
+The non-compliant state is triggered by factors such as a recent compliance policy update, a deprecated policy reference, a missing OS security patch, or an incomplete Company Portal compliance prompt. Exchange Online responds by blocking ActiveSync and EWS connectivity for the affected endpoints, with transport logs showing HTTP 403 rejections and, in some cases, HTTP 429 throttling caused by aggressive retry loops from stale Outlook sessions. The issue has been observed both for individual users and across groups of users enrolled under the same compliance policy, sometimes affecting multiple offices and device platforms simultaneously after a single policy push.
 
-The issue has affected individual users as well as groups of users simultaneously — particularly after scheduled compliance policy updates — spanning multiple offices and device platforms. In multi-user incidents, the pattern is consistent: managed devices are flagged as non-compliant in the organization's mobile device management system, and Exchange Online begins returning blocked or denied responses for those devices. Exchange Online server logs may also show repeated throttling (HTTP 429) errors tied to aggressive retry loops from affected clients, which can compound the disruption and create additional log noise even after the primary compliance block is identified.
+Desktop Outlook clients are occasionally affected as well, showing intermittent disconnections or delayed mail delivery around the same timeframe. Desktop connectivity is typically restored independently after a profile rebuild or restart, pointing to a separable local profile issue rather than the same compliance block. The persistent and primary impact remains on the mobile device, where email access is fully blocked until device compliance is remediated and the mobile sync partnership is re-established.
 
 !!! note "Reported variations"
 
-    - Some users experienced the compliance block only on the mobile device while desktop Outlook continued to sync normally, making the issue appear to be a mobile-only problem until the device compliance state was reviewed.
-    - In certain cases, a stale or corrupted Outlook desktop profile was present alongside the compliance block, requiring both a profile rebuild on the desktop and compliance remediation on the mobile device before full sync was restored.
-    - Devices that were recently re-enrolled in MDM experienced a transient non-compliant state that triggered a burst of sync requests, leading to Exchange Online mailbox throttling (HTTP 429 errors) as a secondary symptom.
-    - Some Android devices appeared connected in Outlook Mobile but silently stopped receiving new messages and push notifications, with no visible "Disconnected" banner — the only indicator was stale inbox content and a non-compliant status in Company Portal.
-    - A deprecated or outdated compliance policy reference on the device caused it to be evaluated as non-compliant even though the device otherwise met current security requirements.
+    - Desktop Outlook continues to receive mail normally while only the mobile client is affected, indicating the compliance block is isolated to the mobile sync partnership.
+    - Multiple users across more than one office or device group are affected simultaneously following a specific compliance policy rollout targeting an organizational unit.
+    - Outlook Mobile displays a "Connected" status despite no new mail arriving and push notifications ceasing, masking the compliance block from the user's perspective.
+    - Exchange Online diagnostics reveal EWS HTTP 429 throttling on affected mailboxes caused by aggressive retry loops from stale Outlook profiles, compounding the compliance block.
+    - The compliance block is triggered by a deprecated or outdated MDM policy reference rather than a newly introduced policy requirement.
+    - The issue onset occurs overnight or in early morning hours, aligning with the compliance policy evaluation timestamp rather than any user action.
+    - A device re-enrolled in MDM enters a brief non-compliant state during the re-enrollment process, triggering a surge of mobile sync requests and corresponding throttling.
+    - An affected device is flagged non-compliant specifically due to a missing OS security patch, activating a conditional access policy blocking the mobile sync partnership until the patch is applied.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 16 reported cases:
 
 ## Root cause
 
-A change or update to an Intune device compliance policy caused affected managed devices — phones and, in some cases, desktops — to be evaluated as non-compliant. Because Exchange Online enforces conditional access based on device compliance status, non-compliant devices were blocked from synchronizing email, resulting in denied mobile sync requests and disconnected Outlook sessions. In some instances, the compliance block also triggered excessive retry attempts from Outlook clients, which led to secondary Exchange Online throttling on the affected mailboxes.
+A change or update to Intune device compliance policies caused affected managed mobile devices to be evaluated as non-compliant, which triggered Exchange Online to block ActiveSync and mobile API access for those endpoints. In some cases, stale Outlook desktop profiles and transient EWS throttling from retry loops contributed secondary disruption but were not the persistent blocker.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'Intune MDM device compliance block' when reporting it.
+Resolved by IT after remediating Intune device compliance status and resetting the affected Exchange Online mobile sync partnerships.
 
 ---
 

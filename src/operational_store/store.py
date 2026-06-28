@@ -191,6 +191,21 @@ def seed_wiki_pages(conn: sqlite3.Connection) -> int:
     return len(groups)
 
 
+def apply_sql_seed(conn: sqlite3.Connection, path: str | Path) -> None:
+    """Apply a committed SQL seed file via executescript.
+    """
+    sql = Path(path).read_text(encoding="utf-8")
+    conn.executescript(sql)
+
+
+def reset_wiki_overview(conn: sqlite3.Connection) -> int:
+    """Column-level clear of the AI-overview columns only.
+    """
+    cur = conn.execute("UPDATE wiki_pages SET ai_overview = NULL, ai_overview_details = NULL")
+    conn.commit()
+    return cur.rowcount
+
+
 def update_wiki_curation(
     conn: sqlite3.Connection,
     family: str,

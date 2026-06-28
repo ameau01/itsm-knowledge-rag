@@ -8,17 +8,17 @@ curated: true
 self_serviceable: false
 ---
 
-# GlobalProtect VPN disconnects seconds after successful MFA authentication
+# Post-Authentication GlobalProtect Gateway Instability Terminating VPN Sessions
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users on managed Windows 10 laptops experience a brief connection to the corporate network through GlobalProtect VPN, followed by an automatic disconnect within approximately three to five seconds. The issue occurs after the Okta MFA push notification is successfully approved — authentication itself completes without error, and the GlobalProtect client momentarily displays a "Connected" status before the session drops.
+Multiple remote users on managed Windows 10 laptops experienced repeated disconnections when connecting to the corporate network through GlobalProtect VPN. After successfully approving the MFA push notification, the VPN client briefly reached a "Connected" state but then dropped the connection within three to five seconds. The rapid disconnection prevented access to internal resources including the corporate intranet, Confluence, and Salesforce. The issue persisted across repeated sign-in attempts throughout the morning.
 
-Once the disconnection occurs, all internal resources become unreachable, including the corporate intranet, Confluence, and Salesforce. Repeated sign-in attempts produce the same result: successful MFA approval, a fleeting connection, and then an immediate drop. The behavior is consistent across multiple users in different geographic regions and is not isolated to a single device or office location.
+The problem was not isolated to a single user or region. At least five remote workers across multiple geographic locations reported identical behavior, ruling out endpoint-specific causes. Diagnostics confirmed that MFA authentication completed successfully for all affected users and that no endpoint certificate issues were present on any of the tested devices.
 
-The issue has been reported by several remote workers simultaneously, suggesting a widespread service disruption rather than a problem with any individual laptop or user account. Affected users confirm that the disconnect happens only after MFA approval, not before, and that no changes were made to their devices or VPN configuration prior to the onset of the problem.
+Investigation revealed that the underlying failure occurred during post-authentication session establishment on the VPN gateway. Multiple clients recorded gateway resets, with IKE negotiation being aborted after authentication had already succeeded, along with portal timeout behavior during the post-auth phase. The consistent pattern across all affected regions pointed to a VPN service-side issue on the gateway rather than any endpoint or user-level problem.
 
 ## Affected environment
 
@@ -31,7 +31,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The GlobalProtect VPN gateway and portal were experiencing instability during the post-authentication phase of session establishment. Although users completed multi-factor authentication successfully and their endpoint certificates were valid, the VPN infrastructure was resetting connections and timing out immediately after authentication. This was a service-side issue on the VPN platform rather than a problem with individual devices, certificates, or user credentials.
+Post-authentication instability on the GlobalProtect gateway or portal was terminating VPN sessions after successful MFA validation. The gateway was resetting connections during the session establishment phase, causing widespread disconnects despite valid endpoint certificate configurations across affected devices.
 
 ## Diagnostics
 
@@ -54,7 +54,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'GlobalProtect post-authentication disconnect' when reporting it.
+The issue was resolved by IT after identifying and correcting post-authentication gateway instability that was terminating GlobalProtect VPN sessions following successful MFA validation.
 
 ---
 

@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Recurring account lockouts from unidentified stale credential source after password reset
+# Recurring AD Lockouts from Unidentified Stale Credential Source Post-Reset
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-After completing a corporate password reset through the Password Reset Portal, affected users experience repeated Active Directory account lockouts that begin almost immediately. Desktop sign-in and SSO Portal access may work briefly after each unlock, but the account locks again within minutes — often on a regular interval of roughly every three to fifteen minutes — blocking access to corporate applications including the SSO Portal, Outlook, and OWA mailbox services.
+Affected users experience repeated Active Directory account lockouts shortly after completing a corporate password reset through the Password Reset Portal. Despite the password change propagating successfully to domain controllers, the account continues to lock at regular intervals — typically every few minutes to every fifteen minutes. Users encounter "account locked" or "invalid password" errors and are unable to access corporate applications including the SSO Portal, Outlook, and OWA mailbox services.
 
-Initial investigation typically points toward mobile devices (such as an iPhone running cached credentials in Mail or Teams apps) because failed authentication attempts may correlate with a mobile IP address. However, the lockouts persist even after the user removes and re-adds the corporate account on the mobile device, indicating that the phone is not the sole or actual source of the problem.
+The lockouts persist even when the user's desktop authentication is functioning normally. The recurring lock events are attributed to stale credentials cached on a device or service that continues to authenticate with the old password in the background. However, the exact source of the failed authentication attempts cannot be definitively identified from available logs; the caller computer name field in lockout event entries is sometimes blank or points to a non-interactive caller rather than a clearly identifiable endpoint.
 
-The account remains unstable despite a successful password change and correct replication across Active Directory domain controllers. Users may see repeated "account locked" or "invalid password" errors across multiple services and are effectively unable to maintain access to any corporate application until the underlying lockout source is identified and remediated.
+Mobile devices with cached credentials are a common suspected source, but in some cases lockouts continue after the user has removed and re-added corporate accounts on the device, indicating an unidentified background service or legacy application as the true cause.
 
 !!! note "Reported variations"
 
-    - Mobile cached credentials may initially appear to be the lockout source based on IP correlation, but lockouts continue after the user fully removes and re-adds the corporate account on the mobile device.
-    - The caller computer name in Active Directory lockout events may be intermittently blank, preventing definitive attribution of the lockout source to any single endpoint or application.
-    - In some cases, the lockout source logs point to a non-interactive caller rather than a mobile user-agent such as ActiveSync, suggesting a background service or legacy application is responsible.
+    - Lockout events correlate with a known mobile device IP address and cease to recur after account unlock and fresh token issuance, with the mobile device remaining the most likely — but unconfirmed — source.
+    - Lockouts persist at the same interval even after the user removes and re-adds the corporate account on the suspected mobile device, indicating a separate background service or integrated application authenticating with stale credentials.
+    - The caller computer name field in Event ID 4740 lockout logs appears intermittently blank, preventing definitive identification of the offending endpoint.
+    - Lockout source logged on the domain controller points to a non-interactive caller ID rather than an ActiveSync or mobile user-agent, requiring escalation to the identity or messaging team for service-side remediation.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-A non-mobile service, legacy client, or integrated application continues to authenticate using the old stored credentials after a password reset, repeatedly triggering Active Directory lockouts. The exact source of the stale credentials cannot be definitively identified from the available authentication logs because the caller computer name field in the lockout events is intermittently blank or points to a non-interactive process rather than a recognizable device. This requires broader investigation and service-side remediation beyond a standard password reset and mobile credential cleanup.
+A non-mobile service, legacy client, or integrated application continued using outdated stored credentials after the user's password reset, repeatedly triggering Active Directory lockouts. Insufficient authentication telemetry — such as blank or ambiguous caller computer name fields in lockout logs — prevented definitive identification of the offending source.
 
 ## Diagnostics
 
@@ -68,7 +69,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'recurring account lockout from unidentified stale credential source' when reporting it.
+Resolved by IT through account unlock and coordination with identity or messaging teams to isolate and remediate the stale credential source; reference "recurring AD lockout – unidentified stale credential source post-reset."
 
 ---
 

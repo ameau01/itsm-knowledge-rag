@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Noncompliance caused by stale deprecated Intune compliance policy reference
+# Deprecated Compliance Policy Reference Causes False Encryption Noncompliance
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their Intune-managed devices are marked as noncompliant, with Conditional Access blocking access to corporate resources such as Exchange Online, SharePoint, Teams, and OneDrive. The compliance failure typically appears in Company Portal as a missing or unreported encryption signal — for example, "Encryption not enabled," "EncryptionMissing," or "Not reported" — even though device-level encryption (such as BitLocker on Windows or native encryption on Android) is confirmed to be active and healthy on the endpoint.
+Affected users with Intune-managed devices were blocked from accessing corporate resources — including Exchange Online, SharePoint Online, Microsoft Teams, Outlook, and OneDrive — by Conditional Access enforcement after compliance policy consolidation or baseline refresh activities. The Intune admin console and Company Portal reported encryption signals as missing (e.g., "EncryptionMissing" or "Not reported"), even though BitLocker or device-level encryption was confirmed as fully enabled on most affected endpoints. The issue impacted Windows 10, Windows 11, and Android devices across multiple offices and security groups.
 
-The issue commonly surfaces after a compliance policy change, consolidation, or baseline refresh carried out by an administrator. Devices continue to evaluate against a retired or deprecated compliance policy revision rather than the current one, so the encryption requirement is assessed using outdated criteria that do not correctly detect the device's actual encryption state. As a result, Conditional Access treats the devices as noncompliant and denies sign-in to protected services.
+Investigation revealed that affected devices were still evaluating against deprecated or retired compliance policy revisions rather than the current replacement versions. Stale device check-in timestamps meant compliance had not been re-evaluated since the policy change, causing encryption telemetry mappings to fail and Conditional Access to deny access based on outdated compliance state. The noncompliant status persisted through repeated manual sync attempts and remote sync operations, though some devices returned to compliant status after syncing while others required administrative correction of the underlying policy reference.
 
-In many cases, affected devices also have stale Intune check-in timestamps — sometimes days old — which compounds the problem by preventing the updated policy assignment from reaching the device and delaying compliance re-evaluation. Manual sync attempts from Company Portal may succeed at the device level but do not resolve the noncompliant status because the underlying policy reference remains pointed at the deprecated revision.
-
-The issue has been observed across both Windows 10/11 and Android 11 devices and has affected individual users as well as larger groups of devices (up to approximately 18 endpoints in a single incident). It tends to cluster within specific device groups or security groups — such as regional sales teams or remote worker groups — that were scoped to the retired policy assignment.
+In at least one case, the missing encryption signal reflected a genuine device state — BitLocker had stalled after an OS update and was not fully enabled — distinguishing that instance from the more common false-reporting pattern. The issue typically affected groups of users tied to specific security or device groups whose policy assignments still pointed to the deprecated policy version.
 
 !!! note "Reported variations"
 
-    - Some devices that were reassigned to the correct policy still required endpoint-level remediation — such as completing a stalled BitLocker enablement or installing pending Windows cumulative updates — before compliance could be restored.
-    - Android devices exhibited the same stale policy reference behavior, with encryption reported as "Not reported" in Company Portal rather than "Encryption not enabled," despite device-level encryption being active.
-    - In some cases, devices checked in successfully and remote sync completed without error, but compliance status remained noncompliant because the sync did not correct the underlying deprecated policy assignment.
+    - Android devices in the same security group were affected alongside Windows endpoints, with identical Conditional Access blocks on corporate resource access.
+    - On Android 11 devices, Company Portal showed encryption status as "Not reported" even though device-level encryption was confirmed enabled at the OS level.
+    - In one case, BitLocker had stalled after an OS update and was not fully enabled, meaning the missing encryption signal reflected an actual device state rather than a telemetry reporting gap.
+    - Some devices had pending Windows cumulative updates that acted as a secondary blocker to restoring compliance even after the policy reference was corrected.
+    - Remote and traveling users experienced extended periods of noncompliance due to prolonged gaps between Intune check-ins, resulting in especially stale compliance evaluations.
+    - Some affected users experienced intermittent partial restoration of access to individual services (e.g., Outlook) after a manual sync, while other services (e.g., OneDrive Mobile) remained blocked.
+    - In one group, the stale reference pointed to a retired policy scope associated with a legacy assignment group rather than simply an outdated policy version.
+    - Mobile device access (e.g., Outlook on a personal phone) remained unaffected, with Conditional Access blocks limited to managed endpoints evaluating against the deprecated policy.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 7 reported cases:
 
 ## Root cause
 
-After a compliance policy update or consolidation in Intune, the affected devices remained assigned to a deprecated or retired compliance policy revision through stale group assignment mappings. Because the outdated policy did not include the current encryption signal mapping, Intune evaluated the devices against criteria that could not correctly detect their encryption status, producing a false noncompliant result. This was often compounded by devices having stale check-in timestamps, which prevented them from receiving the corrected policy assignment and completing a fresh compliance evaluation.
+Deprecated Intune compliance policies remained assigned to device groups through stale group mappings after policy consolidation. Affected devices continued evaluating against the retired policy revisions, which did not include the current encryption requirement or signal mapping. Stale device check-in status further delayed receipt of corrected policy assignments and updated compliance evaluations.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'stale deprecated compliance policy reference' when reporting it.
+The issue was resolved by IT after removing deprecated compliance policy assignments and ensuring affected devices re-evaluated against the current policy revision.
 
 ---
 

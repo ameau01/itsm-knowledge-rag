@@ -8,22 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Shared drive access denied due to stale cached SMB credentials
+# Stale Cached SMB Credentials Cause Mapped Drive Access Denial
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience repeated credential prompts followed by "Access Denied" (Error 5) when attempting to open a mapped network drive or a direct shared folder path through File Explorer on a domain-joined Windows workstation. The issue typically arises shortly after a password change or an Active Directory group membership update, even though the underlying account permissions are correct and fully replicated.
+Affected users on domain-joined Windows 10 workstations experience repeated credential prompts followed by "Access is denied" messages when attempting to open department shared folders via mapped network drives in File Explorer. In one instance, the denial was accompanied by Error 5. The issue prevents normal access to SMB file shares and blocks routine file work.
 
-The credential prompt appears each time the user tries to access the shared drive, and entering the current password does not resolve the denial. Both the mapped drive letter and the direct network path (e.g., \\server\share) exhibit the same behavior, effectively blocking all access to department files stored on the file server.
-
-The issue is confined to the individual workstation that holds the outdated cached credentials; other devices or fresh sessions are not affected. Normal file access is restored once the stale credentials are cleared and the drive is remapped, with no changes required to Active Directory group membership or share permissions.
+The underlying cause is stale cached SMB credentials stored on the workstation. In the reported cases, the credential cache became outdated due to a recent change — either an AD group membership update that granted new share access, or a same-day password change. Although the user's Active Directory membership and share permissions are confirmed correct and fully replicated across domain controllers, the workstation continues to present outdated cached credentials from Windows Credential Manager when connecting to the file server. This causes the SMB session to authenticate with obsolete information, resulting in denied access even when the user re-enters current, valid credentials at the prompt.
 
 !!! note "Reported variations"
 
-    - Historical NTFS deny entries may appear on the file server during investigation, but access is restored without modifying those entries, indicating they are not the immediate cause of the denial.
-    - In some cases the issue follows an Active Directory group membership addition rather than a password change; the stale cached session still prevents the new entitlement from taking effect on the workstation.
+    - Error 5 explicitly returned alongside the "Access Denied" message (observed in one case involving a post-AD-group-change scenario)
+    - Credential prompt and access denial reproduced when navigating directly to the UNC share path, in addition to the mapped drive (observed in one case involving a same-day password change)
+    - Stale credentials triggered by an AD group membership change processed days prior, with full domain controller replication confirmed; resolution in that instance included refreshing the Kerberos ticket
+    - Stale credentials triggered by a same-day password change on the affected user's account
+    - Historical NTFS deny entries noted on the file server for separate follow-up by the file server owner
 
 ## Affected environment
 
@@ -36,7 +37,7 @@ Distribution across 2 reported cases:
 
 ## Root cause
 
-The workstation's Windows Credential Manager retains stored credentials for the mapped network drive that predate a recent password change or Active Directory group update. When the user attempts to connect, the system presents these outdated credentials to the file server, which rejects them and denies access. Clearing the cached credentials, refreshing the authentication session, and remapping the drive allows the workstation to authenticate with current credentials and restores access.
+The affected user's workstation retained stale cached SMB credentials in Windows Credential Manager that did not reflect a recent change — either a password update or a newly granted AD group membership for the target share. Despite correct AD group membership and fully replicated permissions across domain controllers, the workstation continued to present outdated credentials during SMB authentication, causing repeated access denials. Historical NTFS deny entries were noted on the file server but were not the immediate cause, as access was restored without any ACL modification.
 
 ## Diagnostics
 
@@ -72,7 +73,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale cached SMB credentials on mapped drive" when reporting it.
+Resolved by IT by clearing stale cached credentials and remapping the affected network drive with fresh authentication.
 
 ---
 

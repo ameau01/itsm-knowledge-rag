@@ -8,22 +8,22 @@ curated: true
 self_serviceable: false
 ---
 
-# Wi-Fi session drops caused by wireless access point radio instability
+# Wireless AP Radio Instability Causing Repeated Client Deauthentication
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience repeated disconnections from the corporate Wi-Fi network (CorpNet-5G) shortly after successfully connecting. Laptops are able to join the wireless network and initially appear connected, but within two to five minutes the connection drops. This cycle of connecting and disconnecting repeats each time the user attempts to rejoin, interrupting access to internal applications such as Salesforce and the corporate intranet.
+Affected users on a single floor of an office building reported that their managed Windows 10 laptops could successfully join the corporate 5 GHz Wi-Fi SSID but were repeatedly dropped within two to five minutes of connecting. The disconnections interrupted access to internal applications and the corporate intranet. Users could sometimes reconnect briefly, but the cycle of association followed by disconnection recurred persistently. The issue was concentrated to one floor and did not affect wireless users on other floors or at other sites.
 
-The issue is localized to a specific floor or area rather than affecting all wireless users across the organization. Users in nearby areas of the same building typically remain unaffected. Multiple users in the impacted zone report the same pattern simultaneously, and the disruptions are concentrated within a narrow time window.
+Initial investigation considered certificate renewal and 802.1X authentication problems, but diagnostic analysis confirmed that clients were authenticating correctly against RADIUS. Controller-side logs revealed unstable behavior on two specific access points serving the affected floor. These APs were issuing repeated deauthentication events with reason code 6 (Class 2 frame received from nonauthenticated station) shortly after client association. Affected devices were observed bouncing between the two unstable APs every one to three minutes, preventing any sustained network session.
 
-Some users may be able to maintain a brief connection before being dropped again, while others find that repeated reconnection attempts are necessary to regain even temporary access. The laptops do not display a traditional authentication failure message — the Wi-Fi association appears to succeed before the session is abruptly terminated.
+The issue presented as a localized connectivity disruption tied to radio and controller instability rather than a broader authentication or network access control failure. Multiple members of the same team on the affected floor reported identical symptoms during a narrow time window, while colleagues on adjacent floors remained unaffected.
 
 !!! note "Reported variations"
 
-    - Some affected devices may show a connected status with no internet access or no assigned IP address rather than a full disconnection.
-    - Devices may silently roam back and forth between two or more degraded access points every one to three minutes, making the issue appear intermittent rather than a complete outage.
+    - Some affected laptops appeared connected to the SSID but had no network access or no IP address assigned, rather than being fully disconnected.
+    - A subset of users required multiple manual reconnection attempts before achieving even brief connectivity.
 
 ## Affected environment
 
@@ -36,7 +36,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-Wireless access points serving the affected area became unstable, causing the wireless controller to repeatedly disconnect (deauthenticate) client devices shortly after they successfully joined the network. Although users were passing authentication correctly, the access points' radio-level health issues triggered forced disconnections unrelated to any credential, certificate, or network access policy problem. Affected devices were continuously bouncing between the degraded access points, preventing a stable session from being maintained.
+Wireless access point or controller radio instability in the affected area caused repeated client deauthentication and session drops after otherwise successful Wi-Fi authentication.
 
 ## Diagnostics
 
@@ -59,7 +59,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "wireless AP radio instability" when reporting it.
+Resolved by IT after identifying and addressing access point radio instability on the affected floor; reference wireless AP deauthentication and session drop issue.
 
 ---
 

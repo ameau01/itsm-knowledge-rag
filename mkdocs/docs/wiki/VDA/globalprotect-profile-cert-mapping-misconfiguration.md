@@ -8,21 +8,15 @@ curated: true
 self_serviceable: false
 ---
 
-# GlobalProtect profile update referencing wrong certificate causes post-auth disconnects
+# GlobalProtect Profile Certificate Mapping Mismatch Causing Post-Auth Disconnects
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users on managed Windows 10 laptops experience VPN disconnections shortly after completing multi-factor authentication through Okta. GlobalProtect briefly shows a connected status — typically lasting only 10 to 20 seconds — before the session drops automatically. During the brief window of connectivity, internal applications such as the corporate intranet and Confluence may begin loading but become unreachable once the tunnel terminates.
+Affected users on managed Windows 10 laptops experienced repeated VPN disconnections when connecting to the corporate network via GlobalProtect while working remotely. After successfully approving the MFA prompt, the VPN session appeared to establish briefly — typically for approximately 10 to 20 seconds — before dropping automatically. During the short-lived connection, internal applications such as the corporate intranet and Confluence sometimes began loading partially but became unreachable once the tunnel terminated. The issue was reproducible across multiple reconnect attempts and affected multiple users in the same department whose devices had recently received a VPN profile update.
 
-The issue is reproducible across multiple reconnect attempts and is not resolved by retrying the MFA prompt. It has been observed on devices in the Sales and Marketing group that received a VPN profile update pushed on 2026-05-06. Multiple users working remotely from different locations and home networks have reported the same behavior, confirming the issue is not tied to a single device or network environment.
-
-Notably, the MFA step itself completes without error, and the device certificates issued by the corporate certificate service remain valid and unexpired. The disconnection occurs only after authentication succeeds, during the policy evaluation phase that follows login.
-
-!!! note "Reported variations"
-
-    - Some affected users may see internal pages partially load during the brief connected window before the tunnel drops, while others lose connectivity too quickly for any page content to appear.
+Diagnostics confirmed that MFA authentication was completing successfully for all affected users and that the device certificates installed on the endpoints remained valid. However, the GlobalProtect profile pushed to affected devices referenced an incorrect enrolled certificate. Specifically, the profile pointed to an old certificate thumbprint that no longer matched the currently enrolled certificate from the Device Certificate Service. This mismatch caused post-authentication policy evaluation to fail, producing a VPN-ERR-201 error in diagnostic logs, which in turn caused the client to terminate the tunnel immediately after login.
 
 ## Affected environment
 
@@ -35,7 +29,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-A GlobalProtect VPN profile update pushed on 2026-05-06 introduced a misconfiguration on affected endpoints. The updated profile references an outdated certificate thumbprint from a previous enrollment rather than the currently active device certificate. Because the certificate cited in the profile does not match the one actually enrolled on the device, the post-authentication policy check fails and the VPN client immediately terminates the session after login.
+A GlobalProtect profile misconfiguration on affected endpoints caused the client to use a certificate mapping that did not match the active enrolled device certificate. This triggered post-authentication policy disconnects after successful MFA validation.
 
 ## Diagnostics
 
@@ -59,7 +53,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "GlobalProtect profile certificate mapping mismatch" when reporting it.
+The issue was resolved by IT after correcting the GlobalProtect profile to reference the current enrolled device certificate thumbprint.
 
 ---
 

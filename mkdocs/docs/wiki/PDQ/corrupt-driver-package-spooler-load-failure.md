@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Corrupt printer driver package on print server blocks shared queue processing
+# Corrupt Printer Driver Package Causes Queue Failures and Driver Unavailable Errors
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to print through shared queues on a central print server find that submitted jobs remain stuck in the queue — typically at 0% progress or in a perpetual "printing" state — and never reach the physical printer. The printer appears offline in Windows print dialogs on client workstations, and the queue displays a "driver unavailable" message. The issue affects multiple users across departments and floors simultaneously, confirming it is a server-side condition rather than a problem with any individual workstation or printer.
+Affected users across multiple offices and departments experience print jobs that remain stuck in shared queues hosted on Windows print servers. Submitted jobs show zero percent progress or accumulate indefinitely without advancing, and the shared printers appear offline or display "driver unavailable" on client workstations. The issue affects all users mapped to the same server-hosted queue rather than individual machines, blocking routine and time-sensitive printing such as month-end reporting. Stuck job counts range from a handful to over one hundred entries across affected queues. Client-side actions — rebooting workstations, removing and re-adding printers, or clearing local queues — do not resolve the issue.
 
-Restarting the Windows Print Spooler service on the print server or clearing the backlog of stuck jobs may provide brief relief, with a small number of jobs processing successfully. However, the issue typically recurs within minutes, and new submissions immediately stall with the same driver unavailable error. In some cases the Print Spooler service itself becomes unstable, crashing repeatedly and logging service termination events.
+On the print server, the Print Spooler service logs repeated driver load failures, commonly Event ID 372, as well as codes such as 0x00000709, 2147500037, and ERROR_PRINTER_DRIVER_CORRUPT. Checksum or hash verification of the installed driver package against the approved repository copy confirms a mismatch or corruption, typically introduced by a recent automated deployment, scheduled driver update, or maintenance window. In severe cases the Print Spooler enters a crash loop, generating Event ID 7031 entries.
 
-The problem commonly appears shortly after a scheduled or automated printer driver deployment, a Windows update, or a maintenance window on the print server. Affected queues can number in the dozens of stuck jobs spanning multiple user accounts, and the issue persists until IT support replaces the faulty driver package and remaps the affected queues on the server.
+Restarting the Print Spooler service provides only temporary relief. Jobs may briefly process after a restart but stall again within minutes as the spooler re-encounters the corrupt or mismatched driver package. The issue persists until the corrupted driver package is fully removed from the server's driver store, replaced with the approved version, and affected queue mappings are rebuilt. Local printing methods such as USB-attached printers remain unaffected, confirming the fault is isolated to the server-side driver layer.
 
 !!! note "Reported variations"
 
-    - In some cases the Print Spooler service on the print server enters a crash loop rather than simply failing to process jobs, logging repeated service termination events.
-    - Some users encounter a specific Windows connection error (such as 0x00000709) when attempting to add or reconnect to the affected shared printer, rather than seeing a generic "driver unavailable" message.
-    - Occasionally the issue recurs after a previous partial driver reinstall or remediation attempt, indicating residual corrupt driver cache entries were not fully cleared during the earlier fix.
-    - Multiple shared queues using the same driver package may be affected simultaneously, rather than a single printer queue.
-    - A Windows update applied to the print server can trigger the same driver corruption, even when no explicit driver deployment was scheduled.
+    - Some users observe jobs stuck in a "printing" state indefinitely rather than remaining at zero percent in a "spooling" state, or see printers grayed out in the printer list rather than explicitly offline.
+    - The Print Spooler service may enter a crash loop (Event ID 7031) rather than remaining running in a degraded state.
+    - Queue mappings may reference an older or incorrect driver version that no longer matches the package staged on the server, compounding the unavailable-driver condition.
+    - Corruption may result from a partially written driver update leaving a mix of old and new files, an unsigned or improperly signed package, or a Windows cumulative update applied to the print server.
+    - In some cases a single queue is affected while others on the same server continue functioning; in others, multiple queues sharing the same driver package fail simultaneously across departments.
+    - A prior driver reinstall attempt or queue remap may provide only brief relief before the same failures recur, indicating incomplete earlier remediation.
+    - Server-side inspection may reveal specific driver DLL files entirely absent from the expected spool driver directory, indicating an incomplete deployment rather than file-level corruption.
+    - In one instance the corrupt driver deployment was traced to a Group Policy Object responsible for driver distribution, requiring correction of the policy in addition to the server-side driver replacement.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 48 reported cases:
 
 ## Root cause
 
-A printer driver package deployed to the central print server became corrupted, was incomplete, or did not match the approved version. This prevents the Windows Print Spooler from loading the driver assigned to the affected shared queue, leaving the queue unable to process jobs and causing it to report the driver as unavailable. The corruption is typically introduced during an automated or scheduled driver update and is not resolved by restarting the spooler alone, because the faulty driver files remain on the server.
+A corrupt, incomplete, or checksum-mismatched printer driver package on the print server prevents the Windows Print Spooler from loading the driver assigned to shared queues. The corruption is typically introduced during an automated or scheduled driver deployment, leaving the server's driver store in an invalid state that causes recurring driver load failures and blocks all job processing through the affected queues.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'corrupt printer driver package on print server' when reporting it.
+Resolved by IT after removing the corrupted printer driver package from the print server, reinstalling the approved driver version, and rebuilding the affected queue mappings.
 
 ---
 

@@ -8,23 +8,25 @@ curated: true
 self_serviceable: false
 ---
 
-# Conditional Access block due to missing or inactive BitLocker encryption on endpoint
+# BitLocker Encryption Not Active or Attested Causing Noncompliance Block
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users on corporate-managed Windows 10 or Windows 11 devices find themselves unable to access protected Microsoft 365 resources such as Outlook, SharePoint Online, Exchange Online, or Dynamics 365. When attempting to connect, Conditional Access denies the request because the device is marked as noncompliant in Intune. The Company Portal application also displays the device as noncompliant.
+Affected users on corporate-managed Windows 10 and Windows 11 devices experience blocks when accessing protected Microsoft 365 resources — including SharePoint Online, Outlook, Exchange Online, and Dynamics 365. Conditional Access evaluates the devices as noncompliant in Intune because a healthy BitLocker encryption attestation signal is not being reported. Company Portal or the Intune admin console shows the affected devices as noncompliant, and users cannot reach protected applications until encryption status is correctly reported.
 
-The issue typically surfaces after a compliance policy requiring BitLocker device encryption is rolled out or updated. Although the affected devices may have current check-in timestamps and are receiving compliance evaluations normally, the encryption compliance signal is either missing entirely or reports an unhealthy state — for example, BitLocker protection may be suspended or encryption setup may not have completed. This distinguishes the issue from problems involving stale check-ins or incorrect policy targeting.
+The underlying condition varies but consistently involves BitLocker encryption not being in a fully enabled and attested state. In some cases, encryption stalled during initial device provisioning and required local user interaction to complete setup. In other cases, BitLocker protection was found to be suspended on the endpoint, causing the compliance evaluation to return an unhealthy encryption state even though the device was otherwise online and scoped to the correct policy. A third presentation involves devices where encryption began only after a policy sync, with no prior encryption signal present.
 
-The scope of impact can range from a single device to multiple endpoints across one or more offices. In some cases, encryption stalled during initial provisioning and was never completed; in others, BitLocker protection was suspended on a device that had previously been encrypted. Until the endpoint reports a valid, active encryption status back to Intune, the compliance evaluation continues to fail and Conditional Access continues to block access to protected applications.
+The issue has been observed following the rollout of new or updated compliance policies requiring BitLocker device encryption. Multiple users and devices may be affected simultaneously within the same office or policy scope. In at least one case, a stale device check-in compounded the problem by further delaying the reporting of encryption status to Intune.
 
 !!! note "Reported variations"
 
-    - On some devices, BitLocker encryption stalled during initial provisioning and required local user interaction to complete setup and reboot before the encryption signal could be reported.
-    - In certain cases, BitLocker protection was found to be suspended rather than absent, causing the endpoint to report an unhealthy encryption state even though encryption had been configured previously.
-    - A forced remote sync and remote BitLocker enablement resolved the issue for a majority of affected devices, but a subset still required hands-on local action to complete encryption before compliance cleared.
+    - Encryption setup stalled during initial device provisioning and required local user interaction (e.g., completing BitLocker setup and rebooting) before the device could report compliance.
+    - BitLocker protection was found to be suspended on the endpoint rather than absent, resulting in the compliance evaluation returning an unhealthy encryption state despite the device being online and scoped to the correct policy.
+    - A stale device check-in (over 24 hours) compounded the issue by delaying the reporting of encryption status to Intune, prolonging the Conditional Access block.
+    - Multiple devices across more than one office were affected simultaneously following a compliance policy rollout requiring BitLocker encryption.
+    - Some devices began encryption only after a forced sync with the new compliance policy, indicating encryption had not previously been initiated on those endpoints.
 
 ## Affected environment
 
@@ -37,7 +39,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-The affected endpoints either did not have BitLocker disk encryption fully enabled or had BitLocker protection in a suspended or incomplete state. Because the compliance policy requires active encryption, these devices could not pass the encryption check during compliance evaluation. Without a valid encryption attestation reported back to Intune, the devices remained noncompliant and Conditional Access denied access to protected resources.
+After an encryption compliance requirement was enforced, a subset of managed endpoints either had BitLocker encryption disabled, suspended, or incomplete — or did not successfully report encryption attestation back to Intune. This caused device compliance to remain noncompliant and Conditional Access to deny access to protected resources. Once BitLocker was fully active and a successful policy refresh reported the encryption telemetry, compliance was restored.
 
 ## Diagnostics
 
@@ -64,13 +66,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Confirmed local BitLocker status on device <HOSTNAME> via remote PowerShell (manage-bde -status C:) and identified that protection was suspended rather than missing due to stale reporting. Agent <PERSON> (<USER>) coordinated with <PERSON> to perform the remediation.
-2. Re-enabled BitLocker protection on <HOSTNAME> by running 'manage-bde -protectors -enable C:' and verified the encryption state returned to healthy on the endpoint. Protection status confirmed as 'Protection On' after the command completed.
-3. Triggered a device sync from Company Portal on <HOSTNAME> and confirmed Intune marked the device Compliant again within approximately 5 minutes. Validated that <PERSON> (<EMAIL>) could successfully sign in to Exchange Online without Conditional Access blocks. Ticket closed by agent <USER>.
+1. Triggered a remote Intune sync on <HOSTNAME> (enrolled under <EMAIL>) to refresh the stale device check-in and force a new compliance evaluation.
+2. Reviewed the compliance record for <HOSTNAME> in the Intune portal, identified the missing encryption signal (RequireDeviceEncryption: Not reported, ErrorCode: 0x87d1041c) as the only failing control, and re-applied the corporate RequireDeviceEncryption and BitLocker configuration to the device.
+3. Had <PERSON> complete the local BitLocker enablement process on the laptop <HOSTNAME> and reboot so the operating system could finalize encryption status and submit updated telemetry to Intune.
+4. Confirmed the device checked in again after reboot at 2026-01-03T18:02Z, the encryption state populated correctly in Intune (BitLocker XTS-AES 256), and the compliance evaluation changed from Noncompliant to Compliant for <USER>.
+5. Validated that Conditional Access was no longer blocking the managed device <HOSTNAME> and that access to Outlook and SharePoint Online was restored for <PERSON> (<EMAIL>) at the <LOCATION> office.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'BitLocker encryption noncompliance — Conditional Access block' when reporting it.
+Resolved by IT after confirming BitLocker encryption was fully active and ensuring the device reported healthy encryption attestation to Intune following a policy refresh.
 
 ---
 

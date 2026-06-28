@@ -8,26 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# BitLocker unable to start due to uninitialized TPM protector
+# Uninitialized TPM Protector Prevents BitLocker Encryption and Recovery Key Escrow
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their managed Windows laptop is marked noncompliant for disk encryption in Intune or Company Portal. BitLocker shows as "Protection Off" or "Encryption not enabled" on the system drive (C:), and no recovery key is visible in Azure AD or the Intune device record. Manual actions such as rebooting, triggering a Company Portal sync, or attempting to enable BitLocker through the Windows interface do not resolve the issue, and the device remains noncompliant.
+Affected users on corporate-managed Windows 10 and Windows 11 laptops report that their devices are flagged as noncompliant for disk encryption in Microsoft Intune, Company Portal, or the Device Compliance Service. BitLocker remains in a "Protection Off" state on the system drive with no key protectors configured, and no recovery key is visible in Azure AD or the Intune escrow portal. The noncompliant state blocks access to compliance-gated corporate resources such as VPN, email, SharePoint, and line-of-business applications.
 
-The underlying condition is that the device's TPM (Trusted Platform Module) security chip — which BitLocker relies on to protect the encryption key — was never properly set up for BitLocker use. Without this initialization step, BitLocker cannot create the required startup protector, encryption never begins, and no recovery key is generated or uploaded to the organization's management service. In some cases, TPM management tools on the device may display warnings such as "The TPM is not ready for use" or "Troubleshooting recommended," and the BitLocker management interface may show the "Turn on BitLocker" option as greyed out.
+Investigation consistently reveals that the TPM protector was never initialized on the affected endpoint. Although the TPM hardware is physically present and may report as ready in the management console, protector initialization did not complete during provisioning, Autopilot enrollment, or reimaging. Without an initialized TPM protector, BitLocker cannot create key protectors on the OS volume, and no recovery key is generated or escrowed to Azure AD. The Intune encryption policy is typically confirmed as correctly assigned, indicating the failure is a local TPM prerequisite issue — though in some cases the device was also missing from the required Azure AD security group or lacked the policy assignment after re-enrollment, compounding the problem.
 
-This issue commonly appears on newly provisioned or Autopilot-enrolled devices where the TPM setup step did not complete during the initial configuration process, as well as on devices that were recently reimaged, re-enrolled, or had hardware replaced (such as a motherboard swap). Although the Intune encryption policy may be correctly assigned to the device, it cannot take effect because the local TPM prerequisite is not met. As a result, the device remains out of compliance and affected users may be blocked from accessing compliance-gated corporate resources such as VPN, email, or SharePoint sites.
+The condition has been observed following reimaging without a TPM initialization step, motherboard replacements that invalidate a previously initialized protector, and Autopilot provisioning flows where TPM initialization was skipped. Affected users report never receiving a BitLocker PIN prompt or encryption setup during provisioning. Manual remediation attempts such as rebooting, forcing an Intune sync, or enabling BitLocker through the control panel do not resolve the issue. Even after the TPM protector is initialized and encryption starts, automatic recovery key escrow may fail intermittently across several MDM sync cycles before succeeding.
 
 !!! note "Reported variations"
 
-    - On some devices, the TPM hardware reports as present and ready, yet the BitLocker-specific protector was still never created, making the TPM appear healthy while encryption remains blocked.
-    - After the TPM protector is corrected locally, the recovery key upload to Azure AD may not occur automatically; a manual backup step may be required before the device reaches compliant status.
-    - Recovery key upload attempts may fail intermittently with timeout errors during the first one or two device sync cycles, succeeding only on a subsequent sync.
-    - In some cases, the Intune encryption policy was also not assigned or not applied to the device at the time of evaluation, compounding the TPM protector issue and requiring both policy assignment correction and TPM initialization.
-    - The "Turn on BitLocker" option in the Windows interface may appear greyed out, preventing the user from enabling encryption manually.
-    - On devices that underwent a motherboard replacement, a previously valid TPM protector may have been invalidated, producing the same symptoms as a device that was never initialized.
+    - The Intune device compliance status intermittently toggles between noncompliant and pending despite encryption remaining off locally.
+    - The TPM management console reports a specific initialization error (e.g., 0x80070057 or 0xC0000200) rather than simply showing the protector as uninitialized.
+    - Recovery key escrow to Azure AD fails with a timeout error or a "KeyPackage not found" error after the TPM protector is initialized, requiring a forced manual backup.
+    - The device was not added to the required Azure AD security group or lacked the Intune encryption policy assignment after re-enrollment or reimaging.
+    - The TPM protector was previously initialized but became invalidated after a motherboard replacement, causing a formerly encrypted device to lose compliant status.
+    - The device was provisioned through Windows Autopilot and the TPM protector initialization step was skipped during the automated flow.
+    - An MDM sync or enrollment token error (e.g., 0x80180014 or 0x80180026) is logged alongside the escrow failure.
+    - The BitLocker management UI displayed the "Turn on BitLocker" option as greyed out, preventing the user from enabling encryption manually.
 
 ## Affected environment
 
@@ -40,7 +42,7 @@ Distribution across 32 reported cases:
 
 ## Root cause
 
-The TPM protector on the device was not initialized, which prevented BitLocker from creating the security key it needs to start encryption on the system drive. Because encryption never started, no recovery key was generated, and the automatic upload of the recovery key to Azure AD or Intune could not occur. This left the device in a noncompliant state for the organization's disk encryption requirement. The TPM initialization failure typically occurs during device provisioning, reimaging, re-enrollment, or after hardware replacement.
+The TPM protector was not initialized on the affected endpoint, preventing BitLocker from creating the required TPM-backed protector on the OS volume. Without this protector, encryption could not start and recovery key escrow to Azure AD or Intune could not complete. In some cases, the Intune BitLocker policy was also not assigned or had not successfully applied, further compounding the failure.
 
 ## Diagnostics
 
@@ -76,7 +78,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'TPM protector not initialized – BitLocker unable to start' when reporting it.
+Resolved by IT through TPM protector initialization, BitLocker encryption enablement, and recovery key escrow verification to Azure AD.
 
 ---
 

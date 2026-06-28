@@ -8,24 +8,27 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale print queue-to-driver mapping causes stuck jobs and driver unavailable errors
+# Stale Queue-to-Driver Mapping Causes Stuck Print Jobs
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users submitting print jobs to a shared printer queue find that their jobs remain stuck at a pending or zero-percent status and do not print. The printer may appear offline in the Windows Devices panel, and client workstations typically display a "Driver unavailable" message for the affected queue. The issue impacts multiple users printing to the same shared queue simultaneously, often spanning an entire team or floor — reports have involved groups ranging from roughly six to thirty staff members blocked from printing at once.
+Affected users across multiple departments experience print jobs that remain indefinitely stuck in shared print queues hosted on centralized print servers. Client workstations display "Driver unavailable" or "printer offline" status for the affected queue, and neither retrying the print job nor rebooting the workstation resolves the problem. The issue typically impacts all users submitting jobs to the same shared queue, with reported backlogs ranging from approximately 14 to over 30 stuck jobs across multiple users at a time.
 
-The problem persists even after users retry their print jobs or reboot their workstations. In some cases, a previous spooler restart or driver reinstall performed by support staff appeared to resolve the issue temporarily, but printing failures returned within hours or the next day. Stuck job counts in the affected queue have ranged from around fourteen to nearly thirty jobs across multiple user accounts, all showing the same driver-unavailable or offline status.
+Server-side investigation consistently reveals that the shared print queue is still mapped to an outdated, incomplete, or corrupt driver package rather than the current approved driver version. In several cases the stale mapping originated from a prior driver reinstall or scheduled update that left the queue pointing to a legacy or partially installed driver entry. Print Spooler service logs on the affected print servers show repeated "driver unavailable" errors, driver load failures with CRC or checksum validation errors, and spooler crash events confirming that the resident driver package is corrupt or inconsistent.
 
-The issue is confined to a specific shared print queue on the print server rather than affecting all printers or all queues on that server. Other printers and queues hosted on the same server typically continue to function normally. Affected users are generally concentrated on a single floor or within a single department — such as Engineering or Finance — that shares the problematic queue.
+In at least one instance, a spooler restart and queue clear on the print server provided only temporary relief, with jobs returning to a stuck-at-0% state and the printer reverting to offline within approximately 24 hours. The recurrence rendered restart-based workarounds ineffective as a lasting solution. Individual workstation troubleshooting has no effect because the driver mismatch or corruption exists on the print server's queue-to-driver mapping. Incomplete remediation of the server-side driver and queue configuration has led to repeat occurrences after prior incidents were closed.
 
 !!! note "Reported variations"
 
-    - In some cases the installed driver package on the print server is also corrupt (failing checksum or CRC validation), meaning both the stale mapping and the driver integrity issue must be addressed before printing resumes.
-    - A prior remediation or driver reinstall may have replaced the driver files without correcting the queue's internal mapping, causing the issue to recur shortly after the earlier fix appeared successful.
-    - Some affected users see the printer status as "offline" rather than "Driver unavailable," with jobs stalling at zero percent and the print spooler on the server crashing and restarting repeatedly.
-    - The stale mapping may reference a legacy driver type (such as PCL5 instead of the approved PCL6 package) or an outdated driver identifier left behind by a scheduled deployment.
+    - Windows Print Spooler Event ID 372 logged repeatedly on the print server, accompanied by spooler service errors following a prior driver reinstall
+    - Queue mapped to a legacy driver variant (e.g., PCL5 instead of the approved PCL6 package) despite the correct driver being present in the central repository
+    - Driver package corruption manifesting as CRC mismatch or checksum validation failures in server event logs, potentially caused during a scheduled update window
+    - Spooler restart alone fails to resolve the issue when the underlying driver package is corrupt or the queue path references a stale server-side entry
+    - Recurrence of the issue after a previous incident was closed, indicating incomplete remediation of the queue-to-driver association on the print server
+    - Temporary relief after spooler restarts consistently degraded within approximately 24 hours, with the queue returning to its stuck or offline state
+    - The issue was reproducible from multiple device types, including both workstations and laptops connecting to the same shared queue
 
 ## Affected environment
 
@@ -38,7 +41,7 @@ Distribution across 6 reported cases:
 
 ## Root cause
 
-A shared print queue on the print server remains mapped to an outdated, incorrect, or missing printer driver entry even though an approved driver package may already be installed on the server. This mismatch — often left behind after a driver update, reinstall, or scheduled deployment — causes the Windows Print Spooler to fail driver validation when processing jobs, resulting in "driver unavailable" errors and preventing any jobs in that queue from completing. In some instances, the older driver package referenced by the queue is also corrupt, compounding the failure.
+A shared print queue on the affected print server remained mapped to an outdated, corrupt, or mismatched printer driver package—typically left behind after a partial driver reinstall or scheduled update. The stale queue-to-driver association caused the Windows Print Spooler to fail driver validation, reject driver loading, and leave submitted jobs stuck in the queue.
 
 ## Diagnostics
 
@@ -73,7 +76,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale queue-to-driver mapping" when reporting it.
+Resolved by IT by reinstalling the approved printer driver package and correcting the queue-to-driver mapping on the print server.
 
 ---
 

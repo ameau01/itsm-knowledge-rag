@@ -8,23 +8,23 @@ curated: true
 self_serviceable: false
 ---
 
-# Mismatched certificate bound to load balancer causing hostname validation failures
+# Wrong Certificate Bound to Load Balancer Causing Hostname Validation Failures
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to access internal web services through the load balancer encountered TLS certificate warnings and connection errors. The issue presented differently depending on the client: some users saw browser-level certificate warnings, while others experienced outright connection failures with hostname mismatch or trust validation errors such as ERR_SSL_PROTOCOL_ERROR. The affected endpoints included both the internal web portal and the service API, and the issue also disrupted automated integrations such as the payroll sync service.
+Internal users and automated dependent services experienced TLS failures when connecting to internal web and API endpoints through an F5 load balancer. Browser-based users encountered certificate warnings and SSL protocol errors, while automated integrations such as a payroll sync service failed with hostname mismatch and trust validation errors. The failures affected all traffic routed through the load balancer virtual IP in the affected region, even though the certificate bound to the endpoint was valid and not expired.
 
-The outage occurred despite a recent certificate deployment that the service team believed had completed successfully. Monitoring systems did not flag the problem because they were configured to check for certificate expiration only, not for hostname mismatches. As a result, the incorrect binding went undetected until end users and dependent services began reporting failures.
+The root cause was that a valid certificate belonging to a different internal service had been bound to the load balancer instead of the certificate matching the expected hostnames. Because the certificate's common name did not match the requested endpoints, TLS handshake validation failed for all clients enforcing hostname verification. Some clients reported a generic expired-certificate error code rather than a hostname mismatch, depending on the TLS library and validation behavior of the connecting application.
 
-Initial reports were escalated from an office user through the infrastructure on-call channel. Investigation confirmed that the load balancer was serving a valid certificate, but one that belonged to a different internal service, causing hostname validation to fail for all clients connecting to the affected endpoints.
+The organization's certificate monitoring platform did not flag the condition because its checks were limited to certificate expiry rather than hostname or binding correctness. Monitoring continued to report the previous certificate chain fingerprint on the affected endpoint without raising an alert, effectively masking the misconfiguration.
 
 !!! note "Reported variations"
 
-    - Some clients displayed browser certificate warnings while others failed outright with protocol-level errors such as ERR_SSL_PROTOCOL_ERROR, depending on the client's TLS validation behavior.
-    - Automated service integrations (e.g., payroll sync) failed silently or with trust validation errors rather than producing user-visible warnings.
-    - Multiple hostnames served through the same load balancer virtual server were affected simultaneously because they all relied on the same certificate binding.
+    - Monitoring continued to report the old certificate chain fingerprint on the affected endpoint without raising an alert, masking the misconfiguration.
+    - No change record was logged for the load balancer certificate binding during the most recent renewal window, leaving the incorrect binding undetected by change-management processes.
+    - Some clients reported a generic expired-certificate error code rather than a hostname mismatch, depending on the TLS library and validation behavior of the connecting application.
 
 ## Affected environment
 
@@ -37,7 +37,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The load balancer was updated with a valid, current certificate, but the certificate that was bound to the virtual server belonged to a different internal service. Because the certificate's common name did not match the hostnames of the endpoints being served, clients rejected the connection with hostname mismatch errors. The organization's certificate monitoring system did not detect the problem because it was configured to alert only on certificate expiration, not on hostname mismatches.
+The F5 load balancer was updated with a current certificate that did not match the internal web service endpoint name. Although the renewal process completed successfully, the wrong certificate asset was bound to the virtual server, causing hostname validation failures for connecting clients.
 
 ## Diagnostics
 
@@ -61,7 +61,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'wrong certificate bound to load balancer endpoint' when reporting it.
+Resolved by IT; incorrect certificate binding on F5 load balancer caused TLS hostname validation failures for internal web and API endpoints.
 
 ---
 

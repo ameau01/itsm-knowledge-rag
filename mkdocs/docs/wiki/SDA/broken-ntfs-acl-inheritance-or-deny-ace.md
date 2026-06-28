@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# Finance shared drive access denied due to broken NTFS permission inheritance or conflicting deny entries
+# Broken NTFS Inheritance or Explicit Deny ACE on Shared Folder
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to open a Finance shared drive from a mapped network drive or direct path on their Windows workstation are prompted for credentials and then receive an "Access is denied" error. The issue prevents users from listing or opening files in the Finance department folder needed for normal work. The credential prompt and denial persist even after signing out and back in, disconnecting and remapping the drive, or clearing saved credentials. Attempting access from a different workstation with the same account produces the same result.
+Affected users attempting to open a Finance department shared drive from Windows 10 workstations encounter a credential prompt followed by an "Access is denied" error (in some cases error code 0x80070005). The issue prevents users from listing or opening files within the Finance folder path, despite their Active Directory accounts holding confirmed membership in the appropriate file-access security groups. The problem persists after standard client-side remediation steps such as signing out and back in, clearing cached SMB credentials, disconnecting and remapping the network drive, and even attempting access from a different workstation — indicating a server-side rather than client-side cause.
 
-The issue typically affects individual users rather than the entire Finance team. Colleagues on the same floor or in the same department may be able to access the share without difficulty, which can make the problem appear account-specific. In some cases, affected users have recently had a group membership change or access update applied, yet the denial continues despite the update being confirmed as complete.
+Investigation consistently reveals that the affected users' AD group memberships and directory replication are correct across all domain controllers. However, NTFS ACL review on the file server discloses broken permission inheritance on the Finance folder or an explicit deny access control entry (ACE) on a parent or target folder that overrides the group-based allow permissions. In at least one case, the deny ACE was traced to a bulk permission change that inadvertently applied an explicit deny entry for a Finance security group. File server access logs corroborate the denial, recording NT_STATUS_ACCESS_DENIED events for the affected users' security identifiers even after group membership updates are confirmed.
 
-IT verification consistently shows that the affected user already holds the correct Active Directory security group membership for the Finance share, and that group membership has fully replicated across domain controllers. Standard client-side remediation steps — such as refreshing the user session, clearing cached credentials, and remapping the drive — do not resolve the issue on their own. File server logs continue to record access-denied events for the user's account even after these steps, pointing to a server-side permissions problem rather than a user identity or credential issue.
+Colleagues on the same Finance team who belong to a legacy or alternate security group that is separately listed on the folder ACL are unaffected, which initially makes the issue appear account-specific. No client-side changes alone restore access; the issue is resolved only after server-side ACL corrections are applied.
 
 !!! note "Reported variations"
 
-    - In some cases the mapped drive initially reconnects successfully, but the access-denied error appears only when the user navigates into a specific department subfolder rather than at the top level of the share.
-    - Some affected users experience intermittent access-denied behavior rather than a consistent block, with the Finance folder accessible in some sessions but not others, due to inconsistent effective permissions caused by the broken inheritance.
-    - In at least one instance, a colleague's account was unaffected because it belonged to a legacy security group that was still present on the folder's access control list, while the current group had been dropped due to the inheritance break.
+    - In some cases the mapped drive reconnects successfully at the share level, but the "Access is denied" error appears only when navigating into a specific department subfolder beneath the Finance share.
+    - File server logs in certain instances record intermittent rather than consistent NTFS permission errors, with access occasionally succeeding briefly after a token refresh before failing again on subsequent attempts.
+    - At least one case involved a colleague's access functioning normally because the colleague's account belonged to a legacy security group that remained on the folder ACL, while the current standard group was missing from the ACL entirely.
+    - In one instance, initial access restoration steps (credential cleanup and drive remap) appeared to resolve the issue in a remote test session, but file server logs continued to record deny events, revealing a deeper ACL inconsistency.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 5 reported cases:
 
 ## Root cause
 
-The file server's folder-level permissions (NTFS access control lists) on the Finance shared drive are misconfigured. Specifically, permission inheritance on the Finance folder has been broken or removed, and in some cases an explicit deny entry has been applied to the folder or a parent folder that overrides the allow permissions granted through the user's Active Directory security group. Because deny entries take precedence over allow entries in Windows file permissions, the user is blocked from access even though their group membership is correct. The misconfiguration has been traced in some instances to a bulk permission change that inadvertently introduced conflicting deny entries.
+NTFS permissions on the Finance department shared folder were misconfigured. The expected security group was either absent from the folder ACL due to broken or removed permission inheritance, or an explicit deny ACE on a parent or target folder overrode the allow permissions granted through the group. Affected users held valid AD group membership, but the file server's effective permissions denied access because of the conflicting ACL configuration. In one case, a folder/share ACL inheritance mismatch continued to deny the user's SID even after correct group membership was confirmed and applied.
 
 ## Diagnostics
 
@@ -72,7 +73,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "Finance share access denied – NTFS ACL inheritance" when reporting it.
+Resolved by IT through server-side NTFS ACL remediation, removing the erroneous explicit deny ACE and restoring proper permission inheritance on the affected folder hierarchy.
 
 ---
 

@@ -8,23 +8,24 @@ curated: true
 self_serviceable: false
 ---
 
-# BitLocker compliance mismatch due to MDM sync failure with Intune
+# BitLocker Enabled Locally but Intune Reports Noncompliant Due to Escrow and Compliance Reporting Desynchronization
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users find that their managed Windows laptops are reported as noncompliant for disk encryption in Microsoft Intune and the Company Portal, even though BitLocker is confirmed as enabled locally on the device's OS drive. The device may show encryption as fully complete when checked directly (for example, via local status tools), yet Intune continues to display a status such as "EncryptionNotEnabled" or "NotEncrypted." The BitLocker recovery key is not visible in Azure AD or Intune, leaving IT support unable to confirm or retrieve the key through normal management channels.
+Affected users with managed Windows 10 laptops — including at least one Surface Laptop 4 — report that BitLocker disk encryption is confirmed as fully enabled locally on the OS volume, yet Microsoft Intune continues to display the device as noncompliant with an "EncryptionNotEnabled" status. Recovery keys are not visible in Azure AD or Intune escrow, preventing support teams from confirming key availability and leaving the devices in a blocked compliance state. In each case, the local endpoint shows BitLocker active on the system drive with encryption complete, but the management console does not reflect this.
 
-In some cases, the local BitLocker configuration itself is incomplete — for instance, only a numerical password protector may be present on the drive with no hardware-bound TPM protector, despite the TPM being reported as ready. In other cases, the TPM protector and local encryption are fully healthy, but a device synchronization error prevents the recovery key from being transmitted to the management service. Either way, the result is the same: the device appears noncompliant in Intune, the recovery key is missing from the management portal, and the affected user may be flagged during compliance reviews.
+The underlying causes documented across these tickets differ. In one case, Azure AD confirmed a recovery key escrow event, but the Intune compliance service backend continued to report the device as not encrypted — a reporting synchronization mismatch that persisted after all endpoint-side remediation was confirmed complete and required escalation to the backend compliance service team. In a second case, local BitLocker was active but the key protector configuration was incomplete: manage-bde output revealed only a Numerical Password protector with no TPM protector bound, explaining why Intune still reported the device as unencrypted. In a third case, the device had a valid TPM 2.0 protector and full local encryption, but the recovery key failed to escrow because the device encountered an MDM sync error (0x80180014) during its last several scheduled check-ins, preventing the compliance state from updating.
 
-The issue has been observed on devices in the Sales group covered by corporate BitLocker policies, across multiple office locations and device models including Surface Laptop 4 hardware. Affected users typically notice the problem when checking their compliance status in the Company Portal, during routine compliance reviews, or when attempting to verify recovery key availability before travel or client engagements. Manual Intune sync attempts initiated by the user from the device do not resolve the discrepancy.
+Despite differing technical causes, the user-facing presentation is consistent: Intune shows noncompliant encryption status, recovery keys are absent from the management portal, and affected devices are flagged during compliance reviews.
 
 !!! note "Reported variations"
 
-    - The device may show a specific MDM sync error (such as error code 0x80180014) across multiple scheduled check-ins, completely blocking recovery key escrow despite healthy local encryption and TPM status.
-    - In some cases, the TPM protector is not bound to the encrypted drive — only a numerical password protector exists — even though the TPM hardware is ready, resulting in an incomplete protector configuration that compounds the compliance reporting gap.
-    - Azure AD may log a recovery key escrow event for the device while Intune simultaneously continues to report the device as not encrypted and does not display the key, creating a visibility mismatch between the two management surfaces.
+    - In one case, the Intune compliance backend continued to report "NotEncrypted" even after Azure AD confirmed a successful recovery key escrow event, indicating a backend reporting desync rather than an endpoint-side issue.
+    - One affected device (Surface Laptop 4) had BitLocker enabled locally but lacked a TPM protector binding, with only a Numerical Password protector present, representing a protector initialization gap.
+    - One device logged MDM sync error 0x80180014 across multiple consecutive scheduled check-ins, directly preventing recovery key escrow to Azure AD.
+    - In one case, the Company Portal app explicitly displayed a "last sync failed" status to the affected user.
 
 ## Affected environment
 
@@ -37,7 +38,7 @@ Distribution across 3 reported cases:
 
 ## Root cause
 
-BitLocker encryption starts successfully on the device, but intermittent synchronization failures between the device and the Intune mobile device management (MDM) service prevent the recovery key from being properly transmitted to Azure AD and Intune. This leaves encryption active locally while the management systems have no record of the recovery key and continue to report the device as not encrypted. In some instances, the device's BitLocker protector configuration is also left incomplete — missing the hardware-bound TPM protector — because the management sync did not fully reconcile before or after encryption was initiated.
+Three distinct root causes were identified across affected devices. First, a backend compliance reporting desync occurred where Azure AD had successfully received a recovery key escrow event, yet the Intune compliance service continued to report the device as not encrypted — a mismatch between backend services rather than an endpoint-side failure. Second, BitLocker activated before the management state had fully reconciled, resulting in an incomplete protector configuration: the TPM protector binding was never established, leaving only a Numerical Password protector, which caused Intune to treat the device as noncompliant. Third, an MDM sync error (0x80180014) prevented the device from communicating with Intune across multiple consecutive check-ins, blocking recovery key escrow to Azure AD entirely and leaving the compliance state stale.
 
 ## Diagnostics
 
@@ -73,7 +74,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'MDM sync failure causing BitLocker compliance mismatch' when reporting it.
+Resolved by IT through backend compliance service escalation, protector re-initialization, or MDM sync remediation depending on the underlying cause; reference "BitLocker escrow and compliance reporting desynchronization" when reporting.
 
 ---
 

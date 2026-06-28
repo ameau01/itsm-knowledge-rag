@@ -8,22 +8,22 @@ curated: true
 self_serviceable: true
 ---
 
-# Mapped drive targeting retired file server path causes access denial
+# Mapped Drive Targeting Retired UNC Path After File Server Migration
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience "Access Denied" errors (error code 0x5) when attempting to open files on a mapped network drive — in reported cases, the Finance shared drive mapped as the F: drive. The denial may be accompanied by intermittent credential prompts that persist even after the user enters valid credentials. Attempts to access subfolders within the share (such as Reconciliation or Reports directories) fail in the same way.
+Affected users experience "Access Denied" errors (0x5) when attempting to open a shared network drive via a mapped drive letter. The same error may also occur when navigating directly to the correct current UNC path in Windows Explorer. All subfolders within the share are equally inaccessible, and the issue persists regardless of the access method used.
 
-Because the user's group membership and permissions are actually valid, the issue can initially appear identical to a permissions or credential problem. Colleagues in the same department may have no trouble accessing the same share, which can make the problem seem isolated to a single workstation or user session. Standard troubleshooting steps such as signing out, refreshing authentication tokens, or re-entering credentials do not resolve the error.
+Intermittent credential prompts appear during access attempts, but entering valid domain credentials does not resolve the error. Active Directory group membership for the affected user is verified as correct, and entitlement checks confirm the user should have access to the share.
 
-On closer examination, the mapped drive letter is found to be pointing to an outdated or retired server path (for example, a UNC path belonging to a file server that was decommissioned during a prior migration or consolidation) rather than the current, active share path. The stale mapping causes all access attempts through that drive letter to be directed to the wrong location, producing access-denied behavior even though the user has the correct permissions on the current share.
+The issue is isolated to the individual workstation; colleagues in the same department and security group retain normal access to the share, indicating the problem is specific to the affected user's session or drive configuration rather than a broader permissions or server-side outage.
 
 !!! note "Reported variations"
 
-    - Some affected users may also see credential prompts when attempting to access the share directly via the correct UNC path, due to stale cached credentials associated with the old server name lingering on the workstation.
-    - The issue may surface only after a file server migration or consolidation, affecting users whose drive mappings were not updated as part of the transition.
+    - The mapped drive letter points to a retired UNC path from a previous file server migration, while the user believes it references the current server; the direct UNC path to the correct server also fails due to stale cached credentials associated with the outdated path.
+    - Credential prompts appear intermittently rather than consistently, and supplying correct credentials each time still results in Access Denied.
 
 ## Affected environment
 
@@ -36,7 +36,7 @@ Distribution across 1 reported cases:
 
 ## Root cause
 
-The user's mapped network drive was configured with a UNC path pointing to a retired file server that was decommissioned during a previous server consolidation. Because the old path is no longer valid, any access attempt through the mapped drive is directed to the wrong location, resulting in access-denied errors despite the user holding correct group membership and permissions on the current share.
+The affected user's mapped drive was pointing to a stale or retired Finance share path from a previous file server migration. The outdated UNC location produced Access Denied behavior despite valid group membership. Cached credentials associated with the retired path also prevented successful authentication when the user attempted to reach the correct server directly.
 
 ## Diagnostics
 
@@ -59,7 +59,7 @@ Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference "stale or incorrect mapped share path" when reporting it.
+The issue was resolved by IT after identifying and correcting a mapped drive that referenced a retired UNC path from a prior file server migration.
 
 ---
 

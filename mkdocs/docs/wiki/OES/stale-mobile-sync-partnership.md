@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Stale Outlook Mobile Sync Partnership Blocking Exchange Online Email
+# Stale Mobile Sync Partnership Blocks Outlook Mobile Email
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users experience Outlook on their mobile device (iPhone or Android) entering a "Disconnected" state or displaying stale inbox content, with new messages no longer appearing on the device. The issue typically begins without a clear in-app error message, and standard self-service steps such as restarting the Outlook app, rebooting the device, or removing and re-adding the account may not restore sync. In most cases the mobile inbox appears frozen at a point in time — sometimes hours or a full day behind — while the user's other mail access points continue to work normally.
+Affected users experience a failure of Outlook mobile to synchronize their Exchange Online mailbox on managed iOS or Android devices. The Outlook mobile app displays a persistent or intermittent "Disconnected" status, and new messages stop appearing on the device. The mobile inbox appears frozen, showing only older messages, with the last-synced timestamp falling progressively behind. Restarting the app, force-closing it, or rebooting the device does not restore synchronization, and typically no explicit error code is presented to the user.
 
-Desktop Outlook and Outlook on the web (OWA) remain fully functional for the same mailbox, which confirms that the Exchange Online mailbox itself is healthy and that the problem is isolated to the mobile client path. Colleagues on the same network and mail platform are typically unaffected, further narrowing the issue to the individual device rather than a broader service disruption.
+The issue is isolated to the mobile sync path. Other clients — desktop Outlook, Outlook on the web — continue to function normally for the same mailbox. Exchange Online service health dashboards show no active incidents, no mailbox throttling is present, and Intune device compliance checks return a compliant status with no pending policy violations. The combination of healthy webmail access, normal desktop connectivity, and compliant device status narrows the fault to the mobile sync relationship between the Outlook mobile app and Exchange Online.
 
-The issue has been observed following iOS updates, Intune device compliance changes, and desktop Outlook profile rebuilds, though in some cases no specific triggering event is apparent. Affected users are generally on managed (Intune-enrolled) devices and rely on mobile Outlook for field or travel-based work, making the loss of mobile email access operationally disruptive.
+Diagnostic evidence in these cases includes stale last-sync timestamps on the Exchange Online mobile device partnership entries, HTTP 401 authentication errors in sync logs, and repeated failed sync sessions — all occurring despite the device reporting as compliant in Intune. In several cases the condition appears to have been triggered by a device-level change such as an iOS update, an Intune compliance policy transition, or a preceding desktop Outlook profile rebuild, after which the existing mobile partnership fails to re-establish properly.
 
 !!! note "Reported variations"
 
-    - Both mobile devices (iPhone and Android) may be affected simultaneously for users who access the same mailbox from multiple mobile clients, with each device requiring its own partnership reset.
-    - The issue may follow a desktop Outlook profile rebuild, where the desktop client recovers but the mobile sync partnership remains stale and requires separate remediation.
-    - An Intune compliance update or policy change may trigger the stale partnership condition, with the device returning to compliant status in Intune while Exchange Online continues to log mobile client disconnects.
-    - Some users report the Outlook mobile app intermittently flipping between Connected and Disconnected states rather than remaining consistently disconnected.
-    - In dual-client failure scenarios, the desktop Outlook client may also show a disconnected state with credential prompts, requiring a separate desktop profile rebuild alongside the mobile partnership reset.
+    - In one case, both the desktop Outlook client and the mobile client were affected simultaneously, with the desktop showing a disconnected state, repeated credential prompts, and send/receive failures due to an outdated cached profile alongside the stale mobile partnership.
+    - Some users reported the issue began immediately after accepting an Intune device compliance update, suggesting the compliance transition disrupted the existing mobile sync partnership.
+    - In at least one instance, the onset coincided with a major iOS version update, after which the mobile inbox ceased receiving new messages.
+    - Exchange Online sync logs in one case showed repeated HTTP 401 authentication errors tied to the stale mobile partnership.
+    - A minor Intune compliance refresh was required on one device alongside the partnership rebuild, though no active conditional access block was in effect.
+    - A prior desktop Outlook profile rebuild was identified as a preceding event in one case, after which desktop sync recovered but mobile devices did not.
+    - In one case, a user's self-service account removal and re-add on the mobile client did not resolve the issue; server-side ActiveSync partnership clearance and profile rebuild were required. In a separate case, removing and re-adding the account on the mobile client alone resolved the issue without documented server-side partnership removal.
+    - One incident involved both an iOS and an Android device simultaneously stuck in a disconnected state for the same mailbox, with both mobile partnership entries showing stale last-sync timestamps.
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 9 reported cases:
 
 ## Root cause
 
-The mobile device's sync relationship (ActiveSync partnership) with Exchange Online becomes stale or invalid, preventing the Outlook mobile app from maintaining a healthy connection to the mailbox. This can occur after an iOS or Android update, a device compliance state change in Intune, or a desktop Outlook profile rebuild that does not automatically refresh the mobile-side partnership. In some cases a minor device compliance status drift also needs to be refreshed before the mobile sync session can fully recover.
+A stale Outlook mobile profile or invalid Exchange Online ActiveSync device partnership prevents the mobile client from maintaining a healthy sync session. The condition affects both iOS and Android platforms and is isolated to the mobile sync path rather than indicating a mailbox-wide Exchange Online outage. In observed cases the staleness was triggered by events such as an iOS update, an Intune compliance policy change, or a desktop profile rebuild, after which the existing mobile partnership failed to re-negotiate authentication successfully.
 
 ## Diagnostics
 
@@ -74,7 +77,7 @@ Performed by IT support. Representative resolutions from prior cases:
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'stale mobile sync partnership' when reporting it.
+Resolved by IT clearing the stale Exchange Online mobile device partnership and rebuilding the Outlook mobile profile, after which synchronization resumed and current mail began flowing to the device.
 
 ---
 

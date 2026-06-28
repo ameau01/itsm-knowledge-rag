@@ -8,25 +8,28 @@ curated: true
 self_serviceable: false
 ---
 
-# Shared drive access denied due to missing Active Directory security group membership
+# Missing AD Security Group Membership Denies Department Share Access
 
 [← Back to categories](../../index.md)
 
 ## Description
 
-Affected users attempting to open a department shared drive — typically via a mapped network drive letter or a direct UNC path in Windows Explorer — encounter a credentials prompt followed by an "Access is denied" error (commonly error code 0x80070005 or 0x5). Re-entering domain credentials does not resolve the prompt, which loops or fails repeatedly. The issue prevents access to department files on the on-premises file server, while other network shares and resources on the same workstation continue to function normally.
+Affected users report being unable to open departmental shared drives (most commonly Finance, but also HR, Engineering, and other department folders) from mapped drive letters or direct UNC paths on domain-joined Windows workstations. Access attempts prompt for credentials and then return an "Access is denied" error (0x80070005 / NT_STATUS_ACCESS_DENIED). In some cases the credential prompt loops repeatedly before ultimately failing. Other network shares not gated by the same security group remain accessible, and colleagues in the same department and office can open the identical share without difficulty, confirming the issue is account-specific rather than a file server or network outage.
 
-The problem is specific to the affected user's account rather than a general file server outage. Colleagues on the same team, in the same office, and on the same network subnet are typically able to access the same shared folder without difficulty. Clearing saved credentials from Windows Credential Manager, remapping the drive, or signing out and back in does not restore access on its own, which distinguishes this issue from a stale cached credentials problem.
+Standard self-remediation steps — signing out and back in, clearing cached credentials via Credential Manager, and remapping the drive — do not resolve the issue. This persistence distinguishes the problem from stale-credential scenarios and points to a server-side entitlement gap. In at least one case the mapped drive shows a "Disconnected" status, and in another the file server audit log contains explicit NTFS access-denied entries for the affected user's SID.
 
-This issue has been observed across multiple departments — including Finance, Marketing, HR, and Engineering — and across various file servers and share paths. Common triggers include recent onboarding or team transfers where the required security group was not provisioned, Active Directory group cleanup or synchronization events that inadvertently removed the user's group membership, and automated group management scripts that dropped entitlements as a side effect of unrelated group changes. In each case, the shared drive's access controls require membership in a specific Active Directory security group, and the affected user's account is not a current member of that group.
+Investigation in every instance reveals that the affected user's Active Directory account is missing membership in the department-level security group referenced by the share and NTFS ACLs. The absence stems from varied circumstances: incomplete onboarding or inter-department transfer provisioning, automated AD group synchronization or cleanup scripts that inadvertently removed the membership, or an access request that had not yet been fulfilled. Without the group SID in the user's Kerberos token, the file server denies authorization regardless of valid credentials.
 
 !!! note "Reported variations"
 
-    - In some cases, the credentials prompt appears intermittently rather than on every access attempt, with the "Access is denied" error following inconsistently.
-    - Users who recently transferred between departments may find that only the new department's shared drive is inaccessible while access to other network shares — including the previous department's share — continues to work.
-    - In at least one instance, a follow-up audit of the file server revealed broken ACL inheritance on subfolders beneath the shared drive, which affected additional users beyond the one whose missing group membership was restored; this subfolder permissions issue is a separate remediation item.
-    - Some users report that the issue began immediately after an organization-wide Active Directory group cleanup or synchronization window, with access having worked normally the previous day.
-    - An automated group management script removing a user from one project-level group has been observed to inadvertently drop the user's membership in the file share access group as a side effect of nested group cleanup.
+    - Missing group membership caused by an onboarding or inter-department transfer process that did not include the required shared-drive entitlement
+    - Missing group membership triggered by a scheduled AD group audit or cleanup that inadvertently removed the user from a still-required group
+    - Missing group membership caused by an automated nested-group cleanup script or AD synchronization event that dropped the share entitlement
+    - Access request submitted through a self-service portal had not yet been provisioned into Active Directory
+    - Affected user could browse to the top-level share path but was denied access only at a specific subfolder rather than at the share root
+    - Credential prompt looped repeatedly before ultimately returning access denied, rather than presenting a single prompt followed by immediate denial
+    - Affected user tested access from a colleague's workstation and observed the same denial, confirming the issue followed the account
+    - A separate broken-ACL-inheritance issue on subfolders was identified during investigation but was unrelated to the individual user's missing group membership
 
 ## Affected environment
 
@@ -39,7 +42,7 @@ Distribution across 23 reported cases:
 
 ## Root cause
 
-The affected user's Active Directory account is missing membership in the security group that controls access to the department shared drive. Because the file server's share and folder permissions grant access exclusively through that group, the user's sign-in token does not carry the required entitlement, and the file server correctly denies access. The missing membership may result from an incomplete onboarding or team-transfer provisioning process, an Active Directory group cleanup or synchronization event that removed the user, or an automated script that inadvertently dropped the entitlement alongside an unrelated group change.
+The affected user's Active Directory account was not a member of the security group required by the department shared drive's share-level and NTFS access control lists. Because the group SID was absent from the user's logon token, the file server denied authorization even though authentication succeeded. The missing membership resulted from provisioning gaps during onboarding or role transfers, automated AD group cleanup scripts, or unfulfilled access requests.
 
 ## Diagnostics
 
@@ -66,15 +69,15 @@ Performed by IT support. Representative resolutions from prior cases:
 
 **Example 2**
 
-1. Reviewed the effective access requirements for \\CorpFiles\\Finance and confirmed that user <USER> (<PERSON>, employee ID <EMP_ID>) was not a member of the FINANCE_Share_Access Active Directory security group by querying CN=<USER>,OU=Finance,DC=corplabs,DC=internal.
-2. Added <USER> to the FINANCE_Share_Access group via Active Directory Users and Computers to restore the required share and NTFS entitlement for the Finance folder. Change approved by manager <PERSON> (<EMAIL>).
-3. Had <PERSON> sign out of the Windows domain session on <HOSTNAME> and sign back in so the refreshed Kerberos logon token would include the updated FINANCE_Share_Access group membership.
-4. Verified NTFS permissions and inheritance on \\CorpFiles\\Finance to confirm the FINANCE_Share_Access group retained the expected Modify access level; icacls output showed the correct ACE propagating to child objects.
-5. Retested access with <PERSON> from <HOSTNAME> (<IP>) and confirmed the Finance shared drive (F: mapped to \\CorpFiles\\Finance) opened successfully without additional credential prompts or access denied errors.
+1. Verified the share and folder ACL on \\fs01\Finance granted access through the Finance_Read security group by reviewing the NTFS permissions and share-level permissions on the file server.
+2. Added user <USER> (<EMP_ID>, CN=<USER>,OU=Finance,OU=Corp Users,DC=corplabs,DC=internal) to the Finance_Read Active Directory security group required for read access to the Finance shared drive. Updated the onboarding checklist and notified manager <PERSON> (<EMAIL>) of the correction.
+3. Cleared cached credentials on the user's workstation <HOSTNAME> via Windows Credential Manager to remove the repeated credential prompt against the mapped drive (F:) to \\fs01\Finance.
+4. Had the user sign out and sign back in on <HOSTNAME> so the updated Finance_Read group membership was included in a new Kerberos access token. Verified with 'klist' that the refreshed token contained the correct group SID.
+5. <PERSON> the network drive (F:) to the current \\fs01\Finance path on <HOSTNAME> and confirmed that user <USER> could open the Finance folder successfully. <PERSON> (<USER>) from the same team verified shared access was unaffected.
 
 ## Recommendation
 
-This issue is resolved by IT support; reference 'missing AD security group membership for shared drive' when reporting it.
+Resolved by IT by adding the affected user's account to the required Active Directory security group and refreshing the logon session to obtain an updated Kerberos token containing the correct group entitlement.
 
 ---
 
