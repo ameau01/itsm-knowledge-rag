@@ -1,6 +1,6 @@
 # ITSM Knowledge RAG
 
-[![Status](https://img.shields.io/badge/status-v0.1.0%20in%20progress-yellow)](#project-status)
+[![Status](https://img.shields.io/badge/status-v1.0.0-brightgreen)](#project-status)
 [![Live demo](https://img.shields.io/badge/Live_demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://itsm-knowledge-rag-ameau01.streamlit.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face%20Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
@@ -9,24 +9,25 @@
 [![eval](https://img.shields.io/badge/eval-DeepEval%20%2F%20G--Eval-9cf)](https://deepeval.com/guides/guides-rag-evaluation)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 [![CI](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml/badge.svg)](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml)
-[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 
 **Turns a company's closed IT tickets into searchable, verifiable answers, so problems that have already been solved don't get solved from scratch again. It recommends; the agent decides.**
 
 Similarity is not relevance. A search engine ranks tickets that look alike, but two tickets can read the same and be different problems. So this system does not stop at search. It curates an organization's own resolution history into verified answers, then surfaces the source tickets underneath so an agent can confirm before acting. A general model can describe standard VPN troubleshooting. It cannot know that in this company the disconnect was an expired device certificate fixed through the internal enrollment service. That fact lives only in the company's tickets.
 
+Most RAG systems would stop at retrieving those raw ticket fragments. This system first turns the messy history into one coherent, searchable answer per root cause, then shows the source tickets underneath so an agent can verify before acting.
+
 <p align="center">
-  <b><a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Live demo — agent search</a></b>
+  <b><a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Live demo: agent search</a></b>
   &nbsp;&nbsp;·&nbsp;&nbsp;
-  <b><a href="https://ameau01.github.io/itsm-knowledge-rag/">Live wiki — employee pages</a></b>
+  <b><a href="https://ameau01.github.io/itsm-knowledge-rag/">Live wiki: employee pages</a></b>
 </p>
 
 ![Agent search showing an AI Overview marked high confidence and synthesized from 11 consolidated tickets, with a common pattern, scope and variation, how the issue is identified, and verbatim diagnostic steps from the playbook below](docs/images/ai-overview.png)
 
-<p align="center"><i>The agent-facing search: an AI overview, then the ranked source tickets behind it — running live on a Qdrant Cloud index. <a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Try the search</a>.</i></p>
+<p align="center"><i>The agent-facing search: an AI overview, then the ranked source tickets behind it, running live on a Qdrant Cloud index. <a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Try the search</a>.</i></p>
 
+<p align="center"><i>Measured end to end: PII recall 98.9%, retrieval recall@10 0.649 (0.970 family), curation faithfulness 0.95 to 0.99, abstention 1.000. Detail in <a href="#results">Results</a>.</i></p>
 
 ## The problem
 
@@ -39,7 +40,7 @@ The cost lands on both sides. Agents re-solve known issues. Employees wait on an
 
 ## What it does
 
-This project makes an organization's own resolution history usable again. It is a recommender for human agents, not an auto-resolver.
+This project turns an organization’s messy, duplicated support tickets into usable institutional knowledge. It is a recommender for human agents, not an auto-resolver.
 
 When a new support ticket arrives, the human support agent can search this system for similar issues. The system returns a quick overview of past resolutions. This summary highlights common symptoms, root causes, and successful fixes. Links to the original source tickets are also provided. The agent decides whether the new ticket is genuinely the same problem and reuses the proven resolution if it fits.
 
@@ -63,6 +64,8 @@ Closed tickets run through a pipeline. The result is served through a search int
 
 ## Results
 
+These metrics exist because the system is measured on whether it produces *usable institutional knowledge*, not just whether it retrieves similar-looking tickets.
+
 Measured on a synthetic corpus of 745 tickets across 14 issue families. The evaluation ground truth is frozen and committed: a canonical catalog of 14 families and 76 root causes with all 745 tickets assigned, a query set of 63 single-answer, 34 ambiguous, and 15 abstention questions, and a per-family abstention certification (210/210 probes returned null).  Redaction and retrieval numbers are measured. Full methodology and per-axis detail in [docs/evaluation.md](docs/evaluation.md), with retrieval detail in [docs/retrieval-evaluation.md](docs/retrieval-evaluation.md). The L2 curation detail in [docs/wiki-evaluation.md](docs/wiki-evaluation.md).
 
 | Axis | Metric | Result |
@@ -78,20 +81,20 @@ The PII-leakage check is the one hard, non-circular number. Its ground truth is 
 
 ## Quick start
 
-Three paths to run it yourself — or skip setup and open the hosted demo at **[itsm-knowledge-rag-ameau01.streamlit.app](https://itsm-knowledge-rag-ameau01.streamlit.app/)** (agent search on a Qdrant Cloud index). Full detail in [docs/running.md](docs/running.md).
+Three paths to run it yourself, or skip setup and open the hosted demo at **[itsm-knowledge-rag-ameau01.streamlit.app](https://itsm-knowledge-rag-ameau01.streamlit.app/)** (agent search on a Qdrant Cloud index). Full detail in [docs/running.md](docs/running.md).
 
 **Path A. Docker, mock mode (no LLM, no key, no network).**
 ```
 docker compose up rag-demo
 ```
-Loads the operational store from committed SQL seeds (tickets + curated overviews) and serves live local retrieval — no Hugging Face download, no redaction, no LLM key. (First run auto-builds the image; add `--build` to force a rebuild.)
+Loads the operational store from committed SQL seeds (tickets + curated overviews) and serves live local retrieval, with no Hugging Face download, no redaction, no LLM key. (First run auto-builds the image; add `--build` to force a rebuild.)
 
 **Path B. Docker, live ingest (real HF download + Presidio redaction).**
 ```
 cp .env.example .env   # config only — no LLM key needed
 docker compose up rag-live
 ```
-Builds the image, starts Qdrant, ingests the corpus with live redaction, applies the curated L2 content from the committed seeds, embeds, and serves the search app at http://localhost:8000. The first run downloads the corpus and the dense model (about 2 GB, cached in a volume). Retrieval is dense + sparse + RRF, all local. No LLM key is needed — curation and overviews ship as SQL seeds; a key is only for regenerating the seeds or running the judge eval.
+Builds the image, starts Qdrant, ingests the corpus with live redaction, applies the curated L2 content from the committed seeds, embeds, and serves the search app at http://localhost:8000. The first run downloads the corpus and the dense model (about 2 GB, cached in a volume). Retrieval is dense + sparse + RRF, all local. No LLM key is needed: curation and overviews ship as SQL seeds; a key is only for regenerating the seeds or running the judge eval.
 
 **Path C. Local, no Docker (developer).**
 ```
@@ -115,11 +118,11 @@ Plain `down` keeps the volumes, so the next `up` serves in seconds. `down -v` de
 
 The curated knowledge is also published as a static **MkDocs** site (one page per root cause), served separately from the search app and on its own port (`WIKI_VIEW_PORT`, default 8001). It reads the operational store, not the vector index, so it has no Qdrant dependency.
 
-It is deployed live on GitHub Pages: **[ameau01.github.io/itsm-knowledge-rag](https://ameau01.github.io/itsm-knowledge-rag/)** — built from the committed `mkdocs/` by a key-free `mkdocs build` (no LLM runs in CI).
+It is deployed live on GitHub Pages: **[ameau01.github.io/itsm-knowledge-rag](https://ameau01.github.io/itsm-knowledge-rag/)**, built from the committed `mkdocs/` by a key-free `mkdocs build` (no LLM runs in CI).
 
 ![The employee-facing wiki published on GitHub Pages: one root-cause page with the plain-language summary, affected-environment stats, diagnostics, and resolution examples](docs/images/wiki-github-page.png)
 
-<p align="center"><i>The employee-facing wiki, published on GitHub Pages. <a href="https://ameau01.github.io/itsm-knowledge-rag/">Open the live site</a>.</i></p>
+<p align="center"><i>The agent-facing search returns a synthesized overview — curated from the organization’s past resolutions — followed by the ranked source tickets for verification. <a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Try the live demo</a>.</i></p>
 
 ```
 docker compose up wiki-demo    # serve the committed mkdocs/ pages, no key, no DB, instant
@@ -158,16 +161,19 @@ Python, Qdrant (native dense + sparse fusion), AD directory match + format rules
 
 ## Project status
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/ameau01/itsm-knowledge-rag/releases)
-[![Status: In Progress](https://img.shields.io/badge/status-in%20progress-blue)](https://github.com/ameau01/itsm-knowledge-rag)
+[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)](https://github.com/ameau01/itsm-knowledge-rag/releases)
+[![Status: Stable](https://img.shields.io/badge/status-stable-brightgreen)](https://github.com/ameau01/itsm-knowledge-rag)
 
 
-In progress: 
-- The dataset is published and the design is documented. Implementation is in progress.
+Implementation complete, with a live agent-search demo and a published wiki.
+- LLM Wiki page is published on **[ameau01.github.io/itsm-knowledge-rag](https://ameau01.github.io/itsm-knowledge-rag/)**
+- Live search demo page is available at: ** [https://itsm-knowledge-rag-ameau01.streamlit.app](https://itsm-knowledge-rag-ameau01.streamlit.app/)"
+- The dataset is published and the design is documented. 
 - Published dataset with an authored PII sidecar: [`ameau01/synthetic-it-support-tickets`](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets).
 - Initial design documentation on docs/ folder.
-- Add Presidio redaction code to ingestion process, and deepeval for curation evaluation.
-- Add DeepEval and G-Eval to measure quality of Wiki pages and AI overview.
+- Added Presidio redaction code to ingestion process, and deepeval for curation evaluation.
+- Added DeepEval and G-Eval to measure quality of Wiki pages and AI overview.
+- Added Langraph workflow for LLM wiki curation.
 
 ## License
 
@@ -181,6 +187,6 @@ MIT.
   title   = {ITSM Knowledge RAG},
   author  = {Alexander Meau},
   year    = {2026},
-  version = {0.1.0}
+  version = {1.0.0}
 }
 ```

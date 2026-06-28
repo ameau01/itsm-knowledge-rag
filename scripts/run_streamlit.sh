@@ -1,15 +1,16 @@
 #!/usr/bin/env sh
 # run_streamlit.sh — Launch the Streamlit ticket-search app locally.
 #
-# Usage:
-#   uv run sh scripts/run_streamlit.sh                 # serve on :8501
-#   uv run sh scripts/run_streamlit.sh --port 8000     # custom port
-#   uv run sh scripts/run_streamlit.sh --help
+# Usage (always --no-sync: a bare `uv run` re-syncs to the default groups and strips the
+# optional `app`/`retrieval` groups this app needs, so launch it with --no-sync):
+#   uv run --no-sync sh scripts/run_streamlit.sh                 # serve on :8501
+#   uv run --no-sync sh scripts/run_streamlit.sh --port 8000     # custom port
+#   uv run --no-sync sh scripts/run_streamlit.sh --help
 #   Any extra args after the script are passed straight to `streamlit run`.
 #
 # Prerequisites:
-#   uv sync --group app                  # installs streamlit (the `app` group)
-#   uv run sh scripts/run_ingest.sh      # populates the SQLite store the app reads
+#   uv sync --group app --group retrieval   # streamlit + live hybrid retrieval (Qdrant + embed)
+#   uv run --no-sync sh scripts/run_ingest.sh   # populates the SQLite store the app reads
 #
 # Environment (read from the shell or a project-root .env, which is sourced here):
 #   OPERATIONAL_STORE   SQLite store directory (default: .operational_store)
@@ -27,20 +28,21 @@ case "${1:-}" in
 run_streamlit.sh — Launch the Streamlit ticket-search app locally.
 
 USAGE
-    uv run sh scripts/run_streamlit.sh [OPTIONS] [-- STREAMLIT_ARGS...]
+    uv run --no-sync sh scripts/run_streamlit.sh [OPTIONS] [-- STREAMLIT_ARGS...]
+    (--no-sync keeps a bare `uv run` from re-syncing and stripping the app/retrieval groups)
 
 OPTIONS
     --port N      Port to serve on (default: $SUPPORT_VIEW_PORT or 8501).
     -h, --help    Show this message and exit.
 
 EXAMPLES
-    uv run sh scripts/run_streamlit.sh                 # serve on :8501
-    uv run sh scripts/run_streamlit.sh --port 8000     # custom port
-    uv run sh scripts/run_streamlit.sh -- --server.headless true
+    uv run --no-sync sh scripts/run_streamlit.sh                 # serve on :8501
+    uv run --no-sync sh scripts/run_streamlit.sh --port 8000     # custom port
+    uv run --no-sync sh scripts/run_streamlit.sh -- --server.headless true
 
 PREREQUISITES
-    uv sync --group app                  # installs streamlit
-    uv run sh scripts/run_ingest.sh      # populates the SQLite store
+    uv sync --group app --group retrieval   # streamlit + live hybrid retrieval
+    uv run --no-sync sh scripts/run_ingest.sh   # populates the SQLite store
 
 EXIT CODES
     0   App exited cleanly
@@ -71,9 +73,10 @@ while [ $# -gt 0 ]; do
 done
 
 # ── Dependency check ───────────────────────────────────────────────────────────
-uv run --no-sync python3 -c "import streamlit" 2>/dev/null || {
-  echo "Streamlit is not installed."
-  echo "Install it with: uv sync --group app"
+uv run --no-sync python3 -c "import streamlit, qdrant_client" 2>/dev/null || {
+  echo "App dependencies are missing (streamlit and/or the live-retrieval stack)."
+  echo "Install them with: uv sync --group app --group retrieval"
+  echo "Then launch with --no-sync so they aren't stripped: uv run --no-sync sh scripts/run_streamlit.sh"
   exit 1
 }
 
@@ -83,7 +86,7 @@ uv run --no-sync python3 -c "import streamlit" 2>/dev/null || {
 STORE_DIR="${OPERATIONAL_STORE:-.operational_store}"
 if [ ! -f "$STORE_DIR/itsm_rag.db" ] && [ ! -f "streamlit_app/data/itsm_rag.db" ]; then
   echo "No SQLite store found at $STORE_DIR/itsm_rag.db or streamlit_app/data/itsm_rag.db."
-  echo "Populate it first: uv run sh scripts/run_ingest.sh"
+  echo "Populate it first: uv run --no-sync sh scripts/run_ingest.sh"
   exit 1
 fi
 

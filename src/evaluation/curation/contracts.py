@@ -16,7 +16,7 @@ ANSWER_RELEVANCY = "answer_relevancy"
 SUMMARIZATION = "summarization"
 VARIATION = "variation"
 
-GENERATED_FIELDS: tuple[str, ...] = ("title", "symptoms", "cause", "variations", "diagnostic_summary")
+GENERATED_FIELDS: tuple[str, ...] = ("title", "symptoms", "cause", "variations")
 BODY_FIELDS: tuple[str, ...] = ("symptoms", "cause", "variations")
 
 

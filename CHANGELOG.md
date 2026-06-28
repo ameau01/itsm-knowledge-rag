@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Vector store swap] Replace pgvector with Qdrant.
+
+### Changed
+- Hybrid retrieval now uses Qdrant: dense + sparse vectors with native server-side
+  fusion in a single query, replacing Postgres/pgvector + application-side BM25.
+- Updated throughout: ARCHITECTURE.md diagrams, docs/retrieval.md,
+  docs/evaluation.md ablation wording (sparse-only arm), .env.example
+  (QDRANT_URL/COLLECTION replace DATABASE_URL), src config, .gitignore volumes.
+- eval-set metrics contract is implementation-neutral (sparse/dense/hybrid arms);
+  no eval-set changes required.
+
 ## [Project initi] Add initial design docs.
 ### Added
 - Created project skeletion with `pyproject.toml`, `requirement.txt`, `env.example`
@@ -26,53 +37,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - `ARCHITECTURE.md`, `README.md`, `docs/datataset.md`, `docs/evaluation.md`, `docs/redaction-policy.md`, `docs/retrieval.md`, `docs/running.md`
 
-## [Initial ingest code with redaction]
+## [Curation Langraph Implementation]
+
+### Added
+- Added curation langraph source code
+- Added AI overview curation source code
 
 ### Changed
-- update design doc to include sqlite operational store.
-- refactory src code to flatten itsm_rag.
-
-### Added
-- Added initial ingest code to download from huggingface
-- Add redaction_policy.yaml to remove PII
-- Add test scripts to run presidio redaction and examine pii.json and retention.json from dataset.
+- Updated evaluation measurement result
 
 ### Documentation
-- `docs/operational-store.md`, `ARCHITECTURE.md`
+- `docs/wiki-evaluation.md`, `docs/wiki-curation.md`
 
-## [Redaction Code Refactory]
-- Modify redaction policy to use AD dictectory user list for redaction.
+## [Live Demo and Live WIki page]
 
-### Added
-- Add measurement script to score redaction effectiveness with PII and rentetion score
-- Add more columns from ticket corpus to operation store
-
-### Changed
-- redaction-policy updated to use AD directory list.
-- update redactor code to use AD directory, and then custom policy and then presidio.
+### Added 
+- Added live github page with mkdocs
+- Added live streamlit app demo page with Qdrant cloud vector db.
+- Change release version to 1.0.0
 
 ### Documentation
-- `docs/evaluation.md`, `docs/redaction-policy.md`, `README.md`
-
-## [Retrieval Evaluatoin implementation]
-
-### Added
-- Using the eval-set, add code to run recall using root-cause as measurement without LLM.
-- Using the eval-set, add code to run contextual evaluation with DeepEval framework with OpenAI LLM.
-
-### Changed
-- Change the evaluation script into two scripts: run_classic_evaluation.sh, run_deepeval_evaluation.s
-
-### Documentation
-- `docs/evaluation.md`, `docs/redaction-evaluation.md`, `docs/retrieval-evaluation.md`
-
-## [Curation Evaluation implementation]
-
-### Added
-- Using DeepEval test case to evaluate quality of wiki pages.
-- Using G-Eval custom query to evaluate quality of AI overview
-- Added ai-overview component to streamlit search page.
-
-### Documentation
-- `docs/running.md`, `docs/wiki-evaluation.md`
-
+- `README.md`

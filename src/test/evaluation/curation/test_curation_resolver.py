@@ -29,7 +29,6 @@ _RECORD = {
         "symptoms": ["submitted_description", "correspondence"],
         "variations": ["submitted_description", "correspondence"],
         "cause": ["root_cause_narrative", "diagnostics_summary"],
-        "diagnostic_summary": ["diagnostics_summary"],
         "reporting": [],
     },
     "input_scope": {
@@ -45,7 +44,7 @@ _TICKETS = {
     "T3": ("sd3", "co3", "NARR3", "ds3"),
 }
 _CURATION = {"title": "Ti", "symptoms": "Sy", "cause": "Ca", "variations": "Va",
-             "diagnostic_summary": "Dg", "reporting": "Re"}
+             "reporting": "Re"}
 
 
 def _store(tmp_path, *, curate=True, name="t"):
@@ -74,7 +73,7 @@ def test_recipe_context_honors_dedup_and_cap(tmp_path):
     assert ctx["title"] == ["NARR", "NARR3"]                          # narrative only, deduped
     assert ctx["cause"] == ["NARR", "NARR3", "ds1", "ds2"]            # deduped narr + capped@2
     assert ctx["symptoms"] == ["sd1", "sd2", "sd3", "co1", "co2", "co3"]
-    assert ctx["diagnostic_summary"] == ["ds1", "ds2"]               # diagnostics_summary, capped@2
+    assert "diagnostic_summary" not in ctx          # 5-field: field dropped from the contract
 
 
 def test_evidence_pool_is_uncapped_undeduped(tmp_path):

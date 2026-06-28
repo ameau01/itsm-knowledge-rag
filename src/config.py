@@ -65,6 +65,10 @@ class Settings:
     curation_model: str = field(
         default_factory=lambda: os.getenv("CURATION_MODEL", "claude-haiku-4-5-20251001")
     )
+    # Multi-agent (orchestrator + aggregator) curation producer. 
+    multi_agent_model: str = field(
+        default_factory=lambda: _env("MULTI_AGENT_MODEL", "claude-opus-4-6")
+    )
     # DeepEval judge: OpenAI frontier by default
     judge_provider: str = field(default_factory=lambda: os.getenv("JUDGE_PROVIDER", "openai"))
     judge_model: str = field(default_factory=lambda: _env("JUDGE_MODEL", "gpt-5.4"))

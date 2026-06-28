@@ -206,6 +206,15 @@ def reset_wiki_overview(conn: sqlite3.Connection) -> int:
     return cur.rowcount
 
 
+def reset_wiki_curation(conn: sqlite3.Connection) -> int:
+    """Column-level clear of the curation columns only (curated_description, curation_details),
+    """
+    cur = conn.execute(
+        "UPDATE wiki_pages SET curated_description = NULL, curation_details = NULL")
+    conn.commit()
+    return cur.rowcount
+
+
 def update_wiki_curation(
     conn: sqlite3.Connection,
     family: str,
@@ -225,6 +234,7 @@ def update_wiki_curation(
         "WHERE family = ? AND root_cause_id = ?",
         (curated_description, curation_details, now, family, root_cause_id),
     )
+    conn.commit()
     return cur.rowcount
 
 

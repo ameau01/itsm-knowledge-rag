@@ -1,6 +1,6 @@
 [project]
 name = "itsm-knowledge-rag"
-version = "0.1.0"
+version = "1.0.0"
 description = "Turns closed IT tickets into searchable, verifiable answers. RAG pipeline with PII redaction at ingest (Presidio + custom recognizers), hybrid retrieval (Qdrant, dense + sparse vectors), and LLM curation — with a deterministic PII-leakage benchmark separate from judge-based curation quality."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -44,6 +44,13 @@ wiki = [
     "mkdocs-material>=9.5",
 ]
 overview = [
+    "langchain-anthropic>=0.3",
+    "langchain-core>=0.3",
+]
+curation_agent = [
+    # multi-agent (orchestrator + aggregator) curation producer. Build-time only — nothing
+    # on the serve or eval path imports langgraph. langchain-* overlap with `overview`.
+    "langgraph>=0.2",
     "langchain-anthropic>=0.3",
     "langchain-core>=0.3",
 ]
