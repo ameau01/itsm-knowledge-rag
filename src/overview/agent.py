@@ -135,7 +135,7 @@ class OverviewAgent:
     """LLM-only generator. Provider switch (anthropic/openai). Built once; `generate` per page."""
 
     def __init__(self, provider: str = "anthropic", model: str | None = None,
-                 temperature: float = 0.0) -> None:
+                 temperature: float | None = None) -> None:
         try:
             from langchain_core.messages import HumanMessage, SystemMessage
             from pydantic import BaseModel, Field
@@ -148,18 +148,22 @@ class OverviewAgent:
 
         provider = (provider or "anthropic").lower()
         model = model or ("gpt-4o" if provider == "openai" else "claude-opus-4-8")
+        # temperature is deprecated/unsupported on newer models (e.g. claude-opus-4-8),
+        # which 400 if it's sent. Only pass it when the caller explicitly set one.
         if provider == "openai":
             try:
                 from langchain_openai import ChatOpenAI
             except ImportError:
                 raise SystemExit("Provider 'openai' needs langchain-openai. Run: uv add langchain-openai")
-            llm = ChatOpenAI(model=model, temperature=temperature)
+            kwargs = {} if temperature is None else {"temperature": temperature}
+            llm = ChatOpenAI(model=model, **kwargs)
         else:
             try:
                 from langchain_anthropic import ChatAnthropic
             except ImportError:
                 raise SystemExit("Provider 'anthropic' needs langchain-anthropic. Run: uv sync --group overview")
-            llm = ChatAnthropic(model=model, temperature=temperature, max_tokens=1200)
+            kwargs = {} if temperature is None else {"temperature": temperature}
+            llm = ChatAnthropic(model=model, max_tokens=1200, **kwargs)
 
         self.provider, self.model = provider, model
         self.label = f"{provider}:{model}"

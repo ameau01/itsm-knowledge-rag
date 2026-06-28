@@ -41,7 +41,8 @@ def main() -> None:
     ap.add_argument("--db", type=Path, help="explicit DB path (default: settings.operational_store)")
     ap.add_argument("--provider", default=os.getenv("OVERVIEW_PROVIDER") or "anthropic")
     ap.add_argument("--model", default=os.getenv("OVERVIEW_MODEL"))
-    ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--temperature", type=float, default=None,
+                    help="omit to use model default; some models (claude-opus-4-8) reject temperature")
     ap.add_argument("--mock", action="store_true", help="no API; deterministic placeholder")
     ap.add_argument("--dry-run", action="store_true", help="no API; print one prompt preview")
     ap.add_argument("--verify", action="store_true", help="read back ai_overview and check; no writes")
