@@ -1,2 +1,5 @@
 streamlit>=1.35
 python-dotenv>=1.0
+qdrant-client>=1.12
+sentence-transformers>=3.0
+fastembed>=0.4
