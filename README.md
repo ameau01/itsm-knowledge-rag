@@ -1,6 +1,7 @@
 # ITSM Knowledge RAG
 
 [![Status](https://img.shields.io/badge/status-v0.1.0%20in%20progress-yellow)](#project-status)
+[![Live demo](https://img.shields.io/badge/Live_demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://itsm-knowledge-rag-ameau01.streamlit.app/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Hugging Face Dataset](https://img.shields.io/badge/Hugging%20Face%20Dataset-synthetic--it--support--tickets-yellow)](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets)
 [![retrieval](https://img.shields.io/badge/retrieval-Qdrant%20hybrid-blueviolet)](https://qdrant.tech)
@@ -16,7 +17,15 @@
 
 Similarity is not relevance. A search engine ranks tickets that look alike, but two tickets can read the same and be different problems. So this system does not stop at search. It curates an organization's own resolution history into verified answers, then surfaces the source tickets underneath so an agent can confirm before acting. A general model can describe standard VPN troubleshooting. It cannot know that in this company the disconnect was an expired device certificate fixed through the internal enrollment service. That fact lives only in the company's tickets.
 
+<p align="center">
+  <b><a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Live demo — agent search</a></b>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <b><a href="https://ameau01.github.io/itsm-knowledge-rag/">Live wiki — employee pages</a></b>
+</p>
+
 ![Agent search showing an AI Overview marked high confidence and synthesized from 11 consolidated tickets, with a common pattern, scope and variation, how the issue is identified, and verbatim diagnostic steps from the playbook below](docs/images/ai-overview.png)
+
+<p align="center"><i>The agent-facing search: an AI overview, then the ranked source tickets behind it — running live on a Qdrant Cloud index. <a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Try the search</a>.</i></p>
 
 
 ## The problem
@@ -69,7 +78,7 @@ The PII-leakage check is the one hard, non-circular number. Its ground truth is 
 
 ## Quick start
 
-Three paths. Full detail in [docs/running.md](docs/running.md).
+Three paths to run it yourself — or skip setup and open the hosted demo at **[itsm-knowledge-rag-ameau01.streamlit.app](https://itsm-knowledge-rag-ameau01.streamlit.app/)** (agent search on a Qdrant Cloud index). Full detail in [docs/running.md](docs/running.md).
 
 **Path A. Docker, mock mode (no LLM, no key, no network).**
 ```
@@ -109,6 +118,8 @@ The curated knowledge is also published as a static **MkDocs** site (one page pe
 It is deployed live on GitHub Pages: **[ameau01.github.io/itsm-knowledge-rag](https://ameau01.github.io/itsm-knowledge-rag/)** — built from the committed `mkdocs/` by a key-free `mkdocs build` (no LLM runs in CI).
 
 ![The employee-facing wiki published on GitHub Pages: one root-cause page with the plain-language summary, affected-environment stats, diagnostics, and resolution examples](docs/images/wiki-github-page.png)
+
+<p align="center"><i>The employee-facing wiki, published on GitHub Pages. <a href="https://ameau01.github.io/itsm-knowledge-rag/">Open the live site</a>.</i></p>
 
 ```
 docker compose up wiki-demo    # serve the committed mkdocs/ pages, no key, no DB, instant
