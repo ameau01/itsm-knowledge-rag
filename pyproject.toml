@@ -43,6 +43,10 @@ wiki = [
     # mkdocs compilation: render wiki_pages -> Markdown -> static site.
     "mkdocs-material>=9.5",
 ]
+overview = [
+    "langchain-anthropic>=0.3",
+    "langchain-core>=0.3",
+]
 
 [tool.mypy]
 python_version = "3.11"
