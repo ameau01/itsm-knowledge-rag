@@ -10,7 +10,6 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 [![CI](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml/badge.svg)](https://github.com/ameau01/itsm-knowledge-rag/actions/workflows/lint-typecheck-test.yml)
 
-
 **Turns a company's closed IT tickets into searchable, verifiable answers, so problems that have already been solved don't get solved from scratch again. It recommends; the agent decides.**
 
 Similarity is not relevance. A search engine ranks tickets that look alike, but two tickets can read the same and be different problems. So this system does not stop at search. It curates an organization's own resolution history into verified answers, then surfaces the source tickets underneath so an agent can confirm before acting. A general model can describe standard VPN troubleshooting. It cannot know that in this company the disconnect was an expired device certificate fixed through the internal enrollment service. That fact lives only in the company's tickets.
@@ -91,7 +90,7 @@ Loads the operational store from committed SQL seeds (tickets + curated overview
 
 **Path B. Docker, live ingest (real HF download + Presidio redaction).**
 ```
-cp .env.example .env   # config only — no LLM key needed
+cp .env.example .env   # config only, no LLM key needed
 docker compose up rag-live
 ```
 Builds the image, starts Qdrant, ingests the corpus with live redaction, applies the curated L2 content from the committed seeds, embeds, and serves the search app at http://localhost:8000. The first run downloads the corpus and the dense model (about 2 GB, cached in a volume). Retrieval is dense + sparse + RRF, all local. No LLM key is needed: curation and overviews ship as SQL seeds; a key is only for regenerating the seeds or running the judge eval.
@@ -122,7 +121,7 @@ It is deployed live on GitHub Pages: **[ameau01.github.io/itsm-knowledge-rag](ht
 
 ![The employee-facing wiki published on GitHub Pages: one root-cause page with the plain-language summary, affected-environment stats, diagnostics, and resolution examples](docs/images/wiki-github-page.png)
 
-<p align="center"><i>The agent-facing search returns a synthesized overview — curated from the organization’s past resolutions — followed by the ranked source tickets for verification. <a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Try the live demo</a>.</i></p>
+<p align="center"><i>The agent-facing search returns a synthesized overview, curated from the organization's past resolutions, followed by the ranked source tickets for verification. <a href="https://itsm-knowledge-rag-ameau01.streamlit.app/">Try the live demo</a>.</i></p>
 
 ```
 docker compose up wiki-demo    # serve the committed mkdocs/ pages, no key, no DB, instant
@@ -167,10 +166,9 @@ Python, Qdrant (native dense + sparse fusion), AD directory match + format rules
 
 Implementation complete, with a live agent-search demo and a published wiki.
 - LLM Wiki page is published on **[ameau01.github.io/itsm-knowledge-rag](https://ameau01.github.io/itsm-knowledge-rag/)**
-- Live search demo page is available at: ** [https://itsm-knowledge-rag-ameau01.streamlit.app](https://itsm-knowledge-rag-ameau01.streamlit.app/)"
-- The dataset is published and the design is documented. 
+- Live search demo is available at **[itsm-knowledge-rag-ameau01.streamlit.app](https://itsm-knowledge-rag-ameau01.streamlit.app/)**
 - Published dataset with an authored PII sidecar: [`ameau01/synthetic-it-support-tickets`](https://huggingface.co/datasets/ameau01/synthetic-it-support-tickets).
-- Initial design documentation on docs/ folder.
+- Design documentations in docs/ folder.
 - Added Presidio redaction code to ingestion process, and deepeval for curation evaluation.
 - Added DeepEval and G-Eval to measure quality of Wiki pages and AI overview.
 - Added Langraph workflow for LLM wiki curation.
